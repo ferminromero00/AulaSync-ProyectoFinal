@@ -1,0 +1,116 @@
+CRITERIOS DE CORRECCIÓN Y CALIFICACIÓN DEL PROYECTO INTEGRADO - REQUISITOS
+
+ASPECTOS GENERALES
+- Explica claramente el objetivo del sitio.
+- La exposición es amena y ajustada al tiempo.
+- Usa una presentación atractiva.
+- Se expresa adecuadamente.
+- Incluye todos los apartados solicitados.
+- Se explica la arquitectura de la aplicación.
+- Se realiza una demostración de la funcionalidad.
+- Aporta toda la documentación requerida.
+- Diseño visual (interfaces atractivas, homogéneas,…).
+- Mapa de navegación.
+- Libre de errores.
+- Consigue los requisitos establecidos.
+- Justifica las tecnologías escogidas.
+- Añade valor a la aplicación (desarrollo para móvil, maquetas, etc.).
+- Alcance del proyecto. Dificultad.
+- Originalidad. Innovación del proyecto.
+
+DESARROLLO EN ENTORNO SERVIDOR - AulaSync
+================================================================================================================================================
+1. Administración del sistema completamente con lenguaje de servidor
+   - symfony/orm-pack          → Gestión de base de datos con Doctrine ORM
+   - symfony/security-bundle   → Sistema de autenticación y autorización
+   - symfony/form              → Formularios procesados desde el servidor
+   - symfony/validator         → Validación de datos del lado servidor
+   - symfony/maker-bundle      → Generación de entidades, controladores, etc.
+================================================================================================================================================
+2. Acceso a la API desde el front-end con autenticación mediante token
+   - api                       → API Platform para exponer endpoints REST/GraphQL
+   - lexik/jwt-authentication-bundle → Autenticación mediante tokens JWT
+   - symfony/security-bundle   → Protección de rutas y control de roles
+================================================================================================================================================
+3. Consumir al menos un servicio web desde el servidor
+   - symfony/http-client → Cliente HTTP para consumir APIs externas
+================================================================================================================================================
+4. Generación de informes en PDF
+   - knplabs/knp-snappy-bundle → Generación de PDFs desde HTML usando wkhtmltopdf
+================================================================================================================================================
+5. Validación de cuentas por correo electrónico
+   - symfony/mailer            → Envío de correos de verificación
+   - symfony/validator         → Validación de campos como email, tokens, etc.
+================================================================================================================================================
+6. Subida de archivos al servidor
+   - vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades
+   - symfony/form              → Formularios de subida
+   - symfony/validator         → Validación de archivos
+================================================================================================================================================
+7. Importación y exportación de datos
+   - league/csv                → Lectura y escritura de archivos CSV (importar/exportar datos)
+================================================================================================================================================
+8. Descarga de archivos del servidor
+   - Gestionado por Symfony   → Con controladores que devuelven archivos como respuesta
+   - vich/uploader-bundle      → Organización de rutas de archivos
+================================================================================================================================================
+9. Ficheros de Logs
+   - monolog/monolog           → Sistema de logs para registrar errores, acciones, etc.
+================================================================================================================================================
+10. Integración con IA
+    - openai-php/client → Consumir APIs de IA (como ChatGPT)
+    - symfony/http-client → Para llamar a cualquier servicio IA externo
+================================================================================================================================================
+
+
+
+
+
+
+
+
+================================================================================================================================================
+================================================================================================================================================
+DESARROLLO EN ENTORNO CLIENTE
+- Utilización de un framework web.
+- Desarrollo tipo SPA (Single Page Application).
+- Uso de enrutamiento.
+- Reutilización de componentes.
+- Consumo de APIs o servicios web.
+- Interfaz de usuario interactiva.
+- Formularios y parámetros.
+
+DISEÑO DE INTERFACES WEB
+- Prototipo y guía de estilos del diseño.
+- Uso de Flexbox.
+- Uso de Grid Layout.
+- Uso de metodología BEM.
+- Elementos interactivos (transiciones, animaciones, transformaciones, clip-path…).
+- Animaciones y efectos usando Bootstrap y/o Tailwind.
+- Diseño Responsive para todo tipo de pantallas.
+- Uso de SASS (valorado positivamente).
+
+INGLÉS EN AULA BILINGÜE
+- Selector de idioma para internacionalización.
+
+EMPRESA E INICIATIVA EMPRENDEDORA
+- Oportunidad de negocio detectada en el sector del Desarrollo Web.
+- Obligaciones fiscales, laborales y de prevención de riesgos.
+- Estudio de ayudas o subvenciones.
+- Estudio de viabilidad técnica y previsión de recursos.
+- Presupuesto económico y necesidades de financiación.
+- Constitución y puesta en marcha de una empresa.
+
+DESPLIEGUE WEB
+- Uso de nube + Kubernetes + contenedores.
+- Configuración correcta de servidor web y servidor de aplicaciones.
+- Uso de SCV.
+- Uso de IaC con Terraform.
+- Uso de nombres de dominio (no IPs).
+- Uso de protocolos seguros y certificados.
+- Autenticación de usuarios basada en LDAP.
+
+REQUISITOS ADICIONALES (Curso actual)
+- Uso de metodología CI/CD con GithubActions o Jenkins.
+- Realización de pruebas unitarias.
+- Generación de documentación automática del código.
