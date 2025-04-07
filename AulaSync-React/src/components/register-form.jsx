@@ -1,12 +1,25 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { registerStudent } from '../services/api'
 
 export default function RegisterForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors }, setError } = useForm()
+  const navigate = useNavigate()
 
-  const onSubmit = (data) => {
-    console.log(data)
-    // Aquí irá la lógica de registro con la API
+  const onSubmit = async (data) => {
+    try {
+      console.log('Datos a enviar:', data) // Añadimos este log para debug
+      const response = await registerStudent(data)
+      console.log('Respuesta del servidor:', response) // Y este también
+      navigate('/', { state: { message: 'Registro exitoso. Por favor, inicia sesión.' } })
+    } catch (error) {
+      console.error('Error en el registro:', error) // Y este para ver errores
+      setError('root', { 
+        type: 'manual',
+        message: error.message 
+      })
+    }
   }
 
   return (
@@ -70,6 +83,12 @@ export default function RegisterForm() {
         />
         {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
       </div>
+
+      {errors.root && (
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-700">{errors.root.message}</p>
+        </div>
+      )}
 
       <button
         type="submit"

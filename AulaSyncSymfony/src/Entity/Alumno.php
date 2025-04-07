@@ -5,9 +5,11 @@ namespace App\Entity;
 use App\Repository\AlumnoRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: AlumnoRepository::class)]
-class Alumno
+class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -35,10 +37,10 @@ class Alumno
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $update_at = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $curso = null;
 
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $matricula = null; 
 
     public function getId(): ?int
@@ -70,9 +72,11 @@ class Alumno
         return $this;
     }
 
-    public function getRoles(): ?string
+    public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles ? [$this->roles] : [];
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
     public function setRoles(string $roles): static
@@ -135,7 +139,7 @@ class Alumno
         return $this->curso;
     }
 
-    public function setCurso(string $curso): static
+    public function setCurso(?string $curso): static
     {
         $this->curso = $curso;
 
@@ -147,10 +151,20 @@ class Alumno
         return $this->matricula;
     }
 
-    public function setMatricula(string $matricula): static
+    public function setMatricula(?string $matricula): static
     {
         $this->matricula = $matricula;
 
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
     }
 }
