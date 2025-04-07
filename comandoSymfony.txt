@@ -1,0 +1,299 @@
+//INSTALACION
+symfony new --webapp TareasSymfony
+symfony new --webapp --no-git TareasSymfony
+symfony new --webapp --no-interaction TareasSymfony 
+symfony new --webapp --no-git --no-interaction TareasSymfony (EL QUE FUNCIONA)
+
+
+API:
+composer require lexik/jwt-authentication-bundle
+
+php bin/console lexik:jwt:generate-keypair --overwrite
+
+Security_yml:
+json_login:
+check_path: /api/login
+username_path: username
+password_path: password
+# LA identificación se hace automática, después se llama a la siguiente clase para generar el token
+# App\Security\JwtSuccessHandler es la clase que se encargará de generar el token
+success_handler: App\Security\JwtSuccessHandler
+
+
+//COMANDO DE AYUDA
+php bin/console make: (Es la ayuda para ver bastantes comandos)
+
+
+// INICIAR SERVER
+symfony server:start
+
+
+//BASE.HTML.TWIG
+Comentar la linea
+
+{% block javascripts %}
+    {# {% block importmap %}{{ importmap('app') }}{% endblock %} #}
+{% endblock %}
+
+--1. 
+
+// HACER UNA ENTIDAD
+php bin/console make:entity (Crear una entidad)
+    >TareasSymfony (Poner nombre de la tarea: TareasSymfony)
+    >broadcast identity... (Decir que no)
+    >New property name... (Poner titulo)
+    >Field type (?--> para ver todos. Enter directamente string por default)
+    >Can this field be null? (enter de defaul no)
+    >Add another property? (Enter directamente para decir que no)
+terminado
+SE CREA UN .php EN LA CARPETA ENTITY, EN EL DIRECTORIO DE SRC DEL PROYECTO
+
+
+//HACER UN CONTROLADOR 
+php bin/console make:controller
+    >TareasSymfony (elegir nombre de tu entidad)
+TERMINADO
+SE CREA UN .php EN LA CARPETA CONTROLER, EN EL DIRECTORIO DE SRC DEL PROYECTO
+
+
+//HACER FORMULARIO
+php bin/console make:form
+    >nombre de clase (nombre de clase)
+    >nombre de la entidad (puede ser el mismo)
+terminado
+
+En el index: 
+-Crear Formulario 
+-Pasar formulario a la pagina 
+-en la pagina mostrar el formulario
+
+
+--2. 
+
+//BASES DE DATOS, USUARIOS....
+
+//CREAR ENTIDAD USUARIO
+php bin/console make:user (Crear usuario)
+    >Usuario (Elegir nombre del usuario)
+    >¿Almacenar datos en una base de datos? (Default yes, le damos a enter)
+    >Cual quieres que sea el identificador? "username, email, id" (ponemos username)
+    >Quieres que tu aplicacion tenga contraseña? (default yes, le damos enter)
+terminado
+
+
+Se crea en la carpeta Entity, nombreuser.php
+php bin/console make:entity
+    >Tarea (nombre entidad)
+    >broadcast identity... (Decir que no)
+    >New property name... (Poner titulo)
+    >Field type (?--> para ver todos. Enter directamente string por default)
+    >Can this field be null in database? (enter de defaul no)
+    >Add another property? (poner usuario, nombre del user)
+    >Field type (default string, ? para ver todo) (RELATIONS: poner relation)
+    >Cual es la clase con la que quieres relacionarla (Usuario)
+    >Tipo de relacion (ManyToOne) (<usuario> 1 ---- N <tarea>)
+    >Puede ser nula? (Decir que no)
+    >Quieres añadir una nueva propiedad para acceder al usuario... (decir que si)
+    >New field name (dejar default)
+    >Quieres borrar los objetos huerfanos (default no, decir que no)
+    >Quieres añadir algo mas? (decir que no)
+terminado
+
+// ARCHIVO .ENV
+en .env esta la configuracion de la base de datos
+# DATABASE_URL="mysql://app:!ChangeMe!@127.0.0.1:3306/app?serverVersion=8.0.32&charset=utf8mb4"
+Descomentamos donde esta MariaBD 
+
+Cambiamos el comando
+# DATABASE_URL="mysql://root:@127.0.0.1:3306/tareas?serverVersion=8.0.32&charset=utf8mb4"
+
+Esto lo dejamos como esta
+MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+
+//ACTIVAMOS APACHE Y MYSQL EN EL TOMCAT
+
+//CREAR BASE DE DATOS
+php bin/console doctrine:database:create
+php bin/console make:migration
+php bin/console doctrine:migrations:migrate
+
+Se crea en la carpeta MIGRATIONS
+
+//CREAR LOGIN
+php bin/console make:security:form-login
+    >Controler class (default)
+    >Logout (deafult)
+    >phpunit  (default)
+TERMINADO
+
+
+//CREAR REGISTRO
+php bin/console make:registration-form
+    >Quieres añadir una validacion para asegurar que no haya duplicados (si defautl)
+    >email de verificacion? (no)
+    >Quieres autentificar despues de registrarte? (si)
+    >Donde quieres redirigir al usuario? (2) //no te sale si tienes ya creado el login
+    >php-unit test? (no)
+terminado
+
+localhost/register
+
+//Para quitar la condicion de 6 letras
+En el controlertype: debemos poner la contraseña con 4 caracteres minimos
+
+//Cambiar esta linea, es que del controlador te redireccione a otro controlador
+RegistrationController:   return $this->redirectToRoute('app_login');
+
+//Fichero del Logout
+securityController
+
+//Añadir ruta a otro controlador, como un enlace
+<div>
+    <button>
+        <a href="{{path('app_register')}}" ;>Registrarse</a>
+    </button>
+</div>
+
+//CRUD, menu para hacer tareas
+php bin/console make:crud
+    >Nombre de la entidad para crear el crud (Entity) //Tareas
+    >nombre controlador (si, default nombre)
+    >Quieres... (no)
+terminado
+
+/login --> pagina de identificacion
+/register --> me lleva a la pagina de registro
+
+
+/ -> Quiero que me lleve a la pagina de login, desde login acceder a registro
+tras identificarme me lleve a /tarea
+
+src/controller/securityController
+
+cambio:     #[Route(path: '/login', name: 'app_login')]
+por esto:     #[Route(path: '/', name: 'app_login')] (SecurityController)
+
+
+
+/-> desde login acceder a registro
+
+index.twig
+
+<div>
+	<button>
+		<a href="{{path('app_register')}}" ;>Registrarse</a>
+	</button>
+</div>
+
+
+/-> cerrar sesion debe estar en la pagina de tareas al cerrar debo volver al login
+
+<div>
+	<button>
+		<a href="{{path('app_logout')}}" ;>Cerrar Sesion</a>
+	</button>
+	</div>
+
+/-> Cambiar config/packages/security.yaml
+
+form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+                default_target_path: app_tarea_index
+
+añadimos esa ultima linea, para cuando logeemos nos redirrecione al crud directamente
+
+
+/-> src/form/TareaType
+
+public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('titulo')
+            ->add('Usuario', EntityType::class, [
+                'class' => Usuario::class,
+                'choice_label' => 'username',
+            ])
+        ;
+    }
+
+cambiamos choise_label, para que en la creacion en vez de un id aparezca el nombre
+
+
+/-> Queremos una vista que aparezca para crear una tarea y justo debajo la lista de las tareas creadas
+
+TareaController -> combinamos el index con el newTarea, en el controler modificamos esto
+
+#[Route(name: 'app_tarea_index', methods: ['GET'])]
+    public function index(TareaRepository $tareaRepository, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $tarea = new Tarea();
+        $form = $this->createForm(TareaType::class, $tarea);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($tarea);
+            $entityManager->flush();
+        }
+
+        return $this->render('tarea/index.html.twig', [
+            'tareas' => $tareaRepository->findAll(),
+            'form' => $form
+        ]);
+    }
+
+--en index.html.twig añadimos esta linea 
+{{ form(form) }}
+
+
+--en form/TareaType
+public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('titulo')
+            ->add('agregar', SubmitType::class, ['label' => 'Añadir Tarea'])
+
+            /* 
+            ->add('Usuario', EntityType::class, [
+                'class' => Usuario::class,
+                'choice_label' => 'username',
+            ])*/
+        ;
+    }
+
+comentamos la linea de usuario, y añadimos un boton para añadir tarea
+
+Dara un error al enviar porque tiene que tener el POST, cambiamos la linea
+
+En TareaController
+#[Route(name: 'app_tarea_index', methods: ['GET', 'POST'])]
+
+Dara un error de sql, ya que pusimos que usuario no puede ser null
+
+en TareaController cogemos el usuario de la sesion y se lo pasamos para que no sea null
+
+public function index(TareaRepository $tareaRepository, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $tarea = new Tarea();
+        $form = $this->createForm(TareaType::class, $tarea);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            //Recogemos el usuario de la sesion
+            $usuario = $this->getUser();
+            //Le asigno el usuario que ha iniciado la sesion
+            $tarea -> setUsuario();
+            //Inserta un registro en la tabla tarea
+            $entityManager->persist($tarea);
+            //Guarda los cambios
+            $entityManager->flush();
+        }
+    }
+
+
+
+
+
+
+
