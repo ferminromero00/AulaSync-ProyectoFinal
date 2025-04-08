@@ -1,9 +1,18 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import LoginForm from "../components/login-form"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 export default function LoginPage() {
-  const [role, setRole] = useState('profesor') // 'profesor' o 'alumno'
+  const [role, setRole] = useState('profesor')
+  const [message, setMessage] = useState('')
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message)
+      setRole('alumno')
+    }
+  }, [location])
 
   const descriptions = {
     profesor: {
@@ -35,6 +44,12 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-gray-800">AulaSync</h1>
+            
+            {message && (
+              <div className="mt-4 p-4 rounded-md bg-green-50 text-green-700">
+                <p>{message}</p>
+              </div>
+            )}
             
             {/* Role selector */}
             <div className="mt-4 flex space-x-4 mb-6">
