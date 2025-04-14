@@ -23,7 +23,7 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(type: 'json')]
-    private array $roles = [];
+    private array $roles = ['ROLE_PROFESOR'];
 
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
@@ -81,9 +81,9 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // Garantizar que siempre tenga ROLE_PROFESOR
-        $roles[] = 'ROLE_PROFESOR';
-        $roles[] = 'ROLE_USER';
+        if (empty($roles)) {
+            $roles[] = 'ROLE_PROFESOR';
+        }
         return array_unique($roles);
     }
 

@@ -24,8 +24,8 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $roles = null;
+    #[ORM\Column(type: "json")]
+    private array $roles = [];
 
     #[ORM\Column(length: 255)]
     private ?string $first_name = null;
@@ -84,15 +84,16 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = $this->roles ? [$this->roles] : [];
-        $roles[] = 'ROLE_USER';
+        $roles = $this->roles;
+        if (empty($roles)) {
+            $roles[] = 'ROLE_ALUMNO';
+        }
         return array_unique($roles);
     }
 
-    public function setRoles(string $roles): static
+    public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
