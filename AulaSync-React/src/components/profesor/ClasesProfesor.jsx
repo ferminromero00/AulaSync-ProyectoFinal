@@ -65,6 +65,18 @@ const ClasesProfesor = ({ onClaseCreated }) => {
         setMenuAbierto(null);
     };
 
+    // Añadir este useEffect para manejar clicks fuera del menú
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuAbierto && !event.target.closest('.menu-button')) {
+                setMenuAbierto(null);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [menuAbierto]);
+
     return (
         <>
             <div className="w-full bg-white rounded-lg shadow-sm">
@@ -89,23 +101,29 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                 ) : error ? (
                     <div className="text-red-500 text-center">{error}</div>
                 ) : (
-                    <div className="grid gap-6 p-8 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 p-8 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
                         {clases.length > 0 ? (
                             clases.map((clase) => (
-                                <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all relative">
+                                <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all relative w-full max-w-sm">
                                     <div className="absolute top-4 right-4">
                                         <button 
-                                            onClick={() => setMenuAbierto(menuAbierto === clase.id ? null : clase.id)}
-                                            className="p-1 hover:bg-gray-200 rounded-full"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
+                                            }}
+                                            className="menu-button p-1 hover:bg-gray-200 rounded-full transition-colors"
                                         >
                                             <MoreVertical className="h-5 w-5 text-gray-500" />
                                         </button>
                                         {menuAbierto === clase.id && (
-                                            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 border border-gray-100">
                                                 <div className="py-1">
                                                     <button
-                                                        onClick={() => handleEliminarClase(clase.id)}
-                                                        className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleEliminarClase(clase.id);
+                                                        }}
+                                                        className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50 w-full transition-colors"
                                                     >
                                                         <Trash className="h-4 w-4 mr-2" />
                                                         Eliminar clase

@@ -3,7 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth'
 
-export default function StudentLayout() {
+const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
@@ -14,9 +14,17 @@ export default function StudentLayout() {
 
     return (
         <div className="min-h-screen bg-gray-100">
+            {/* Overlay para móvil */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={`fixed top-0 left-0 z-40 h-full w-64 transform transition-transform duration-300 ease-in-out 
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`fixed top-0 left-0 z-40 h-full w-64 transform transition-transform duration-300 ease-in-out
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div className="flex h-full flex-col bg-green-900 text-white">
                     <div className="flex h-16 items-center justify-between px-4">
                         <Link to="/alumno/dashboard" className="flex items-center space-x-2">
@@ -53,13 +61,15 @@ export default function StudentLayout() {
                 </div>
             </aside>
 
-            {/* Main content */}
-            <div className={`min-h-screen transition-all duration-300 ease-in-out ${isSidebarOpen ? 'pl-64' : 'pl-0'}`}>
-                <header className="sticky top-0 z-20 bg-white border-b">
+            {/* Main content - ajustado para móvil y desktop */}
+            <div className={`transition-all duration-300 ease-in-out
+                ${isSidebarOpen ? 'lg:ml-64' : ''}
+                flex flex-col min-h-screen`}>
+                <header className="sticky top-0 z-20 bg-white border-b w-full">
                     <div className="flex h-16 items-center gap-4 px-4">
                         <button 
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100"
+                            className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100"
                         >
                             {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
@@ -67,10 +77,14 @@ export default function StudentLayout() {
                     </div>
                 </header>
                 
-                <main className="container mx-auto px-4 py-8">
-                    <Outlet />
+                <main className="flex-grow p-4">
+                    <div className="max-w-7xl mx-auto">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>
     )
 }
+
+export default StudentLayout;

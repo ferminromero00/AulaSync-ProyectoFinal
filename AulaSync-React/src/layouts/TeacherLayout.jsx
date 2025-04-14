@@ -3,7 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth';
 
-export default function TeacherLayout() {
+const TeacherLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
@@ -13,18 +13,18 @@ export default function TeacherLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 flex">
             {/* Overlay solo para móvil */}
             {isSidebarOpen && (
                 <div 
-                    className="fixed inset-0 z-30 bg-gray-900/50 lg:hidden"
+                    className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
-            {/* Sidebar - quitamos lg:translate-x-0 para que responda al toggle */}
-            <aside className={`fixed top-0 left-0 z-40 h-full w-64 transform transition-transform duration-300 ease-in-out 
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            {/* Sidebar */}
+            <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out bg-gray-900
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div className="flex h-full flex-col bg-gray-900 text-white">
                     <div className="flex h-16 items-center justify-between px-4">
                         <Link to="/profesor/dashboard" className="flex items-center space-x-2">
@@ -69,14 +69,13 @@ export default function TeacherLayout() {
                 </div>
             </aside>
 
-            {/* Main content - ajustamos el padding según el estado del menú */}
-            <div className={`min-h-screen transition-all duration-300 ease-in-out
-                ${isSidebarOpen ? 'pl-64' : 'pl-0'}`}>
-                <header className="sticky top-0 z-20 bg-white border-b">
+            {/* Main content */}
+            <div className="flex-1 flex flex-col min-h-screen">
+                <header className="sticky top-0 z-20 bg-white border-b w-full">
                     <div className="flex h-16 items-center gap-4 px-4">
                         <button 
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                            className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                         >
                             <span className="sr-only">Toggle menú</span>
                             {isSidebarOpen ? (
@@ -85,14 +84,17 @@ export default function TeacherLayout() {
                                 <Menu className="h-6 w-6" />
                             )}
                         </button>
-                        <span className="text-lg font-semibold">AulaSync</span>
                     </div>
                 </header>
                 
-                <main className="container mx-auto px-4 py-8">
-                    <Outlet />
+                <main className="flex-1 p-4">
+                    <div className="max-w-7xl mx-auto">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </div>
     )
 }
+
+export default TeacherLayout;
