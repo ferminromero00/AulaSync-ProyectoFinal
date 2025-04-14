@@ -3,9 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity]
-class Profesor
+class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,8 +22,8 @@ class Profesor
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $roles = null;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
@@ -33,11 +37,19 @@ class Profesor
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $updateAt = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $especialidad = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $departamento = null;
+
+    #[ORM\OneToMany(mappedBy: 'profesor', targetEntity: Clase::class)]
+    private Collection $clases;
+
+    public function __construct()
+    {
+        $this->clases = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -66,12 +78,16 @@ class Profesor
         return $this;
     }
 
-    public function getRoles(): ?string
+    public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+        // Garantizar que siempre tenga ROLE_PROFESOR
+        $roles[] = 'ROLE_PROFESOR';
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
-    public function setRoles(string $roles): static
+    public function setRoles(array $roles): static
     {
         $this->roles = $roles;
         return $this;
@@ -141,5 +157,15 @@ class Profesor
     {
         $this->departamento = $departamento;
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
     }
 }

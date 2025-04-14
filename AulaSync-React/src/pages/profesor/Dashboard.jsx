@@ -1,5 +1,7 @@
 import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react"
-import ClassCard from "../../components/ClassCard"
+import { useEffect, useState } from "react"
+import { getClasesProfesor } from "../../services/clases"
+import ClasesProfesor from "../../components/profesor/ClasesProfesor"
 
 export default function Dashboard() {
     const stats = [
@@ -10,8 +12,8 @@ export default function Dashboard() {
     ]
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 p-4">
+            <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
                 <h1 className="text-3xl font-bold tracking-tight">Dashboard del Profesor</h1>
                 <div className="flex items-center space-x-2">
                     <Calendar className="h-5 w-5 text-gray-500" />
@@ -26,7 +28,7 @@ export default function Dashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
                 {stats.map((stat, index) => (
                     <div key={index} className="rounded-lg border bg-white p-6">
                         <div className="flex items-center">
@@ -43,22 +45,9 @@ export default function Dashboard() {
             </div>
 
             {/* Classes Grid */}
-            <div className="grid gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2 rounded-lg border bg-white">
-                    <div className="border-b p-6">
-                        <h2 className="font-semibold">Tus Clases</h2>
-                        <p className="text-sm text-gray-500">Gestiona tus clases activas</p>
-                    </div>
-                    <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
-                        <ClassCard title="Desarrollo Web" students={24} time="Lun, Mié, Vie • 9:00" color="bg-blue-500" />
-                        <ClassCard title="JavaScript" students={18} time="Mar, Jue • 11:00" color="bg-green-500" />
-                        <ClassCard title="React" students={22} time="Lun, Mié • 14:00" color="bg-purple-500" />
-                    </div>
-                </div>
-
-                {/* Sidebar con próximas tareas y calificaciones recientes */}
-                <div className="space-y-6">
-                    {/* ... Componentes de tareas y calificaciones ... */}
+            <div className="flex justify-center w-full">
+                <div className="w-full max-w-7xl">
+                    <ClasesProfesor />
                 </div>
             </div>
         </div>

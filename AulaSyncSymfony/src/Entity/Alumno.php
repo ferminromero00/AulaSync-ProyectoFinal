@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AlumnoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -42,6 +44,14 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $matricula = null; 
+
+    #[ORM\ManyToMany(targetEntity: Curso::class, inversedBy: "alumnos")]
+    private Collection $cursos;
+
+    public function __construct()
+    {
+        $this->cursos = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -155,6 +165,25 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->matricula = $matricula;
 
+        return $this;
+    }
+
+    public function getCursos(): Collection
+    {
+        return $this->cursos;
+    }
+
+    public function addCurso(Curso $curso): self
+    {
+        if (!$this->cursos->contains($curso)) {
+            $this->cursos->add($curso);
+        }
+        return $this;
+    }
+
+    public function removeCurso(Curso $curso): self
+    {
+        $this->cursos->removeElement($curso);
         return $this;
     }
 
