@@ -8,9 +8,13 @@ export default function LoginPage() {
   const location = useLocation()
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const roleParam = searchParams.get('role');
+    if (roleParam) {
+        setRole(roleParam);
+    }
     if (location.state?.message) {
-      setMessage(location.state.message)
-      setRole('alumno')
+        setMessage(location.state.message);
     }
   }, [location])
 

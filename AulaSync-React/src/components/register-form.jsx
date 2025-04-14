@@ -10,7 +10,7 @@ function RegisterForm() {
   const onSubmit = async (data) => {
     try {
       const response = await registerStudent(data)
-      navigate('/', { 
+      navigate('/?role=alumno', { 
         state: { 
           message: 'Registro exitoso. Por favor, inicia sesión con tus credenciales.' 
         },
