@@ -2,13 +2,15 @@
 
 namespace App\Entity;
 
+use App\Repository\ProfesorRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\DBAL\Types\Types;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProfesorRepository::class)]
 class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,15 +28,15 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = ['ROLE_PROFESOR'];
 
     #[ORM\Column(length: 255)]
-    private ?string $firstName = null;
+    private ?string $first_name = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $lastName = null;
+    private ?string $last_name = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updateAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -95,23 +97,23 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getFirstName(): ?string
     {
-        return $this->firstName;
+        return $this->first_name;
     }
 
-    public function setFirstName(string $firstName): static
+    public function setFirstName(string $first_name): static
     {
-        $this->firstName = $firstName;
+        $this->first_name = $first_name;
         return $this;
     }
 
     public function getLastName(): ?string
     {
-        return $this->lastName;
+        return $this->last_name;
     }
 
-    public function setLastName(string $lastName): static
+    public function setLastName(string $last_name): static
     {
-        $this->lastName = $lastName;
+        $this->last_name = $last_name;
         return $this;
     }
 

@@ -13,7 +13,7 @@ export default function LoginForm({ role }) {
 
     const onSubmit = async (data) => {
         try {
-            const response = await login(data);
+            const response = await login(data, role);
             console.log('Login exitoso:', response);
             navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard');
         } catch (error) {

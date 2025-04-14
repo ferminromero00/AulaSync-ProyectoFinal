@@ -4,21 +4,40 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        app_user_provider:
+        app_alumno_provider:
             entity:
                 class: App\Entity\Alumno
                 property: email
+        app_profesor_provider:
+            entity:
+                class: App\Entity\Profesor
+                property: email
+        # Proveedor por defecto que combina ambos
+        app_chain_provider:
+            chain:
+                providers: ['app_profesor_provider', 'app_alumno_provider']
         users_in_memory: { memory: null }
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        api:
-            pattern: ^/api
+        api_alumno:
+            pattern: ^/api/alumno
             stateless: true
-            provider: app_user_provider
+            provider: app_alumno_provider
             json_login:
-                check_path: api_login
+                check_path: api_login_alumno
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+        api_profesor:
+            pattern: ^/api/profesor
+            stateless: true
+            provider: app_profesor_provider
+            json_login:
+                check_path: api_login_profesor
                 username_path: email
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -26,7 +45,7 @@ security:
             jwt: ~
         main:
             lazy: true
-            provider: app_user_provider
+            provider: app_chain_provider  # Cambiamos esto de app_user_provider a app_chain_provider
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -37,9 +56,10 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/registro, roles: PUBLIC_ACCESS }
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/alumno/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/profesor/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/alumno, roles: ROLE_ALUMNO }
+        - { path: ^/api/profesor, roles: ROLE_PROFESOR }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 

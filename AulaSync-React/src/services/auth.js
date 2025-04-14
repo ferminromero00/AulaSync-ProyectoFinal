@@ -1,8 +1,9 @@
 const API_URL = 'http://localhost:8000/api';
 
-export const login = async (credentials) => {
+export const login = async (credentials, role) => {
     try {
-        const response = await fetch(`${API_URL}/login`, {
+        const endpoint = role === 'profesor' ? '/profesor/login' : '/alumno/login';
+        const response = await fetch(`${API_URL}${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -16,14 +17,16 @@ export const login = async (credentials) => {
             throw new Error(data.message || 'Error en el inicio de sesión');
         }
 
+        // Guardamos el token y la información del usuario
         if (data.token) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('role', role);
         }
 
         return data;
     } catch (error) {
         console.error('Error en la petición:', error);
-        throw new Error('Error en el inicio de sesión');
+        throw error;
     }
 };
