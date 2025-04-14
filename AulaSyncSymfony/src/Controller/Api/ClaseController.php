@@ -76,4 +76,73 @@ class ClaseController extends AbstractController
             return new JsonResponse(['error' => 'Error al obtener las clases'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/clases/profesor/stats', name: 'clases_profesor_stats', methods: ['GET'])]
+    public function getClasesProfesorStats(EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $profesor = $this->getUser();
+            
+            // Obtener total de clases
+            $totalClases = $em->createQueryBuilder()
+                ->select('COUNT(c.id)')
+                ->from(Clase::class, 'c')
+                ->where('c.profesor = :profesor')
+                ->setParameter('profesor', $profesor)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            // Obtener suma total de estudiantes
+            $totalEstudiantes = $em->createQueryBuilder()
+                ->select('SUM(c.numEstudiantes)')
+                ->from(Clase::class, 'c')
+                ->where('c.profesor = :profesor')
+                ->setParameter('profesor', $profesor)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            return new JsonResponse([
+                'totalClases' => (int)$totalClases,
+                'totalEstudiantes' => (int)($totalEstudiantes ?? 0)
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Error al obtener estadísticas'], 
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    #[Route('/clases/{id}', name: 'clase_eliminar', methods: ['DELETE'])]
+    public function eliminarClase(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $clase = $em->getRepository(Clase::class)->find($id);
+            
+            if (!$clase) {
+                return new JsonResponse(
+                    ['error' => 'Clase no encontrada'], 
+                    JsonResponse::HTTP_NOT_FOUND
+                );
+            }
+
+            // Verificar que el profesor actual es el propietario de la clase
+            if ($clase->getProfesor() !== $this->getUser()) {
+                return new JsonResponse(
+                    ['error' => 'No tienes permiso para eliminar esta clase'], 
+                    JsonResponse::HTTP_FORBIDDEN
+                );
+            }
+
+            $em->remove($clase);
+            $em->flush();
+            
+            return new JsonResponse(['message' => 'Clase eliminada correctamente']);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Error al eliminar la clase'], 
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

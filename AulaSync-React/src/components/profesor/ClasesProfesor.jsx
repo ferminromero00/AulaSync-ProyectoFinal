@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getClasesProfesor, crearClase } from '../../services/clases';
-import { Plus } from 'lucide-react';
+import { getClasesProfesor, crearClase, eliminarClase } from '../../services/clases';
+import { Plus, MoreVertical, Trash } from 'lucide-react';
 
-const ClasesProfesor = () => {
+const ClasesProfesor = ({ onClaseCreated }) => {
     const [clases, setClases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -10,6 +10,7 @@ const ClasesProfesor = () => {
     const [nuevaClase, setNuevaClase] = useState({
         nombre: ''
     });
+    const [menuAbierto, setMenuAbierto] = useState(null);
 
     useEffect(() => {
         cargarClases();
@@ -37,11 +38,31 @@ const ClasesProfesor = () => {
             setMostrarFormulario(false);
             setNuevaClase({ nombre: '' });
             await cargarClases();
+            // Llamar a la función para actualizar las estadísticas
+            if (onClaseCreated) {
+                onClaseCreated();
+            }
         } catch (error) {
             console.error('Error al crear la clase:', error);
             // Podrías mostrar un mensaje de error al usuario aquí
             alert(error.message);
         }
+    };
+
+    const handleEliminarClase = async (claseId) => {
+        if (window.confirm('¿Estás seguro de que quieres eliminar esta clase?')) {
+            try {
+                await eliminarClase(claseId);
+                await cargarClases();
+                if (onClaseCreated) {
+                    onClaseCreated();
+                }
+            } catch (error) {
+                console.error('Error al eliminar la clase:', error);
+                alert(error.message);
+            }
+        }
+        setMenuAbierto(null);
     };
 
     return (
@@ -71,8 +92,29 @@ const ClasesProfesor = () => {
                     <div className="grid gap-6 p-8 sm:grid-cols-2 lg:grid-cols-3">
                         {clases.length > 0 ? (
                             clases.map((clase) => (
-                                <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all">
-                                    <h3 className="text-lg font-semibold text-gray-900">{clase.nombre}</h3>
+                                <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all relative">
+                                    <div className="absolute top-4 right-4">
+                                        <button 
+                                            onClick={() => setMenuAbierto(menuAbierto === clase.id ? null : clase.id)}
+                                            className="p-1 hover:bg-gray-200 rounded-full"
+                                        >
+                                            <MoreVertical className="h-5 w-5 text-gray-500" />
+                                        </button>
+                                        {menuAbierto === clase.id && (
+                                            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                                <div className="py-1">
+                                                    <button
+                                                        onClick={() => handleEliminarClase(clase.id)}
+                                                        className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-100 w-full"
+                                                    >
+                                                        <Trash className="h-4 w-4 mr-2" />
+                                                        Eliminar clase
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 pr-8">{clase.nombre}</h3>
                                     <p className="text-sm text-gray-600 mt-1">{clase.numEstudiantes || 0} estudiantes</p>
                                     <p className="text-sm text-gray-500 mt-2">{clase.horario}</p>
                                 </div>
