@@ -26,13 +26,14 @@ function ClasesProfesor() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            await crearClase(nuevaClase, token);
+            const response = await crearClase(nuevaClase);
             setMostrarFormulario(false);
             setNuevaClase({ nombre: '' });
             await cargarClases();
         } catch (error) {
             console.error('Error al crear la clase:', error);
+            // Podrías mostrar un mensaje de error al usuario aquí
+            alert(error.message);
         }
     };
 

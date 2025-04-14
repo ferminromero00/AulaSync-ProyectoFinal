@@ -15,24 +15,48 @@ class ClaseController extends AbstractController
     #[Route('/clases', name: 'clases_crear', methods: ['POST'])]
     public function crearClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        $profesor = $this->getUser();
+        if (!$profesor || !in_array('ROLE_PROFESOR', $profesor->getRoles())) {
+            return new JsonResponse([
+                'error' => 'Acceso denegado'
+            ], JsonResponse::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
-        $clase = new Clase();
-        $clase->setNombre($data['nombre']);
-        $clase->setProfesor($this->getUser());
-        $clase->setCreatedAt(new \DateTime());
+        
+        if (!$data) {
+            return new JsonResponse([
+                'error' => 'Datos JSON inválidos'
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+        
+        $profesor = $this->getUser();
+        if (!$profesor) {
+            return new JsonResponse([
+                'error' => 'Usuario no autenticado'
+            ], JsonResponse::HTTP_UNAUTHORIZED);
+        }
 
         try {
+            $clase = new Clase();
+            $clase->setNombre($data['nombre']);
+            $clase->setProfesor($profesor);
+            $clase->setNumEstudiantes(0);
+            $clase->setCreatedAt(new \DateTime());
+
             $em->persist($clase);
             $em->flush();
             
             return new JsonResponse([
                 'message' => 'Clase creada correctamente',
-                'id' => $clase->getId()
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'numEstudiantes' => $clase->getNumEstudiantes()
             ], JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
             return new JsonResponse([
                 'error' => 'Error al crear la clase: ' . $e->getMessage()
-            ], JsonResponse::HTTP_BAD_REQUEST);
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

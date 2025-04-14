@@ -1,27 +1,28 @@
 const API_URL = 'http://localhost:8000/api';
 
-export const getClasesProfesor = async (token) => {
+export const getClasesProfesor = async () => {
     try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/clases/profesor`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || 'Error al obtener las clases');
+            const error = await response.json();
+            throw new Error(error.message || 'Error al obtener las clases');
         }
 
-        return data;
+        return await response.json();
     } catch (error) {
         throw error;
     }
 };
 
-export const crearClase = async (claseData, token) => {
+export const crearClase = async (claseData) => {
     try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/clases`, {
             method: 'POST',
             headers: {
@@ -31,13 +32,12 @@ export const crearClase = async (claseData, token) => {
             body: JSON.stringify(claseData)
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || 'Error al crear la clase');
+            const error = await response.json();
+            throw new Error(error.error || 'Error al crear la clase');
         }
 
-        return data;
+        return await response.json();
     } catch (error) {
         throw error;
     }

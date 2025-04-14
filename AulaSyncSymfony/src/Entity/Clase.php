@@ -26,5 +26,52 @@ class Clase
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
-    // Getters y setters...
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getNombre(): ?string
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(string $nombre): self
+    {
+        $this->nombre = $nombre;
+        return $this;
+    }
+
+    public function getNumEstudiantes(): ?int
+    {
+        return $this->numEstudiantes;
+    }
+
+    public function setNumEstudiantes(int $numEstudiantes): self
+    {
+        $this->numEstudiantes = $numEstudiantes;
+        return $this;
+    }
+
+    public function getProfesor(): ?Profesor
+    {
+        return $this->profesor;
+    }
+
+    public function setProfesor(?Profesor $profesor): self
+    {
+        $this->profesor = $profesor;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
 }
