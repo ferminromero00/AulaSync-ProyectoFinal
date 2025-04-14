@@ -30,3 +30,17 @@ export const login = async (credentials, role) => {
         throw error;
     }
 };
+
+export const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+};
+
+export const isAuthenticated = () => {
+    return !!localStorage.getItem('token');
+};
+
+export const getUserRole = () => {
+    return localStorage.getItem('role');
+};

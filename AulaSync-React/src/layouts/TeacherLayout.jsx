@@ -1,16 +1,14 @@
 import { useState } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 'lucide-react'
+import { logout } from '../services/auth';
 
 export default function TeacherLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
     const handleLogout = () => {
-        // Limpiamos el token del localStorage
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        // Redirigimos al login
+        logout();
         navigate('/')
     }
 

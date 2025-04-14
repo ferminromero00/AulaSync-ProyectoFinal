@@ -1,22 +1,40 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import TeacherLayout from './layouts/TeacherLayout'
+import StudentLayout from './layouts/StudentLayout'
 import TeacherDashboard from './pages/profesor/Dashboard'
+import DashboardAlumno from './pages/alumno/DashboardAlumno'
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Rutas del profesor */}
-        <Route path="/profesor" element={<TeacherLayout />}>
+        {/* Rutas protegidas de profesor */}
+        <Route path="/profesor/*" element={
+          <ProtectedRoute allowedRole="profesor">
+            <TeacherLayout />
+          </ProtectedRoute>
+        }>
           <Route path="dashboard" element={<TeacherDashboard />} />
+          {/* ...otras rutas de profesor... */}
+        </Route>
+
+        {/* Rutas protegidas de alumno */}
+        <Route path="/alumno/*" element={
+          <ProtectedRoute allowedRole="alumno">
+            <StudentLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="dashboard" element={<DashboardAlumno />} />
+          {/* ...otras rutas de alumno... */}
         </Route>
       </Routes>
-    </Router>
+    </BrowserRouter>
   )
 }
 
