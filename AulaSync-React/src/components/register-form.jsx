@@ -1,16 +1,22 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
-import { registerStudent } from '../services/api'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { registerStudent, registerTeacher } from '../services/api'
 
 function RegisterForm() {
   const { register, handleSubmit, formState: { errors }, setError } = useForm()
   const navigate = useNavigate()
+  const location = useLocation();
+  const role = new URLSearchParams(location.search).get('role') || 'alumno';
+
+  const buttonColors = role === 'profesor' 
+    ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500' 
+    : 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
 
   const onSubmit = async (data) => {
     try {
-      const response = await registerStudent(data)
-      navigate('/?role=alumno', { 
+      const response = await (role === 'alumno' ? registerStudent(data) : registerTeacher(data));
+      navigate('/?role=' + role, { 
         state: { 
           message: 'Registro exitoso. Por favor, inicia sesión con tus credenciales.' 
         },
@@ -95,9 +101,9 @@ function RegisterForm() {
 
       <button
         type="submit"
-        className="w-full rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        className={`w-full rounded-md px-4 py-2 text-sm font-medium text-white ${buttonColors} focus:outline-none focus:ring-2 focus:ring-offset-2`}
       >
-        Registrarse
+        Registrarse como {role}
       </button>
     </form>
   )

@@ -86,13 +86,16 @@ export default function LoginPage() {
               {role === 'alumno' ? (
                 <>
                   O{" "}
-                  <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                  <Link to="/register?role=alumno" className="font-medium text-blue-600 hover:text-blue-500">
                     regístrate como nuevo alumno
                   </Link>
                 </>
               ) : (
                 <>
-                  Contacta con el administrador si necesitas acceso
+                  O{" "}
+                  <Link to="/register?role=profesor" className="font-medium text-blue-600 hover:text-blue-500">
+                    regístrate como nuevo profesor
+                  </Link>
                 </>
               )}
             </p>

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Alumno;
+use App\Entity\Profesor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -42,6 +43,35 @@ class RegistroController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse([
                 'error' => 'Error al registrar el alumno: ' . $e->getMessage()
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/registro/profesor', name: 'registro_profesor', methods: ['POST'])]
+    public function registerProfesor(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        $profesor = new Profesor();
+        $profesor->setEmail($data['email']);
+        $profesor->setFirstName($data['firstName']);
+        $profesor->setLastName($data['lastName']);
+        $profesor->setRoles(['ROLE_PROFESOR']);
+        $profesor->setPassword($passwordHasher->hashPassword($profesor, $data['password']));
+        $profesor->setCreatedAt(new \DateTime());
+        $profesor->setUpdateAt(new \DateTime());
+        
+        try {
+            $em->persist($profesor);
+            $em->flush();
+            
+            return new JsonResponse([
+                'message' => 'Profesor registrado correctamente',
+                'id' => $profesor->getId()
+            ], JsonResponse::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Error al registrar el profesor: ' . $e->getMessage()
             ], JsonResponse::HTTP_BAD_REQUEST);
         }
     }

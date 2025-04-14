@@ -21,3 +21,25 @@ export const registerStudent = async (studentData) => {
         throw error;
     }
 };
+
+export const registerTeacher = async (teacherData) => {
+    try {
+        const response = await fetch(`${API_URL}/registro/profesor`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(teacherData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Error en el registro');
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+};
