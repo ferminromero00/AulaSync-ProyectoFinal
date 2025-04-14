@@ -15,65 +15,65 @@ class ClaseController extends AbstractController
     #[Route('/clases', name: 'clases_crear', methods: ['POST'])]
     public function crearClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $profesor = $this->getUser();
-        if (!$profesor || !in_array('ROLE_PROFESOR', $profesor->getRoles())) {
-            return new JsonResponse([
-                'error' => 'Acceso denegado'
-            ], JsonResponse::HTTP_FORBIDDEN);
-        }
-
-        $data = json_decode($request->getContent(), true);
-        
-        if (!$data) {
-            return new JsonResponse([
-                'error' => 'Datos JSON inválidos'
-            ], JsonResponse::HTTP_BAD_REQUEST);
-        }
-        
-        $profesor = $this->getUser();
-        if (!$profesor) {
-            return new JsonResponse([
-                'error' => 'Usuario no autenticado'
-            ], JsonResponse::HTTP_UNAUTHORIZED);
-        }
-
         try {
+            $data = json_decode($request->getContent(), true);
+            $profesor = $this->getUser();
+            
             $clase = new Clase();
-            $clase->setNombre($data['nombre']);
-            $clase->setProfesor($profesor);
-            $clase->setNumEstudiantes(0);
-            $clase->setCreatedAt(new \DateTime());
+            $clase->setNombre($data['nombre'])
+                  ->setProfesor($profesor)
+                  ->setNumEstudiantes(0)
+                  ->setCreatedAt(new \DateTime());
 
             $em->persist($clase);
             $em->flush();
             
             return new JsonResponse([
                 'message' => 'Clase creada correctamente',
-                'id' => $clase->getId(),
-                'nombre' => $clase->getNombre(),
-                'numEstudiantes' => $clase->getNumEstudiantes()
+                'clase' => [
+                    'id' => $clase->getId(),
+                    'nombre' => $clase->getNombre(),
+                    'numEstudiantes' => $clase->getNumEstudiantes(),
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                ]
             ], JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
-            return new JsonResponse([
-                'error' => 'Error al crear la clase: ' . $e->getMessage()
-            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['error' => 'Error al crear la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    #[Route('/clases/profesor', name: 'clases_profesor', methods: ['GET'])]
-    public function getClasesProfesor(EntityManagerInterface $em): JsonResponse
+    #[Route('/clases/profesor', name: 'clases_profesor', methods: ['GET', 'OPTIONS'])]
+    public function getClasesProfesor(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $profesor = $this->getUser();
-        $clases = $em->getRepository(Clase::class)->findBy(['profesor' => $profesor]);
-        
-        $clasesArray = array_map(function($clase) {
-            return [
-                'id' => $clase->getId(),
-                'nombre' => $clase->getNombre(),
-                'numEstudiantes' => $clase->getNumEstudiantes(),
-            ];
-        }, $clases);
+        if ($request->getMethod() === 'OPTIONS') {
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        }
 
-        return new JsonResponse($clasesArray);
+        try {
+            $profesor = $this->getUser();
+            $queryBuilder = $em->createQueryBuilder()
+                ->select('c')
+                ->from(Clase::class, 'c')
+                ->where('c.profesor = :profesor')
+                ->setParameter('profesor', $profesor)
+                ->orderBy('c.createdAt', 'DESC');
+
+            $clases = $queryBuilder->getQuery()
+                ->setHint(\Doctrine\ORM\Query::HINT_FORCE_PARTIAL_LOAD, true)
+                ->getResult();
+
+            $clasesArray = array_map(function($clase) {
+                return [
+                    'id' => $clase->getId(),
+                    'nombre' => $clase->getNombre(),
+                    'numEstudiantes' => $clase->getNumEstudiantes(),
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                ];
+            }, $clases);
+
+            return new JsonResponse($clasesArray);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al obtener las clases'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

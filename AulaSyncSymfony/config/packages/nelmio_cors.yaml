@@ -15,3 +15,4 @@ nelmio_cors:
             allow_methods: ['POST', 'GET', 'OPTIONS']
             max_age: 3600
             allow_credentials: true
+            expose_headers: ['Location']

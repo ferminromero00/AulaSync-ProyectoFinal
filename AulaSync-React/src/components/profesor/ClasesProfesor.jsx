@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { getClasesProfesor, crearClase } from '../../services/clases';
 import { Plus } from 'lucide-react';
 
-function ClasesProfesor() {
+const ClasesProfesor = () => {
     const [clases, setClases] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [nuevaClase, setNuevaClase] = useState({
         nombre: ''
@@ -15,11 +17,16 @@ function ClasesProfesor() {
 
     const cargarClases = async () => {
         try {
+            setIsLoading(true);
             const token = localStorage.getItem('token');
             const clasesData = await getClasesProfesor(token);
             setClases(clasesData);
+            setError(null);
         } catch (error) {
+            setError('Error al cargar las clases');
             console.error('Error al cargar las clases:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -54,21 +61,29 @@ function ClasesProfesor() {
                     </button>
                 </div>
 
-                <div className="grid gap-6 p-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {clases.length > 0 ? (
-                        clases.map((clase) => (
-                            <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all">
-                                <h3 className="text-lg font-semibold text-gray-900">{clase.nombre}</h3>
-                                <p className="text-sm text-gray-600 mt-1">{clase.numEstudiantes || 0} estudiantes</p>
-                                <p className="text-sm text-gray-500 mt-2">{clase.horario}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-500 col-span-full text-center py-8">
-                            No hay clases creadas. Crea tu primera clase haciendo clic en "Nueva Clase".
-                        </p>
-                    )}
-                </div>
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-red-500 text-center">{error}</div>
+                ) : (
+                    <div className="grid gap-6 p-8 sm:grid-cols-2 lg:grid-cols-3">
+                        {clases.length > 0 ? (
+                            clases.map((clase) => (
+                                <div key={clase.id} className="flex flex-col p-6 rounded-lg border bg-gray-50 hover:shadow-lg transition-all">
+                                    <h3 className="text-lg font-semibold text-gray-900">{clase.nombre}</h3>
+                                    <p className="text-sm text-gray-600 mt-1">{clase.numEstudiantes || 0} estudiantes</p>
+                                    <p className="text-sm text-gray-500 mt-2">{clase.horario}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 col-span-full text-center py-8">
+                                No hay clases creadas. Crea tu primera clase haciendo clic en "Nueva Clase".
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {mostrarFormulario && (

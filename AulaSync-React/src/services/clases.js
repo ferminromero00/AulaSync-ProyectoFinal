@@ -1,21 +1,27 @@
 const API_URL = 'http://localhost:8000/api';
 
+let controller = null;
+
 export const getClasesProfesor = async () => {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/clases/profesor`, {
+            method: 'GET',
+            credentials: 'include',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Error al obtener las clases');
+            throw new Error('Error al obtener las clases');
         }
 
         return await response.json();
     } catch (error) {
+        console.error('Error:', error);
         throw error;
     }
 };

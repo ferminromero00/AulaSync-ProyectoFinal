@@ -1,7 +1,7 @@
-import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react"
-import { useEffect, useState } from "react"
-import { getClasesProfesor } from "../../services/clases"
-import ClasesProfesor from "../../components/profesor/ClasesProfesor"
+import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getClasesProfesor } from "../../services/clases";
+import ClasesProfesor from "../../components/profesor/ClasesProfesor";
 
 export default function Dashboard() {
     const stats = [
