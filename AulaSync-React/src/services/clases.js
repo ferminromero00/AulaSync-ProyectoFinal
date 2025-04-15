@@ -112,7 +112,7 @@ export const getClaseById = async (id) => {
 
 export const buscarClasePorCodigo = async (codigo) => {
     try {
-        return handleRequest(`/clases/buscar/${codigo}`, {
+        return handleRequest(`/alumno/clases/buscar/${codigo}`, {
             method: 'GET'
         });
     } catch (error) {

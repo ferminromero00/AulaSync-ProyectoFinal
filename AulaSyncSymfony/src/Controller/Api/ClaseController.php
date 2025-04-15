@@ -228,4 +228,48 @@ class ClaseController extends AbstractController
             return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET'])]
+    public function buscarClasePorCodigoAlumno(string $codigo, EntityManagerInterface $em): JsonResponse
+    {
+        $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
+        if (!$clase) {
+            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+        }
+        // Si se desea, se pueden incluir otros detalles
+        return new JsonResponse([
+            'id' => $clase->getId(),
+            'nombre' => $clase->getNombre(),
+            'profesor' => $clase->getProfesor()->getFirstName().' '.$clase->getProfesor()->getLastName(),
+            'codigoClase' => $clase->getCodigoClase(),
+        ]);
+    }
+
+    #[Route('/alumno/clases/unirse', name: 'clase_unirse_alumno', methods: ['POST'])]
+    public function unirseAClase(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        if (empty($data['codigo'])) {
+            return new JsonResponse(['error' => 'No se proporcionó código'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+        
+        $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $data['codigo']]);
+        if (!$clase) {
+            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+        }
+        
+        $alumno = $this->getUser();
+        
+        if ($clase->getAlumnos()->contains($alumno)) {
+            return new JsonResponse(['error' => 'Ya estás inscrito en esta clase'], JsonResponse::HTTP_CONFLICT);
+        }
+        
+        $clase->addAlumno($alumno);
+        $em->flush();
+        
+        return new JsonResponse([
+            'message' => 'Te has unido a la clase correctamente',
+            'claseId' => $clase->getId()
+        ]);
+    }
 }
