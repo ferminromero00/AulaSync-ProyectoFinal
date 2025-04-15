@@ -9,6 +9,7 @@ import DashboardAlumno from './pages/alumno/DashboardAlumno'
 import Clases from './pages/profesor/Clases'
 import Configuracion from './pages/profesor/Configuracion'
 import ClaseDashboard from './pages/profesor/ClaseDashboard'
+import ConfiguracionAlumno from './pages/alumno/Configuracion'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         }>
           <Route path="dashboard" element={<DashboardAlumno />} />
           <Route path="clase/:id" element={<ClaseDashboard />} />
+          <Route path="configuracion" element={<ConfiguracionAlumno />} />
           {/* ...otras rutas de alumno... */}
         </Route>
       </Routes>
