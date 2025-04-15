@@ -100,6 +100,10 @@ export const getClaseById = async (id) => {
 export const buscarClasePorCodigo = async (codigo) => {
     try {
         const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No hay token de autenticación');
+        }
+
         const response = await fetch(`${API_URL}/clases/buscar/${codigo}`, {
             method: 'GET',
             headers: {
@@ -109,31 +113,11 @@ export const buscarClasePorCodigo = async (codigo) => {
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al buscar la clase');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
-};
-
-export const unirseAClase = async (codigo) => {
-    try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/clases/unirse/${codigo}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+            if (response.status === 404) {
+                throw new Error('Clase no encontrada');
             }
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al unirse a la clase');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al buscar la clase');
         }
 
         return await response.json();
@@ -146,6 +130,10 @@ export const unirseAClase = async (codigo) => {
 export const getClasesAlumno = async () => {
     try {
         const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No hay token de autenticación');
+        }
+
         const response = await fetch(`${API_URL}/alumno/clases`, {
             method: 'GET',
             headers: {
@@ -156,12 +144,40 @@ export const getClasesAlumno = async () => {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Error al obtener clases del alumno');
+            throw new Error(error.error || 'Error al obtener las clases del alumno');
         }
 
         return await response.json();
     } catch (error) {
         console.error('Error en getClasesAlumno:', error);
+        throw error;
+    }
+};
+
+export const unirseAClase = async (codigo) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No hay token de autenticación');
+        }
+
+        const response = await fetch(`${API_URL}/alumno/clases/unirse`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ codigo })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al unirse a la clase');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error en unirseAClase:', error);
         throw error;
     }
 };
