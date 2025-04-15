@@ -8,6 +8,7 @@ const DashboardAlumno = () => {
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
     const [clases, setClases] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     const stats = [
@@ -56,10 +57,20 @@ const DashboardAlumno = () => {
                 setClases(data);
             } catch (error) {
                 console.error('Error al cargar clases del alumno:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
         cargarClases();
     }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">

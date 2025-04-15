@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getClaseById, getClaseByIdAlumno } from '../../services/clases';
+import { getClaseById } from '../../services/clases';
 import { BookOpen, Users, Bell, ChevronRight, UserPlus } from 'lucide-react';
 
 const ClaseDashboard = () => {
@@ -11,13 +11,7 @@ const ClaseDashboard = () => {
     useEffect(() => {
         const fetchClase = async () => {
             try {
-                const role = localStorage.getItem('role');
-                let data;
-                if (role === 'alumno') {
-                    data = await getClaseByIdAlumno(id);
-                } else {
-                    data = await getClaseById(id);
-                }
+                const data = await getClaseById(id);
                 setClase(data);
             } catch (error) {
                 console.error('Error al cargar la clase:', error);

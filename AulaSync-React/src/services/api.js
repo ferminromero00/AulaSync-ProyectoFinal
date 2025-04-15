@@ -3,9 +3,10 @@ const API_URL = 'http://localhost:8000/api';
 const api = {
     get: async (url) => {
         const token = localStorage.getItem('token');
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const response = await fetch(`${API_URL}${url}`, {
-            headers: headers
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         if (!response.ok) throw new Error('Error en la petición');
         return response.json();
@@ -13,13 +14,12 @@ const api = {
 
     put: async (url, data) => {
         const token = localStorage.getItem('token');
-        const headers = token ? { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-        } : { 'Content-Type': 'application/json' };
         const response = await fetch(`${API_URL}${url}`, {
             method: 'PUT',
-            headers: headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(data)
         });
         if (!response.ok) throw new Error('Error en la petición');
@@ -40,11 +40,11 @@ const api = {
 };
 
 export const registerStudent = async (data) => {
-    return api.post('/registro', data);
+    return api.post('/register/student', data);
 };
 
 export const registerTeacher = async (data) => {
-    return api.post('/registro/profesor', data);
+    return api.post('/register/teacher', data);
 };
 
 export default api;

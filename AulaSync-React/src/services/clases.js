@@ -128,7 +128,7 @@ export const unirseAClase = async (codigo) => {
 export const getClasesAlumno = async () => {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/clases/alumno`, {
+        const response = await fetch(`${API_URL}/alumno/clases`, { // URL cambiada aquí
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
