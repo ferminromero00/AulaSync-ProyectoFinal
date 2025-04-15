@@ -23,7 +23,7 @@ class RegistroController extends AbstractController
         $alumno->setEmail($data['email']);
         $alumno->setFirstName($data['firstName']);
         $alumno->setLastName($data['lastName']);
-        $alumno->setRoles('ROLE_ALUMNO');
+        $alumno->setRoles(['ROLE_ALUMNO']); // <-- Cambiado aquí
         $alumno->setPassword($passwordHasher->hashPassword($alumno, $data['password']));
         $alumno->setCreatedAt(new \DateTime());
         $alumno->setUpdateAt(new \DateTime());

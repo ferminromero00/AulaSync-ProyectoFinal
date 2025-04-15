@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use App\Repository\ClaseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\Alumno;
 
 #[ORM\Entity(repositoryClass: ClaseRepository::class)]
 class Clase
@@ -29,8 +32,13 @@ class Clase
     #[ORM\Column(length: 255, unique: true)]
     private ?string $codigoClase = null;
 
+    #[ORM\ManyToMany(targetEntity: Alumno::class, inversedBy: "clases")]
+    #[ORM\JoinTable(name: 'clase_alumno')]
+    private Collection $alumnos;
+
     public function __construct()
     {
+        $this->alumnos = new ArrayCollection();
         $this->codigoClase = $this->generarCodigoClase();
     }
 
@@ -91,6 +99,30 @@ class Clase
     public function setCodigoClase(string $codigoClase): self
     {
         $this->codigoClase = $codigoClase;
+        return $this;
+    }
+
+    public function getAlumnos(): Collection
+    {
+        return $this->alumnos;
+    }
+
+    public function addAlumno(Alumno $alumno): self
+    {
+        if (!$this->alumnos->contains($alumno)) {
+            $this->alumnos->add($alumno);
+            $alumno->addClase($this); // Cambiado de addClass a addClase
+            $this->numEstudiantes = $this->alumnos->count();
+        }
+        return $this;
+    }
+
+    public function removeAlumno(Alumno $alumno): self
+    {
+        if ($this->alumnos->removeElement($alumno)) {
+            $alumno->removeClase($this); // Cambiado de removeClass a removeClase
+            $this->numEstudiantes = $this->alumnos->count();
+        }
         return $this;
     }
 

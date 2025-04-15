@@ -9,6 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Clase;
+use App\Entity\Curso;
 
 #[ORM\Entity(repositoryClass: AlumnoRepository::class)]
 class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
@@ -45,11 +47,15 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $matricula = null; 
 
+    #[ORM\ManyToMany(targetEntity: Clase::class, mappedBy: "alumnos")]
+    private Collection $clases;
+
     #[ORM\ManyToMany(targetEntity: Curso::class, inversedBy: "alumnos")]
     private Collection $cursos;
 
     public function __construct()
     {
+        $this->clases = new ArrayCollection();
         $this->cursos = new ArrayCollection();
     }
 
@@ -185,6 +191,28 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeCurso(Curso $curso): self
     {
         $this->cursos->removeElement($curso);
+        return $this;
+    }
+
+    public function getClases(): Collection
+    {
+        return $this->clases;
+    }
+
+    public function addClase(Clase $clase): self
+    {
+        if (!$this->clases->contains($clase)) {
+            $this->clases->add($clase);
+            $clase->addAlumno($this);
+        }
+        return $this;
+    }
+
+    public function removeClase(Clase $clase): self
+    {
+        if ($this->clases->removeElement($clase)) {
+            $clase->removeAlumno($this);
+        }
         return $this;
     }
 

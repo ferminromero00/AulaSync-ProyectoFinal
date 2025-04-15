@@ -37,6 +37,7 @@ function App() {
           </ProtectedRoute>
         }>
           <Route path="dashboard" element={<DashboardAlumno />} />
+          <Route path="clase/:id" element={<ClaseDashboard />} />
           {/* ...otras rutas de alumno... */}
         </Route>
       </Routes>

@@ -1,11 +1,13 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BookOpen, Calendar, FileText, CheckCircle, Plus, X } from "lucide-react"
-import { buscarClasePorCodigo } from "../../services/clases"
+import { buscarClasePorCodigo, unirseAClase, getClasesAlumno } from "../../services/clases"
+import { Link } from "react-router-dom"
 
 const DashboardAlumno = () => {
     const [mostrarModal, setMostrarModal] = useState(false)
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
+    const [clases, setClases] = useState([]);
 
     const stats = [
         { icon: BookOpen, label: "Clases Inscritas", value: "4", color: "bg-green-100 text-green-600" },
@@ -17,13 +19,11 @@ const DashboardAlumno = () => {
         e.preventDefault()
         try {
             const data = await buscarClasePorCodigo(codigo)
-            console.log('Clase encontrada:', {
-                nombre: data.nombre,
-                profesor: data.profesor,
-                codigo: data.codigoClase
-            })
-            // También podemos mostrar un mensaje de éxito
-            alert(`Clase encontrada: ${data.nombre} - Profesor: ${data.profesor}`)
+            // Confirmar unión
+            if (window.confirm(`¿Quieres unirte a la clase "${data.nombre}" de ${data.profesor}?`)) {
+                await unirseAClase(data.codigoClase)
+                alert('Te has unido a la clase correctamente')
+            }
             setMostrarModal(false)
             setCodigo("")
             setError("")
@@ -32,6 +32,19 @@ const DashboardAlumno = () => {
             console.error('Error:', error)
         }
     }
+
+    // Cargar clases inscritas al montar el componente o tras unirse a una clase
+    useEffect(() => {
+        const cargarClases = async () => {
+            try {
+                const data = await getClasesAlumno();
+                setClases(data);
+            } catch (error) {
+                console.error('Error al cargar clases del alumno:', error);
+            }
+        };
+        cargarClases();
+    }, []);
 
     return (
         <div className="space-y-6 p-4">
@@ -73,6 +86,30 @@ const DashboardAlumno = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Clases inscritas */}
+            <div className="max-w-7xl mx-auto mt-8">
+                <h2 className="text-xl font-bold mb-4">Tus Clases</h2>
+                {clases.length === 0 ? (
+                    <p className="text-gray-500">No estás inscrito en ninguna clase.</p>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {clases.map(clase => (
+                            <Link
+                                key={clase.id}
+                                to={`/alumno/clase/${clase.id}`}
+                                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 block p-6"
+                            >
+                                <h3 className="text-lg font-semibold">{clase.nombre}</h3>
+                                <p className="text-sm text-gray-500 mt-1">Profesor: {clase.profesor}</p>
+                                <p className="text-sm text-gray-500">Código: {clase.codigoClase}</p>
+                                <p className="text-sm text-gray-500">Estudiantes: {clase.numEstudiantes}</p>
+                                <p className="text-sm text-gray-500">Creada: {new Date(clase.createdAt).toLocaleDateString()}</p>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Modal para unirse a clase */}

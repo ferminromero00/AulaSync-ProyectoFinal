@@ -40,11 +40,11 @@ const api = {
 };
 
 export const registerStudent = async (data) => {
-    return api.post('/register/student', data);
+    return api.post('/registro', data);
 };
 
 export const registerTeacher = async (data) => {
-    return api.post('/register/teacher', data);
+    return api.post('/registro/profesor', data);
 };
 
 export default api;

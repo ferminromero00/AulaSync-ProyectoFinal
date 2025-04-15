@@ -1,3 +1,5 @@
+import api from './api';
+
 const API_URL = 'http://localhost:8000/api';
 
 let controller = null;
@@ -97,14 +99,51 @@ export const getClaseById = async (id) => {
     }
 };
 
-import api from './api';
-
 export const buscarClasePorCodigo = async (codigo) => {
     try {
         const data = await api.get(`/clases/buscar/${codigo}`);
         return data;
     } catch (error) {
         console.error('Error:', error);
+        throw error;
+    }
+};
+
+export const unirseAClase = async (codigo) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/clases/unirse/${codigo}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al unirse a la clase');
+    }
+    return await response.json();
+};
+
+export const getClasesAlumno = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/clases/alumno`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Error al obtener clases del alumno');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error en getClasesAlumno:', error);
         throw error;
     }
 };

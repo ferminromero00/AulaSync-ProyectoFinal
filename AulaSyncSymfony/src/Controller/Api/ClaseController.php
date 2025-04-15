@@ -125,6 +125,41 @@ class ClaseController extends AbstractController
         }
     }
 
+    #[Route('/clases/alumno', name: 'clases_alumno', methods: ['GET'])]
+    public function getClasesAlumno(EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            /** @var Alumno $alumno */
+            $alumno = $this->getUser();
+            if (!$alumno) {
+                return new JsonResponse(['error' => 'No autenticado'], JsonResponse::HTTP_UNAUTHORIZED);
+            }
+
+            // Obtener las clases del alumno
+            $clases = $alumno->getClases();
+            $clasesArray = [];
+
+            foreach ($clases as $clase) {
+                $clasesArray[] = [
+                    'id' => $clase->getId(),
+                    'nombre' => $clase->getNombre(),
+                    'codigoClase' => $clase->getCodigoClase(),
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'profesor' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
+                    'numEstudiantes' => $clase->getNumEstudiantes(),
+                ];
+            }
+
+            return new JsonResponse($clasesArray);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Error al obtener las clases: ' . $e->getMessage()], 
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    // --- Todas las rutas con /clases/{id} deben ir después ---
     #[Route('/clases/{id}', name: 'clase_eliminar', methods: ['DELETE'])]
     public function eliminarClase(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -173,7 +208,15 @@ class ClaseController extends AbstractController
                 return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
             }
 
-            $estudiantes = []; // Aquí puedes añadir lógica para obtener estudiantes si están relacionados con la clase
+            // Transformar la colección de alumnos en un array con sus datos
+            $estudiantes = $clase->getAlumnos()->map(function($alumno) {
+                return [
+                    'id' => $alumno->getId(),
+                    'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
+                    'email' => $alumno->getEmail(),
+                    'matricula' => $alumno->getMatricula()
+                ];
+            })->toArray();
 
             return new JsonResponse([
                 'id' => $clase->getId(),
@@ -222,5 +265,30 @@ class ClaseController extends AbstractController
                 JsonResponse::HTTP_INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    #[Route('/clases/unirse/{codigo}', name: 'clase_unirse', methods: ['POST'])]
+    public function unirseAClase(string $codigo, EntityManagerInterface $em): JsonResponse
+    {
+        $alumno = $this->getUser();
+        if (!$alumno) {
+            return new JsonResponse(['error' => 'No autenticado'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
+        if (!$clase) {
+            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        if ($clase->getAlumnos()->contains($alumno)) {
+            return new JsonResponse(['message' => 'Ya estás inscrito en esta clase'], JsonResponse::HTTP_OK);
+        }
+
+        $clase->addAlumno($alumno);
+        $clase->setNumEstudiantes($clase->getAlumnos()->count());
+        $em->persist($clase);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Te has unido a la clase correctamente']);
     }
 }
