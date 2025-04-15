@@ -81,33 +81,15 @@ const ClaseDashboard = () => {
                             </button>
                         </div>
                         {clase.estudiantes && clase.estudiantes.length > 0 ? (
-                            <>
-                                <div className="space-y-3">
-                                    {clase.estudiantes.slice(0, 3).map((estudiante) => (
-                                        <div key={estudiante.id} className="flex items-center space-x-3">
-                                            <div className="flex-shrink-0">
-                                                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <span className="text-blue-600 font-medium text-sm">
-                                                        {estudiante.nombre.charAt(0)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-medium text-gray-900 truncate">{estudiante.nombre}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {clase.estudiantes.length > 3 && (
-                                    <button className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium">
-                                        Ver todos ({clase.estudiantes.length})
-                                    </button>
-                                )}
-                            </>
+                            <ul className="space-y-2">
+                                {clase.estudiantes.map((estudiante) => (
+                                    <li key={estudiante.id} className="text-gray-700">
+                                        {estudiante.nombre}
+                                    </li>
+                                ))}
+                            </ul>
                         ) : (
-                            <div className="text-center py-3">
-                                <p className="text-sm text-gray-500">No hay estudiantes</p>
-                            </div>
+                            <p className="text-sm text-gray-500">No hay estudiantes inscritos.</p>
                         )}
                     </div>
 

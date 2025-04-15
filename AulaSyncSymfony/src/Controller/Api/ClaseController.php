@@ -165,24 +165,26 @@ class ClaseController extends AbstractController
                 return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
             }
 
-            // Verificar que el profesor actual es el propietario de la clase
             if ($clase->getProfesor() !== $this->getUser()) {
                 return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
             }
 
-            $estudiantes = []; // Aquí puedes añadir lógica para obtener estudiantes si están relacionados con la clase
+            $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
+                $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
+                return [
+                    'id' => $alumno->getId(),
+                    'nombre' => strlen($nombreCompleto) > 20 
+                        ? substr($nombreCompleto, 0, 17) . '...' 
+                        : $nombreCompleto,
+                ];
+            })->toArray();
 
             return new JsonResponse([
                 'id' => $clase->getId(),
                 'nombre' => $clase->getNombre(),
-                'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                'codigoClase' => $clase->getCodigoClase(),
                 'numEstudiantes' => $clase->getNumEstudiantes(),
-                'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
-                'profesor' => [
-                    'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
-                    'especialidad' => $clase->getProfesor()->getEspecialidad()
-                ],
-                'estudiantes' => $estudiantes
+                'estudiantes' => $estudiantes,
             ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
