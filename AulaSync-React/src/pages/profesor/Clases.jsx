@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
 import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Clases = () => {
     const [clases, setClases] = useState([]);
@@ -91,14 +92,18 @@ const Clases = () => {
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {clases.map((clase) => (
-                        <div key={clase.id} 
-                             className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <Link
+                            key={clase.id}
+                            to={`/profesor/clase/${clase.id}`}
+                            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                        >
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-semibold text-gray-900">{clase.nombre}</h2>
                                     <div className="relative">
                                         <button 
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 e.stopPropagation();
                                                 setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
                                             }}
@@ -111,6 +116,7 @@ const Clases = () => {
                                                 <div className="py-1">
                                                     <button
                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             e.stopPropagation();
                                                             handleEliminarClase(clase.id);
                                                         }}
@@ -154,7 +160,7 @@ const Clases = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

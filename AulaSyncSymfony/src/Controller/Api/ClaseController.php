@@ -154,4 +154,38 @@ class ClaseController extends AbstractController
             );
         }
     }
+
+    #[Route('/clases/{id}', name: 'clase_detalle', methods: ['GET'])]
+    public function getClaseDetalle(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $clase = $em->getRepository(Clase::class)->find($id);
+
+            if (!$clase) {
+                return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            // Verificar que el profesor actual es el propietario de la clase
+            if ($clase->getProfesor() !== $this->getUser()) {
+                return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
+            }
+
+            $estudiantes = []; // Aquí puedes añadir lógica para obtener estudiantes si están relacionados con la clase
+
+            return new JsonResponse([
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                'numEstudiantes' => $clase->getNumEstudiantes(),
+                'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                'profesor' => [
+                    'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
+                    'especialidad' => $clase->getProfesor()->getEspecialidad()
+                ],
+                'estudiantes' => $estudiantes
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
