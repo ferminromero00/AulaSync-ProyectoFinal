@@ -159,6 +159,49 @@ class ClaseController extends AbstractController
         }
     }
 
+    #[Route('/clases/alumno/{id}', name: 'clase_detalle_alumno', methods: ['GET'])]
+    public function getClaseDetalleAlumno(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $alumno = $this->getUser();
+            if (!$alumno) {
+                return new JsonResponse(['error' => 'No autenticado'], JsonResponse::HTTP_UNAUTHORIZED);
+            }
+
+            $clase = $em->getRepository(Clase::class)->find($id);
+
+            if (!$clase) {
+                return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            // Verifica que el alumno esté inscrito en la clase
+            if (!$clase->getAlumnos()->contains($alumno)) {
+                return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
+            }
+
+            $estudiantes = $clase->getAlumnos()->map(function($alumno) {
+                return [
+                    'id' => $alumno->getId(),
+                    'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
+                    'email' => $alumno->getEmail(),
+                    'matricula' => $alumno->getMatricula()
+                ];
+            })->toArray();
+
+            return new JsonResponse([
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'codigoClase' => $clase->getCodigoClase(),
+                'numEstudiantes' => $clase->getNumEstudiantes(),
+                'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                'profesor' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
+                'estudiantes' => $estudiantes
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // --- Todas las rutas con /clases/{id} deben ir después ---
     #[Route('/clases/{id}', name: 'clase_eliminar', methods: ['DELETE'])]
     public function eliminarClase(int $id, EntityManagerInterface $em): JsonResponse
