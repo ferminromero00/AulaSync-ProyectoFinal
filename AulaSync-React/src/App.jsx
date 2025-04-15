@@ -6,6 +6,8 @@ import TeacherLayout from './layouts/TeacherLayout'
 import StudentLayout from './layouts/StudentLayout'
 import TeacherDashboard from './pages/profesor/Dashboard'
 import DashboardAlumno from './pages/alumno/DashboardAlumno'
+import Clases from './pages/profesor/Clases'
+import Configuracion from './pages/profesor/Configuracion'
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           </ProtectedRoute>
         }>
           <Route path="dashboard" element={<TeacherDashboard />} />
+          <Route path="clases" element={<Clases />} />
+          <Route path="configuracion" element={<Configuracion />} />
           {/* ...otras rutas de profesor... */}
         </Route>
 

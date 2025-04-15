@@ -5,18 +5,21 @@ let controller = null;
 export const getClasesProfesor = async () => {
     try {
         const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No hay token de autenticación');
+        }
+
         const response = await fetch(`${API_URL}/clases/profesor`, {
             method: 'GET',
-            credentials: 'include',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('Error al obtener las clases');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al obtener las clases');
         }
 
         return await response.json();

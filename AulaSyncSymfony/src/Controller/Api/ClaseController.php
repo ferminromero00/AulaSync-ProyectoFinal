@@ -34,7 +34,14 @@ class ClaseController extends AbstractController
                     'id' => $clase->getId(),
                     'nombre' => $clase->getNombre(),
                     'numEstudiantes' => $clase->getNumEstudiantes(),
-                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
+                    'estado' => 'Activa',
+                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'profesor' => [
+                        'nombre' => $profesor->getFirstName() . ' ' . $profesor->getLastName(),
+                        'especialidad' => $profesor->getEspecialidad()
+                    ]
                 ]
             ], JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -51,29 +58,31 @@ class ClaseController extends AbstractController
 
         try {
             $profesor = $this->getUser();
-            $queryBuilder = $em->createQueryBuilder()
-                ->select('c')
-                ->from(Clase::class, 'c')
-                ->where('c.profesor = :profesor')
-                ->setParameter('profesor', $profesor)
-                ->orderBy('c.createdAt', 'DESC');
+            if (!$profesor) {
+                return new JsonResponse(['error' => 'Usuario no autenticado'], JsonResponse::HTTP_UNAUTHORIZED);
+            }
 
-            $clases = $queryBuilder->getQuery()
-                ->setHint(\Doctrine\ORM\Query::HINT_FORCE_PARTIAL_LOAD, true)
-                ->getResult();
+            $clases = $em->getRepository(Clase::class)->findBy(['profesor' => $profesor]);
 
             $clasesArray = array_map(function($clase) {
                 return [
                     'id' => $clase->getId(),
                     'nombre' => $clase->getNombre(),
                     'numEstudiantes' => $clase->getNumEstudiantes(),
-                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
+                    'estado' => 'Activa',
+                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'profesor' => [
+                        'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
+                        'especialidad' => $clase->getProfesor()->getEspecialidad()
+                    ]
                 ];
             }, $clases);
 
             return new JsonResponse($clasesArray);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Error al obtener las clases'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['error' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
