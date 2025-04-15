@@ -43,7 +43,12 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             jwt: ~
-        api_clases:
+        api_clases_alumno:       # Nuevo firewall para alumnos accediendo a clases
+            pattern: ^/api/clases/\d+/alumno
+            stateless: true
+            provider: app_alumno_provider
+            jwt: ~
+        api_clases:              # Ruta para profesores
             pattern: ^/api/clases
             stateless: true
             provider: app_profesor_provider
@@ -65,7 +70,8 @@ security:
         - { path: ^/api/profesor/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/alumno, roles: ROLE_ALUMNO }
         - { path: ^/api/profesor, roles: ROLE_PROFESOR }
-        - { path: ^/api/clases, roles: ROLE_PROFESOR }
+        - { path: ^/api/clases/\d+/alumno, roles: ROLE_ALUMNO }  # Para alumnos
+        - { path: ^/api/clases, roles: ROLE_PROFESOR }           # Para profesores
         - { path: ^/api/profesor/clases, roles: ROLE_PROFESOR }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

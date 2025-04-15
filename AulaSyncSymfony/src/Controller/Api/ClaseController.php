@@ -190,4 +190,42 @@ class ClaseController extends AbstractController
             return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/clases/{id}/alumno', name: 'clase_detalle_alumno', methods: ['GET'])]
+    public function getClaseDetalleAlumno(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $clase = $em->getRepository(Clase::class)->find($id);
+
+            if (!$clase) {
+                return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            $alumno = $this->getUser();
+
+            if (!$clase->getAlumnos()->contains($alumno)) {
+                return new JsonResponse(['error' => 'No estás inscrito en esta clase'], JsonResponse::HTTP_FORBIDDEN);
+            }
+
+            $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
+                $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
+                return [
+                    'id' => $alumno->getId(),
+                    'nombre' => strlen($nombreCompleto) > 20 
+                        ? substr($nombreCompleto, 0, 17) . '...' 
+                        : $nombreCompleto,
+                ];
+            })->toArray();
+
+            return new JsonResponse([
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'codigoClase' => $clase->getCodigoClase(),
+                'numEstudiantes' => $clase->getNumEstudiantes(),
+                'estudiantes' => $estudiantes,
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

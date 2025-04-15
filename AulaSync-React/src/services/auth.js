@@ -17,16 +17,17 @@ export const login = async (credentials, role) => {
             throw new Error(data.message || 'Error en el inicio de sesión');
         }
 
-        // Guardamos el token y la información del usuario
         if (data.token) {
+            // Almacenar datos de sesión
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('role', role);
+            localStorage.setItem('tokenTimestamp', Date.now().toString());
         }
 
         return data;
     } catch (error) {
-        console.error('Error en la petición:', error);
+        console.error('Error en login:', error);
         throw error;
     }
 };

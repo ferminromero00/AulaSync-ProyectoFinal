@@ -1,28 +1,60 @@
 const API_URL = 'http://localhost:8000/api';
 
-let controller = null;
+const handleRequest = async (url, options = {}) => {
+    const token = localStorage.getItem('token');
+    const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+    
+    // Verificar si el token ha expirado (1 hora)
+    if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
+        throw new Error('TOKEN_EXPIRED');
+    }
+
+    if (!token) {
+        throw new Error('NO_TOKEN');
+    }
+
+    const defaultHeaders = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+
+    try {
+        const response = await fetch(`${API_URL}${url}`, {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers
+            },
+            credentials: 'include'
+        });
+
+        if (response.status === 401) {
+            throw new Error('UNAUTHORIZED');
+        }
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || error.message || 'Error en la petición');
+        }
+
+        return response.json();
+    } catch (error) {
+        if (error.message === 'TOKEN_EXPIRED' || 
+            error.message === 'NO_TOKEN' || 
+            error.message === 'UNAUTHORIZED') {
+            // Solo limpiamos el storage, pero no redirigimos
+            localStorage.clear();
+        }
+        throw error;
+    }
+};
 
 export const getClasesProfesor = async () => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No hay token de autenticación');
-        }
-
-        const response = await fetch(`${API_URL}/clases/profesor`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        return handleRequest('/clases/profesor', {
+            method: 'GET'
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al obtener las clases');
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -31,22 +63,10 @@ export const getClasesProfesor = async () => {
 
 export const crearClase = async (claseData) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/clases`, {
+        return handleRequest('/clases', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
             body: JSON.stringify(claseData)
         });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al crear la clase');
-        }
-
-        return await response.json();
     } catch (error) {
         throw error;
     }
@@ -54,21 +74,9 @@ export const crearClase = async (claseData) => {
 
 export const eliminarClase = async (claseId) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/clases/${claseId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        return handleRequest(`/clases/${claseId}`, {
+            method: 'DELETE'
         });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al eliminar la clase');
-        }
-
-        return await response.json();
     } catch (error) {
         throw error;
     }
@@ -76,51 +84,37 @@ export const eliminarClase = async (claseId) => {
 
 export const getClaseById = async (id) => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/clases/${id}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al obtener la clase');
+        const role = localStorage.getItem('role');
+        if (!role) {
+            throw new Error('NO_ROLE');
         }
 
-        return await response.json();
+        const endpoint = role === 'alumno' ? `/clases/${id}/alumno` : `/clases/${id}`;
+
+        return handleRequest(endpoint, {
+            method: 'GET'
+        });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error en getClaseById:', error);
+        if (
+            error.message === 'TOKEN_EXPIRED' || 
+            error.message === 'NO_TOKEN' || 
+            error.message === 'UNAUTHORIZED'
+        ) {
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+            throw new Error('Sesión expirada. Redirigiendo al login...');
+        }
         throw error;
     }
 };
 
 export const buscarClasePorCodigo = async (codigo) => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No hay token de autenticación');
-        }
-
-        const response = await fetch(`${API_URL}/clases/buscar/${codigo}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        return handleRequest(`/clases/buscar/${codigo}`, {
+            method: 'GET'
         });
-
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('Clase no encontrada');
-            }
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al buscar la clase');
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Error:', error);
         throw error;
@@ -129,25 +123,9 @@ export const buscarClasePorCodigo = async (codigo) => {
 
 export const getClasesAlumno = async () => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No hay token de autenticación');
-        }
-
-        const response = await fetch(`${API_URL}/alumno/clases`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        return handleRequest('/alumno/clases', {
+            method: 'GET'
         });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error al obtener las clases del alumno');
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Error en getClasesAlumno:', error);
         throw error;
@@ -156,28 +134,25 @@ export const getClasesAlumno = async () => {
 
 export const unirseAClase = async (codigo) => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No hay token de autenticación');
-        }
-
-        const response = await fetch(`${API_URL}/alumno/clases/unirse`, {
+        return handleRequest('/alumno/clases/unirse', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ codigo })
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al unirse a la clase');
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Error en unirseAClase:', error);
         throw error;
     }
 };
+
+// Exportar todas las funciones en un solo lugar
+const claseService = {
+    getClasesProfesor,
+    crearClase,
+    eliminarClase,
+    getClaseById,
+    buscarClasePorCodigo,
+    getClasesAlumno,
+    unirseAClase
+};
+
+export default claseService;

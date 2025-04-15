@@ -1,10 +1,11 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
 import { BookOpen, Users, Bell, ChevronRight, UserPlus } from 'lucide-react';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [clase, setClase] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -15,12 +16,15 @@ const ClaseDashboard = () => {
                 setClase(data);
             } catch (error) {
                 console.error('Error al cargar la clase:', error);
+                if (error.message.includes('No autorizado')) {
+                    navigate('/'); // Redirigir al login si el token no es válido
+                }
             } finally {
                 setIsLoading(false);
             }
         };
         fetchClase();
-    }, [id]);
+    }, [id, navigate]);
 
     if (isLoading) {
         return (
