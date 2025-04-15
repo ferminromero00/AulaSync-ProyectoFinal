@@ -9,6 +9,9 @@ const ClaseDashboard = () => {
     const [clase, setClase] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
+    const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
+
     useEffect(() => {
         const fetchClase = async () => {
             try {
@@ -77,12 +80,14 @@ const ClaseDashboard = () => {
                     <div className="lg:w-1/5 bg-white rounded-lg shadow p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
-                            <button
-                                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                                title="Añadir estudiante"
-                            >
-                                <UserPlus className="h-5 w-5 text-gray-600" />
-                            </button>
+                            {role === 'profesor' && (
+                                <button
+                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                                    title="Añadir estudiante"
+                                >
+                                    <UserPlus className="h-5 w-5 text-gray-600" />
+                                </button>
+                            )}
                         </div>
                         {clase.estudiantes && clase.estudiantes.length > 0 ? (
                             <ul className="space-y-2">
