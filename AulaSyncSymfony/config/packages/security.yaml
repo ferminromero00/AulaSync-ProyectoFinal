@@ -46,7 +46,7 @@ security:
         api_clases:
             pattern: ^/api/clases
             stateless: true
-            provider: app_profesor_provider
+            provider: app_chain_provider
             jwt: ~
         main:
             lazy: true
@@ -65,7 +65,7 @@ security:
         - { path: ^/api/profesor/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/alumno, roles: ROLE_ALUMNO }
         - { path: ^/api/profesor, roles: ROLE_PROFESOR }
-        - { path: ^/api/clases, roles: ROLE_PROFESOR }
+        - { path: ^/api/clases, roles: [ROLE_PROFESOR, ROLE_ALUMNO] }
         - { path: ^/api/profesor/clases, roles: ROLE_PROFESOR }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

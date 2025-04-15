@@ -96,3 +96,15 @@ export const getClaseById = async (id) => {
         throw error;
     }
 };
+
+import api from './api';
+
+export const buscarClasePorCodigo = async (codigo) => {
+    try {
+        const data = await api.get(`/clases/buscar/${codigo}`);
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};

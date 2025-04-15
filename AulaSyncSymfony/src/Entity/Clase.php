@@ -26,6 +26,14 @@ class Clase
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $codigoClase = null;
+
+    public function __construct()
+    {
+        $this->codigoClase = $this->generarCodigoClase();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -73,5 +81,27 @@ class Clase
     {
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    public function getCodigoClase(): ?string
+    {
+        return $this->codigoClase;
+    }
+
+    public function setCodigoClase(string $codigoClase): self
+    {
+        $this->codigoClase = $codigoClase;
+        return $this;
+    }
+
+    private function generarCodigoClase(): string
+    {
+        // Generar un código aleatorio de 6 caracteres alfanuméricos
+        $caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $codigo = '';
+        for ($i = 0; $i < 6; $i++) {
+            $codigo .= $caracteres[rand(0, strlen($caracteres) - 1)];
+        }
+        return $codigo;
     }
 }

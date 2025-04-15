@@ -24,6 +24,7 @@ class ClaseController extends AbstractController
                   ->setProfesor($profesor)
                   ->setNumEstudiantes(0)
                   ->setCreatedAt(new \DateTime());
+            // El código se genera automáticamente en el constructor
 
             $em->persist($clase);
             $em->flush();
@@ -37,7 +38,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'codigoClase' => $clase->getCodigoClase(),
                     'profesor' => [
                         'nombre' => $profesor->getFirstName() . ' ' . $profesor->getLastName(),
                         'especialidad' => $profesor->getEspecialidad()
@@ -45,7 +46,9 @@ class ClaseController extends AbstractController
                 ]
             ], JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Error al crear la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['error' => 'Error al crear la clase: ' . $e->getMessage()], 
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -72,7 +75,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'codigoClase' => $clase->getCodigoClase(),
                     'profesor' => [
                         'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
                         'especialidad' => $clase->getProfesor()->getEspecialidad()
@@ -175,7 +178,7 @@ class ClaseController extends AbstractController
             return new JsonResponse([
                 'id' => $clase->getId(),
                 'nombre' => $clase->getNombre(),
-                'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                'codigoClase' => $clase->getCodigoClase(),
                 'numEstudiantes' => $clase->getNumEstudiantes(),
                 'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                 'profesor' => [
@@ -186,6 +189,38 @@ class ClaseController extends AbstractController
             ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Error al obtener los detalles de la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/clases/buscar/{codigo}', name: 'buscar_clase', methods: ['GET'])]
+    public function buscarClasePorCodigo(string $codigo, EntityManagerInterface $em): JsonResponse
+    {
+        $usuario = $this->getUser();
+        if (!$usuario) {
+            return new JsonResponse(['error' => 'No autenticado'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        try {
+            $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
+
+            if (!$clase) {
+                return new JsonResponse(
+                    ['error' => 'Clase no encontrada'], 
+                    JsonResponse::HTTP_NOT_FOUND
+                );
+            }
+
+            return new JsonResponse([
+                'nombre' => $clase->getNombre(),
+                'profesor' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
+                'codigoClase' => $clase->getCodigoClase()
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Error al buscar la clase'], 
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

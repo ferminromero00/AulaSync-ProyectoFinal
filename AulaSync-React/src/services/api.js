@@ -3,10 +3,9 @@ const API_URL = 'http://localhost:8000/api';
 const api = {
     get: async (url) => {
         const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const response = await fetch(`${API_URL}${url}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: headers
         });
         if (!response.ok) throw new Error('Error en la petición');
         return response.json();
@@ -14,12 +13,13 @@ const api = {
 
     put: async (url, data) => {
         const token = localStorage.getItem('token');
+        const headers = token ? { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+        } : { 'Content-Type': 'application/json' };
         const response = await fetch(`${API_URL}${url}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: headers,
             body: JSON.stringify(data)
         });
         if (!response.ok) throw new Error('Error en la petición');
