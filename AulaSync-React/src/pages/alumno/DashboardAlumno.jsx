@@ -1,39 +1,54 @@
 import { useState, useEffect } from "react"
 import { BookOpen, Calendar, FileText, CheckCircle, Plus, X } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, getClasesAlumno } from "../../services/clases"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 const DashboardAlumno = () => {
     const [mostrarModal, setMostrarModal] = useState(false)
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
     const [clases, setClases] = useState([]);
+    const navigate = useNavigate();
 
     const stats = [
-        { icon: BookOpen, label: "Clases Inscritas", value: "4", color: "bg-green-100 text-green-600" },
-        { icon: FileText, label: "Tareas Pendientes", value: "3", color: "bg-amber-100 text-amber-600" },
-        { icon: CheckCircle, label: "Tareas Completadas", value: "12", color: "bg-blue-100 text-blue-600" },
+        { 
+            icon: BookOpen, 
+            label: "Clases Inscritas", 
+            value: clases.length,
+            color: "bg-green-100 text-green-600" 
+        },
+        { 
+            icon: FileText, 
+            label: "Tareas Pendientes", 
+            value: "3", 
+            color: "bg-amber-100 text-amber-600" 
+        },
+        { 
+            icon: CheckCircle, 
+            label: "Tareas Completadas", 
+            value: "12", 
+            color: "bg-blue-100 text-blue-600" 
+        },
     ]
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
         try {
             const data = await buscarClasePorCodigo(codigo)
-            // Confirmar unión
             if (window.confirm(`¿Quieres unirte a la clase "${data.nombre}" de ${data.profesor}?`)) {
-                await unirseAClase(data.codigoClase)
-                alert('Te has unido a la clase correctamente')
+                const response = await unirseAClase(data.codigoClase)
+                // Redirigir a la clase después de unirse
+                navigate(`/alumno/clase/${response.claseId}`);
+                setMostrarModal(false)
+                setCodigo("")
+                setError("")
             }
-            setMostrarModal(false)
-            setCodigo("")
-            setError("")
         } catch (error) {
             setError("Clase no encontrada")
             console.error('Error:', error)
         }
     }
 
-    // Cargar clases inscritas al montar el componente o tras unirse a una clase
     useEffect(() => {
         const cargarClases = async () => {
             try {
@@ -47,69 +62,70 @@ const DashboardAlumno = () => {
     }, []);
 
     return (
-        <div className="space-y-6 p-4">
-            <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard del Alumno</h1>
-                <div className="flex items-center space-x-4">
-                    <button
-                        onClick={() => setMostrarModal(true)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                        <Plus className="h-5 w-5" />
-                        <span>Unirse a clase</span>
-                    </button>
-                    <div className="flex items-center space-x-2">
-                        <Calendar className="h-5 w-5 text-gray-500" />
-                        <span className="text-sm text-gray-500">
-                            {new Date().toLocaleDateString('es-ES', { 
-                                day: 'numeric', 
-                                month: 'long', 
-                                year: 'numeric' 
-                            })}
-                        </span>
-                    </div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* Header con bienvenida y botón de unirse */}
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Bienvenido a tu Dashboard</h1>
+                    <p className="text-gray-600">Gestiona tus clases y actividades</p>
                 </div>
+                <button
+                    onClick={() => setMostrarModal(true)}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Unirse a clase
+                </button>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+            {/* Stats en cards más atractivas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {stats.map((stat, index) => (
-                    <div key={index} className="rounded-lg border bg-white p-6">
-                        <div className="flex items-center">
-                            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.color}`}>
+                    <div key={index} 
+                         className="bg-white rounded-lg shadow-sm p-6 transition-all hover:shadow-md">
+                        <div className="flex items-center justify-between">
+                            <div className={`p-3 rounded-lg ${stat.color}`}>
                                 <stat.icon className="h-6 w-6" />
                             </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-2xl font-bold">{stat.value}</h3>
+                            <div className="text-right">
+                                <p className="text-2xl font-bold">{stat.value}</p>
+                                <p className="text-gray-600">{stat.label}</p>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Clases inscritas */}
-            <div className="max-w-7xl mx-auto mt-8">
-                <h2 className="text-xl font-bold mb-4">Tus Clases</h2>
-                {clases.length === 0 ? (
-                    <p className="text-gray-500">No estás inscrito en ninguna clase.</p>
-                ) : (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {clases.map(clase => (
-                            <Link
-                                key={clase.id}
-                                to={`/alumno/clase/${clase.id}`}
-                                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 block p-6"
-                            >
-                                <h3 className="text-lg font-semibold">{clase.nombre}</h3>
-                                <p className="text-sm text-gray-500 mt-1">Profesor: {clase.profesor}</p>
-                                <p className="text-sm text-gray-500">Código: {clase.codigoClase}</p>
-                                <p className="text-sm text-gray-500">Estudiantes: {clase.numEstudiantes}</p>
-                                <p className="text-sm text-gray-500">Creada: {new Date(clase.createdAt).toLocaleDateString()}</p>
-                            </Link>
-                        ))}
-                    </div>
-                )}
+            {/* Listado de clases con nuevo diseño */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-lg font-semibold mb-4">Mis Clases</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {clases.length > 0 ? clases.map(clase => (
+                        <Link
+                            key={clase.id}
+                            to={`/alumno/clase/${clase.id}`}
+                            className="block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100"
+                        >
+                            <div className="flex items-center gap-4 mb-3">
+                                <div className="bg-green-100 p-3 rounded-lg">
+                                    <BookOpen className="h-6 w-6 text-green-600" />
+                                </div>
+                                <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
+                            </div>
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <p>Profesor: {clase.profesor}</p>
+                                <p>Estudiantes: {clase.numEstudiantes}</p>
+                                <p>Código: {clase.codigoClase}</p>
+                            </div>
+                        </Link>
+                    )) : (
+                        <div className="col-span-full text-center py-8 text-gray-500">
+                            <BookOpen className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                            <p>No estás inscrito en ninguna clase</p>
+                            <p className="text-sm">Usa el botón "Unirse a clase" para empezar</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Modal para unirse a clase */}

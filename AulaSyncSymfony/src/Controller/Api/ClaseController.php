@@ -324,7 +324,10 @@ class ClaseController extends AbstractController
         }
 
         if ($clase->getAlumnos()->contains($alumno)) {
-            return new JsonResponse(['message' => 'Ya estás inscrito en esta clase'], JsonResponse::HTTP_OK);
+            return new JsonResponse([
+                'message' => 'Ya estás inscrito en esta clase',
+                'claseId' => $clase->getId()
+            ], JsonResponse::HTTP_OK);
         }
 
         $clase->addAlumno($alumno);
@@ -332,6 +335,9 @@ class ClaseController extends AbstractController
         $em->persist($clase);
         $em->flush();
 
-        return new JsonResponse(['message' => 'Te has unido a la clase correctamente']);
+        return new JsonResponse([
+            'message' => 'Te has unido a la clase correctamente',
+            'claseId' => $clase->getId()
+        ]);
     }
 }
