@@ -72,7 +72,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'codigoClase' => $clase->getCodigoClase(),  // Usar el código generado aleatoriamente
                     'profesor' => [
                         'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
                         'especialidad' => $clase->getProfesor()->getEspecialidad()
