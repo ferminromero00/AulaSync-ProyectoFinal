@@ -88,6 +88,10 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                                                     <span>{clase.numEstudiantes} estudiantes</span>
                                                 </div>
                                                 <div className="flex items-center text-sm text-gray-500">
+                                                    <BookOpen className="h-4 w-4 mr-1" />
+                                                    <span>Código: {clase.codigoClase}</span>
+                                                </div>
+                                                <div className="flex items-center text-sm text-gray-500">
                                                     <Calendar className="h-4 w-4 mr-1" />
                                                     <span>{new Date(clase.createdAt).toLocaleDateString('es-ES', {
                                                         day: 'numeric',

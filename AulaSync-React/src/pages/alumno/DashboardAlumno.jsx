@@ -34,10 +34,15 @@ const DashboardAlumno = () => {
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
+        console.log("Iniciando handleBuscarClase con código:", codigo); // Log 1
         try {
+            console.log("Llamando a buscarClasePorCodigo con código:", codigo); // Log 2
             const data = await buscarClasePorCodigo(codigo)
+            console.log("Respuesta de buscarClasePorCodigo:", data); // Log 3
             if (window.confirm(`¿Quieres unirte a la clase "${data.nombre}" de ${data.profesor}?`)) {
+                console.log("Confirmación aceptada. Llamando a unirseAClase con código:", data.codigoClase); // Log 4
                 const response = await unirseAClase(data.codigoClase)
+                console.log("Respuesta de unirseAClase:", response); // Log 5
                 // Redirigir a la clase después de unirse
                 navigate(`/alumno/clase/${response.claseId}`);
                 setMostrarModal(false)
@@ -45,6 +50,7 @@ const DashboardAlumno = () => {
                 setError("")
             }
         } catch (error) {
+            console.error("Error en handleBuscarClase:", error); // Log de error
             setError("Clase no encontrada")
             console.error('Error:', error)
         }

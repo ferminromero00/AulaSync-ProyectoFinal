@@ -37,7 +37,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => 'CLS-' . str_pad($clase->getId(), 4, '0', STR_PAD_LEFT),
+                    'codigoClase' => $clase->getCodigoClase(), // <-- Usar el código real de la base de datos
                     'profesor' => [
                         'nombre' => $profesor->getFirstName() . ' ' . $profesor->getLastName(),
                         'especialidad' => $profesor->getEspecialidad()
@@ -232,11 +232,19 @@ class ClaseController extends AbstractController
     #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET'])]
     public function buscarClasePorCodigoAlumno(string $codigo, EntityManagerInterface $em): JsonResponse
     {
+        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Código recibido: " . $codigo); // Log 1
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
         if (!$clase) {
+            // Para debug (remover en producción)
+            // $clase = new Clase();
+            // $clase->setNombre("Clase de prueba");
+            // $clase->setCodigoClase($codigo);
+            // $clase->setCreatedAt(new \DateTime());
+            \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase no encontrada con código: " . $codigo); // Log 2
             return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
         // Si se desea, se pueden incluir otros detalles
+        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase encontrada: " . $clase->getNombre()); // Log 3
         return new JsonResponse([
             'id' => $clase->getId(),
             'nombre' => $clase->getNombre(),
@@ -249,12 +257,15 @@ class ClaseController extends AbstractController
     public function unirseAClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Datos recibidos: " . json_encode($data)); // Log 1
         if (empty($data['codigo'])) {
+            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - No se proporcionó código"); // Log 2
             return new JsonResponse(['error' => 'No se proporcionó código'], JsonResponse::HTTP_BAD_REQUEST);
         }
         
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $data['codigo']]);
         if (!$clase) {
+            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Clase no encontrada con código: " . $data['codigo']); // Log 3
             return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
         

@@ -112,11 +112,14 @@ export const getClaseById = async (id) => {
 
 export const buscarClasePorCodigo = async (codigo) => {
     try {
-        return handleRequest(`/alumno/clases/buscar/${codigo}`, {
+        console.log("buscarClasePorCodigo - Llamando a la API con código:", codigo); // Log 1
+        const response = await handleRequest(`/alumno/clases/buscar/${codigo}`, {
             method: 'GET'
         });
+        console.log("buscarClasePorCodigo - Respuesta de la API:", response); // Log 2
+        return response;
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error en buscarClasePorCodigo:', error);
         throw error;
     }
 };
@@ -134,10 +137,13 @@ export const getClasesAlumno = async () => {
 
 export const unirseAClase = async (codigo) => {
     try {
-        return handleRequest('/alumno/clases/unirse', {
+        console.log("unirseAClase - Llamando a la API con código:", codigo); // Log 1
+        const response = await handleRequest('/alumno/clases/unirse', {
             method: 'POST',
             body: JSON.stringify({ codigo })
         });
+        console.log("unirseAClase - Respuesta de la API:", response); // Log 2
+        return response;
     } catch (error) {
         console.error('Error en unirseAClase:', error);
         throw error;
