@@ -118,6 +118,7 @@ const DashboardAlumno = () => {
         setLoading(true);
         try {
           const data = await obtenerInvitacionesPendientes();
+          console.log("Invitaciones pendientes:", data); // <-- Añade esto para depurar
           setNotificaciones(data);
         } catch (e) {
           setNotificaciones([]);

@@ -58,7 +58,12 @@ class InvitacionController extends AbstractController
         }
 
         if ($respuesta === 'aceptar') {
-            $invitacion->getClase()->addAlumno($invitacion->getAlumno());
+            $clase = $invitacion->getClase();
+            $alumno = $invitacion->getAlumno();
+            // Evita duplicados
+            if (!$clase->getAlumnos()->contains($alumno)) {
+                $clase->addAlumno($alumno);
+            }
             $invitacion->setEstado('aceptada');
         } else {
             $invitacion->setEstado('rechazada');
@@ -72,22 +77,30 @@ class InvitacionController extends AbstractController
     public function obtenerInvitacionesPendientes(EntityManagerInterface $em): JsonResponse
     {
         $alumno = $this->getUser();
+
+        // Añade este chequeo para evitar consultas erróneas
+        if (!$alumno instanceof \App\Entity\Alumno) {
+            return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
+        }
         
         $invitaciones = $em->getRepository(Invitacion::class)->findBy([
             'alumno' => $alumno,
             'estado' => 'pendiente'
         ]);
 
-        $data = array_map(fn(Invitacion $inv) => [
-            'id' => $inv->getId(),
-            'clase' => [
-                'id' => $inv->getClase()->getId(),
-                'nombre' => $inv->getClase()->getNombre(),
-                'profesor' => $inv->getClase()->getProfesor()->getFirstName() . ' ' . 
-                            $inv->getClase()->getProfesor()->getLastName()
-            ],
-            'fecha' => $inv->getFecha()->format('Y-m-d H:i:s')
-        ], $invitaciones);
+        $data = array_map(function(Invitacion $inv) {
+            $clase = $inv->getClase();
+            $profesor = $clase ? $clase->getProfesor() : null;
+            return [
+                'id' => $inv->getId(),
+                'clase' => [
+                    'id' => $clase ? $clase->getId() : null,
+                    'nombre' => $clase ? $clase->getNombre() : 'Clase eliminada',
+                    'profesor' => $profesor ? ($profesor->getFirstName() . ' ' . $profesor->getLastName()) : 'Profesor desconocido'
+                ],
+                'fecha' => $inv->getFecha() ? $inv->getFecha()->format('Y-m-d H:i:s') : null
+            ];
+        }, $invitaciones);
 
         return new JsonResponse($data);
     }

@@ -22,19 +22,20 @@ export const handleRequest = async (url, options = {}) => {
     }
 
     const defaultHeaders = {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+
+    const config = {
+        ...options,
+        headers: {
+            ...defaultHeaders,
+            ...options.headers
+        }
     };
 
     try {
-        const response = await fetch(`${BASE_URL}${url}`, {
-            ...options,
-            headers: {
-                ...defaultHeaders,
-                ...options.headers
-            }
-        });
+        const response = await fetch(`${BASE_URL}${url}`, config);
 
         if (response.status === 401) {
             localStorage.clear();
@@ -75,11 +76,17 @@ export const api = {
 };
 
 export const registerStudent = async (data) => {
-    return api.post('/register/student', data);
+    return handleRequest('/registro', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
 };
 
 export const registerTeacher = async (data) => {
-    return api.post('/register/teacher', data);
+    return handleRequest('/registro/profesor', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
 };
 
 export default api;

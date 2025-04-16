@@ -53,6 +53,11 @@ security:
             stateless: true
             provider: app_profesor_provider
             jwt: ~
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_chain_provider  # Añadir esta línea
+            jwt: ~
         main:
             lazy: true
             provider: app_chain_provider  # Cambiamos esto de app_user_provider a app_chain_provider
@@ -68,6 +73,8 @@ security:
     access_control:
         - { path: ^/api/alumno/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/profesor/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/registro, roles: PUBLIC_ACCESS }
+        - { path: ^/api/invitaciones, roles: ROLE_ALUMNO }  # Añade esta línea
         - { path: ^/api/alumno, roles: ROLE_ALUMNO }
         - { path: ^/api/profesor, roles: ROLE_PROFESOR }
         - { path: ^/api/clases/\d+/alumno, roles: ROLE_ALUMNO }  # Para alumnos
