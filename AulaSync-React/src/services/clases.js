@@ -4,13 +4,16 @@ const handleRequest = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const tokenTimestamp = localStorage.getItem('tokenTimestamp');
     
-    // Verificar si el token ha expirado (1 hora)
-    if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
-        throw new Error('TOKEN_EXPIRED');
+    // Verificar si hay token
+    if (!token) {
+        localStorage.clear(); // Limpiar todo el storage
+        throw new Error('NO_TOKEN');
     }
 
-    if (!token) {
-        throw new Error('NO_TOKEN');
+    // Verificar si el token ha expirado (1 hora)
+    if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
+        localStorage.clear(); // Limpiar todo el storage
+        throw new Error('TOKEN_EXPIRED');
     }
 
     const defaultHeaders = {
@@ -25,11 +28,11 @@ const handleRequest = async (url, options = {}) => {
             headers: {
                 ...defaultHeaders,
                 ...options.headers
-            },
-            credentials: 'include'
+            }
         });
 
         if (response.status === 401) {
+            localStorage.clear(); // Limpiar storage en caso de token inválido
             throw new Error('UNAUTHORIZED');
         }
 
@@ -40,12 +43,7 @@ const handleRequest = async (url, options = {}) => {
 
         return response.json();
     } catch (error) {
-        if (error.message === 'TOKEN_EXPIRED' || 
-            error.message === 'NO_TOKEN' || 
-            error.message === 'UNAUTHORIZED') {
-            // Solo limpiamos el storage, pero no redirigimos
-            localStorage.clear();
-        }
+        console.error('Request Error:', error);
         throw error;
     }
 };

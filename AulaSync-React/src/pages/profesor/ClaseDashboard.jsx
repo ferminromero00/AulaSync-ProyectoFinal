@@ -1,13 +1,19 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X } from 'lucide-react';
+import debounce from 'lodash/debounce';
+import { searchAlumnos } from '../../services/alumnos';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [clase, setClase] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showSearchModal, setShowSearchModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -28,6 +34,90 @@ const ClaseDashboard = () => {
         };
         fetchClase();
     }, [id, navigate]);
+
+    const handleSearchAlumnos = async (query) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        
+        setIsSearching(true);
+        try {
+            const data = await searchAlumnos(query);
+            setSearchResults(data);
+        } catch (error) {
+            console.error('Error buscando alumnos:', error);
+            setSearchResults([]);
+            // Opcionalmente puedes mostrar un mensaje de error al usuario
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const debouncedSearch = debounce(handleSearchAlumnos, 1000);
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
+    };
+
+    const renderStudentSearchModal = () => {
+        if (!showSearchModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Buscar Alumnos</h3>
+                        <button 
+                            onClick={() => setShowSearchModal(false)}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            placeholder="Buscar por email..."
+                            className="w-full p-2 border border-gray-300 rounded-md pr-10"
+                        />
+                        <Search className="h-5 w-5 text-gray-400 absolute right-3 top-2.5" />
+                    </div>
+
+                    <div className="mt-4 max-h-60 overflow-y-auto">
+                        {isSearching ? (
+                            <div className="text-center py-4">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                            </div>
+                        ) : searchTerm && searchResults.length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">No se encontraron resultados</p>
+                        ) : (
+                            <ul className="divide-y divide-gray-200">
+                                {searchResults.map((alumno) => (
+                                    <li 
+                                        key={alumno.id} 
+                                        className="py-3 hover:bg-gray-50 cursor-pointer px-2 rounded"
+                                        onClick={() => {
+                                            // TODO: Implementar la lógica para añadir al alumno
+                                            console.log('Añadir alumno:', alumno);
+                                        }}
+                                    >
+                                        <div className="font-medium">{alumno.nombre}</div>
+                                        <div className="text-sm text-gray-500">{alumno.email}</div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     if (isLoading) {
         return (
@@ -84,6 +174,7 @@ const ClaseDashboard = () => {
                                 <button
                                     className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
                                     title="Añadir estudiante"
+                                    onClick={() => setShowSearchModal(true)}
                                 >
                                     <UserPlus className="h-5 w-5 text-gray-600" />
                                 </button>
@@ -112,6 +203,7 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </div>
+            {renderStudentSearchModal()}
         </div>
     );
 };

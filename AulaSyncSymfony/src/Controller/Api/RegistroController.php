@@ -10,10 +10,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Psr\Log\LoggerInterface;
 
 #[Route('/api', name: 'api_')]
 class RegistroController extends AbstractController
 {
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/registro', name: 'registro', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -92,5 +101,48 @@ class RegistroController extends AbstractController
         }, $alumnos);
 
         return new JsonResponse($alumnosArray);
+    }
+
+    #[Route('/profesor/alumnos/search', name: 'api_alumnos_search', methods: ['GET'])]
+    #[IsGranted('ROLE_PROFESOR')]
+    public function searchAlumnos(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $query = $request->query->get('query');
+            
+            if (!$query) {
+                return new JsonResponse([]);
+            }
+
+            $this->logger->info('Búsqueda de alumnos iniciada', [
+                'query' => $query,
+                'user' => $this->getUser()?->getUserIdentifier()
+            ]);
+
+            $qb = $em->getRepository(Alumno::class)->createQueryBuilder('a')
+                ->where('a.email LIKE :query')
+                ->orWhere('CONCAT(a.first_name, \' \', a.last_name) LIKE :query')
+                ->setParameter('query', '%' . $query . '%')
+                ->setMaxResults(10);
+
+            $alumnos = $qb->getQuery()->getResult();
+            
+            return new JsonResponse(array_map(function($alumno) {
+                return [
+                    'id' => $alumno->getId(),
+                    'email' => $alumno->getEmail(),
+                    'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName()
+                ];
+            }, $alumnos));
+        } catch (\Exception $e) {
+            $this->logger->error('Error en búsqueda de alumnos', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return new JsonResponse([
+                'error' => 'Error al buscar alumnos'
+            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
