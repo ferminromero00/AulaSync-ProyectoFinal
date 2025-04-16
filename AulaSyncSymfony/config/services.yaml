@@ -20,5 +20,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # Añadir configuración específica para el controlador
+    App\Controller\Api\ClaseController:
+        tags: ['controller.service_arguments']
+        autowire: true
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

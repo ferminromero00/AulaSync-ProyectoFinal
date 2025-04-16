@@ -150,6 +150,17 @@ export const unirseAClase = async (codigo) => {
     }
 };
 
+export const salirDeClase = async (claseId) => {
+    try {
+        return await handleRequest(`/alumno/clases/${claseId}/salir`, {
+            method: 'POST'
+        });
+    } catch (error) {
+        console.error('Error en salirDeClase:', error);
+        throw error;
+    }
+};
+
 // Exportar todas las funciones en un solo lugar
 const claseService = {
     getClasesProfesor,
@@ -158,7 +169,8 @@ const claseService = {
     getClaseById,
     buscarClasePorCodigo,
     getClasesAlumno,
-    unirseAClase
+    unirseAClase,
+    salirDeClase
 };
 
 export default claseService;

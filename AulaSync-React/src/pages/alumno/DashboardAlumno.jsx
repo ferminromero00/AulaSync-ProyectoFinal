@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react"
-import { BookOpen, Calendar, FileText, CheckCircle, Plus, X } from "lucide-react"
-import { buscarClasePorCodigo, unirseAClase, getClasesAlumno } from "../../services/clases"
+import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle } from "lucide-react"
+import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
 import { Link, useNavigate } from "react-router-dom"
 
 const DashboardAlumno = () => {
     const [mostrarModal, setMostrarModal] = useState(false)
+    const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false)
+    const [claseParaUnirse, setClaseParaUnirse] = useState(null)
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
     const [clases, setClases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [menuAbierto, setMenuAbierto] = useState(null);
+    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
     const navigate = useNavigate();
 
     const stats = [
@@ -34,25 +40,70 @@ const DashboardAlumno = () => {
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
-        console.log("Iniciando handleBuscarClase con código:", codigo); // Log 1
         try {
-            console.log("Llamando a buscarClasePorCodigo con código:", codigo); // Log 2
             const data = await buscarClasePorCodigo(codigo)
-            console.log("Respuesta de buscarClasePorCodigo:", data); // Log 3
-            if (window.confirm(`¿Quieres unirte a la clase "${data.nombre}" de ${data.profesor}?`)) {
-                console.log("Confirmación aceptada. Llamando a unirseAClase con código:", data.codigoClase); // Log 4
-                const response = await unirseAClase(data.codigoClase)
-                console.log("Respuesta de unirseAClase:", response); // Log 5
-                // Redirigir a la clase después de unirse
-                navigate(`/alumno/clase/${response.claseId}`);
-                setMostrarModal(false)
-                setCodigo("")
-                setError("")
-            }
+            setClaseParaUnirse(data)
+            setShowJoinConfirmModal(true)
+            setError("")
         } catch (error) {
-            console.error("Error en handleBuscarClase:", error); // Log de error
             setError("Clase no encontrada")
             console.error('Error:', error)
+        }
+    }
+
+    const handleConfirmJoin = async () => {
+        try {
+            const response = await unirseAClase(claseParaUnirse.codigoClase)
+            navigate(`/alumno/clase/${response.claseId}`);
+            setMostrarModal(false)
+            setShowJoinConfirmModal(false)
+            setCodigo("")
+            setClaseParaUnirse(null)
+            setNotification({
+                show: true,
+                message: 'Te has unido a la clase exitosamente',
+                type: 'success'
+            });
+        } catch (error) {
+            setNotification({
+                show: true,
+                message: error.message || 'Error al unirse a la clase',
+                type: 'error'
+            });
+        }
+    }
+
+    const handleMenuClick = (claseId) => {
+        setMenuAbierto(claseId === menuAbierto ? null : claseId)
+    }
+
+    const handleSalirClase = async (claseId) => {
+        try {
+            await salirDeClase(claseId);
+            
+            // Actualizar el estado local eliminando la clase
+            setClases(prevClases => prevClases.filter(clase => clase.id !== claseId));
+            
+            setMenuAbierto(null);
+            setShowConfirmModal(false);
+            setNotification({
+                show: true,
+                message: 'Has salido de la clase exitosamente',
+                type: 'success'
+            });
+            
+            // Ocultar la notificación después de 3 segundos
+            setTimeout(() => {
+                setNotification({ show: false, message: '', type: '' });
+            }, 3000);
+        } catch (error) {
+            console.error('Error al salir de la clase:', error);
+            setNotification({
+                show: true,
+                message: error.message || 'Error al salir de la clase',
+                type: 'error'
+            });
+            setShowConfirmModal(false);
         }
     }
 
@@ -118,23 +169,57 @@ const DashboardAlumno = () => {
                 <h2 className="text-lg font-semibold mb-4">Mis Clases</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {clases.length > 0 ? clases.map(clase => (
-                        <Link
-                            key={clase.id}
-                            to={`/alumno/clase/${clase.id}`}
-                            className="block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100"
-                        >
-                            <div className="flex items-center gap-4 mb-3">
-                                <div className="bg-green-100 p-3 rounded-lg">
-                                    <BookOpen className="h-6 w-6 text-green-600" />
+                        <div key={clase.id} className="relative block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100">
+                            <Link
+                                to={`/alumno/clase/${clase.id}`}
+                            >
+                                <div className="flex items-center gap-4 mb-3">
+                                    <div className="bg-green-100 p-3 rounded-lg">
+                                        <BookOpen className="h-6 w-6 text-green-600" />
+                                    </div>
+                                    <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
                                 </div>
-                                <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
-                            </div>
-                            <div className="space-y-1 text-sm text-gray-600">
-                                <p>Profesor: {clase.profesor}</p>
-                                <p>Estudiantes: {clase.numEstudiantes}</p>
-                                <p>Código: {clase.codigoClase}</p>
-                            </div>
-                        </Link>
+                                <div className="space-y-1 text-sm text-gray-600">
+                                    <p>Profesor: {clase.profesor}</p>
+                                    <p>Estudiantes: {clase.numEstudiantes}</p>
+                                    <p>Código: {clase.codigoClase}</p>
+                                </div>
+                            </Link>
+                            {/* Botón de menú mejorado */}
+                            <button
+                                className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                                onClick={() => handleMenuClick(clase.id)}
+                                aria-label="Opciones de clase"
+                            >
+                                <MoreVertical className="h-5 w-5 text-gray-500" />
+                            </button>
+                            
+                            {/* Menú desplegable mejorado */}
+                            {menuAbierto === clase.id && (
+                                <div className="absolute top-12 right-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 animate-fadeIn">
+                                    <button
+                                        className="w-full px-4 py-2 text-left flex items-center space-x-2 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setClaseSeleccionada(clase);
+                                            setShowConfirmModal(true);
+                                            setMenuAbierto(null);
+                                        }}
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        <span>Salir de la clase</span>
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {/* Overlay para cerrar el menú al hacer clic fuera */}
+                            {menuAbierto === clase.id && (
+                                <div 
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setMenuAbierto(null)}
+                                />
+                            )}
+                        </div>
                     )) : (
                         <div className="col-span-full text-center py-8 text-gray-500">
                             <BookOpen className="h-12 w-12 mx-auto mb-2 text-gray-400" />
@@ -191,6 +276,91 @@ const DashboardAlumno = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+                        <div className="flex items-center justify-center mb-4 text-amber-500">
+                            <AlertTriangle className="h-12 w-12" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-center mb-2">
+                            ¿Confirmar salida?
+                        </h3>
+                        <p className="text-gray-600 text-center mb-6">
+                            ¿Estás seguro de que quieres salir de la clase "{claseSeleccionada?.nombre}"?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => handleSalirClase(claseSeleccionada?.id)}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación para unirse */}
+            {showJoinConfirmModal && claseParaUnirse && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+                        <div className="flex items-center justify-center mb-4 text-green-500">
+                            <BookOpen className="h-12 w-12" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-center mb-2">
+                            ¿Unirse a la clase?
+                        </h3>
+                        <p className="text-gray-600 text-center mb-2">
+                            ¿Quieres unirte a la clase "{claseParaUnirse.nombre}"?
+                        </p>
+                        <p className="text-gray-500 text-sm text-center mb-6">
+                            Profesor: {claseParaUnirse.profesor}
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowJoinConfirmModal(false)
+                                    setClaseParaUnirse(null)
+                                }}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmJoin}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Notificación tipo toast */}
+            {notification.show && (
+                <div className={`fixed bottom-4 right-4 z-50 ${
+                    notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                } text-white px-6 py-3 rounded-lg shadow-lg transition-all transform translate-y-0`}>
+                    <div className="flex items-center space-x-2">
+                        <span>{notification.message}</span>
+                        <button 
+                            onClick={() => setNotification({ show: false, message: '', type: '' })}
+                            className="ml-2 hover:text-gray-200"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
                     </div>
                 </div>
             )}

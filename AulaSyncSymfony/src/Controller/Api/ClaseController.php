@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
 #[Route('/api', name: 'api_')]
 class ClaseController extends AbstractController
@@ -282,5 +283,41 @@ class ClaseController extends AbstractController
             'message' => 'Te has unido a la clase correctamente',
             'claseId' => $clase->getId()
         ]);
+    }
+
+    #[Route('/alumno/clases/{id}/salir', name: 'clase_salir_alumno', methods: ['POST'])]
+    public function salirDeClase(
+        #[MapEntity] Clase $clase,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        try {
+            if (!$clase) {
+                return new JsonResponse(
+                    ['error' => 'Clase no encontrada'],
+                    JsonResponse::HTTP_NOT_FOUND
+                );
+            }
+
+            $alumno = $this->getUser();
+            
+            if (!$clase->getAlumnos()->contains($alumno)) {
+                return new JsonResponse(
+                    ['error' => 'No estás inscrito en esta clase'],
+                    JsonResponse::HTTP_BAD_REQUEST
+                );
+            }
+
+            $clase->removeAlumno($alumno);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Has salido de la clase correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Error al salir de la clase: ' . $e->getMessage()],
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }
