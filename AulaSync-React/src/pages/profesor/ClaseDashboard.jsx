@@ -4,6 +4,8 @@ import { getClaseById } from '../../services/clases';
 import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
+import { enviarInvitacion } from '../../services/invitaciones';
+import { toast } from 'react-hot-toast';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -14,6 +16,7 @@ const ClaseDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [isInviting, setIsInviting] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -62,6 +65,20 @@ const ClaseDashboard = () => {
         debouncedSearch(value);
     };
 
+    const handleInvitarAlumno = async (alumno) => {
+        try {
+            setIsInviting(true);
+            await enviarInvitacion(alumno.id, id);
+            toast.success(`Invitación enviada a ${alumno.nombre}`);
+            setShowSearchModal(false);
+        } catch (error) {
+            console.error('Error al enviar invitación:', error);
+            toast.error(error.message || 'Error al enviar la invitación');
+        } finally {
+            setIsInviting(false);
+        }
+    };
+
     const renderStudentSearchModal = () => {
         if (!showSearchModal) return null;
 
@@ -101,14 +118,18 @@ const ClaseDashboard = () => {
                                 {searchResults.map((alumno) => (
                                     <li 
                                         key={alumno.id} 
-                                        className="py-3 hover:bg-gray-50 cursor-pointer px-2 rounded"
-                                        onClick={() => {
-                                            // TODO: Implementar la lógica para añadir al alumno
-                                            console.log('Añadir alumno:', alumno);
-                                        }}
+                                        className="py-3 hover:bg-gray-50 cursor-pointer px-2 rounded transition-colors"
+                                        onClick={() => handleInvitarAlumno(alumno)}
                                     >
-                                        <div className="font-medium">{alumno.nombre}</div>
-                                        <div className="text-sm text-gray-500">{alumno.email}</div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="font-medium">{alumno.nombre}</div>
+                                                <div className="text-sm text-gray-500">{alumno.email}</div>
+                                            </div>
+                                            {isInviting && (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                                            )}
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

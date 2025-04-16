@@ -1,41 +1,41 @@
-const API_URL = 'http://localhost:8000/api';
+const BASE_URL = 'http://localhost:8000/api';
 
-export const handleRequest = async (endpoint, options = {}) => {
+const handleError = (error) => {
+    if (error.message === 'Failed to fetch') {
+        throw new Error('ERROR_DE_RED');
+    }
+    throw error;
+};
+
+export const handleRequest = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const tokenTimestamp = localStorage.getItem('tokenTimestamp');
-
-    // Verificar si hay token y si no es una ruta pública
-    if (!token && !endpoint.includes('/register') && !endpoint.includes('/login')) {
+    
+    if (!token) {
+        localStorage.clear();
         throw new Error('NO_TOKEN');
     }
 
-    // Verificar si el token ha expirado (1 hora)
     if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
         localStorage.clear();
         throw new Error('TOKEN_EXPIRED');
     }
 
     const defaultHeaders = {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     };
 
-    // Añadir el token solo si existe
-    if (token) {
-        defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = {
-        ...options,
-        headers: {
-            ...defaultHeaders,
-            ...options.headers
-        }
-    };
-
     try {
-        const response = await fetch(`${API_URL}${endpoint}`, config);
-        
+        const response = await fetch(`${BASE_URL}${url}`, {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers
+            }
+        });
+
         if (response.status === 401) {
             localStorage.clear();
             throw new Error('UNAUTHORIZED');
@@ -48,28 +48,29 @@ export const handleRequest = async (endpoint, options = {}) => {
 
         return response.json();
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Request Error:', error);
         throw error;
     }
 };
 
-const api = {
-    get: async (url) => {
-        return handleRequest(url);
+export const api = {
+    async get(endpoint) {
+        try {
+            return await handleRequest(endpoint);
+        } catch (error) {
+            handleError(error);
+        }
     },
 
-    put: async (url, data) => {
-        return handleRequest(url, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-    },
-
-    post: async (url, data) => {
-        return handleRequest(url, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+    async post(endpoint, data) {
+        try {
+            return await handleRequest(endpoint, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+        } catch (error) {
+            handleError(error);
+        }
     }
 };
 

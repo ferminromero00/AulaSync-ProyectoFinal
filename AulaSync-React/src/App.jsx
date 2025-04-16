@@ -10,40 +10,44 @@ import Clases from './pages/profesor/Clases'
 import Configuracion from './pages/profesor/Configuracion'
 import ClaseDashboard from './pages/profesor/ClaseDashboard'
 import ConfiguracionAlumno from './pages/alumno/Configuracion'
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        
-        {/* Rutas protegidas de profesor */}
-        <Route path="/profesor/*" element={
-          <ProtectedRoute allowedRole="profesor">
-            <TeacherLayout />
-          </ProtectedRoute>
-        }>
-          <Route path="dashboard" element={<TeacherDashboard />} />
-          <Route path="clases" element={<Clases />} />
-          <Route path="configuracion" element={<Configuracion />} />
-          <Route path="clase/:id" element={<ClaseDashboard />} />
-          {/* ...otras rutas de profesor... */}
-        </Route>
+    <>
+      <Toaster position="top-right" />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Rutas protegidas de profesor */}
+          <Route path="/profesor/*" element={
+            <ProtectedRoute allowedRole="profesor">
+              <TeacherLayout />
+            </ProtectedRoute>
+          }>
+            <Route path="dashboard" element={<TeacherDashboard />} />
+            <Route path="clases" element={<Clases />} />
+            <Route path="configuracion" element={<Configuracion />} />
+            <Route path="clase/:id" element={<ClaseDashboard />} />
+            {/* ...otras rutas de profesor... */}
+          </Route>
 
-        {/* Rutas protegidas de alumno */}
-        <Route path="/alumno/*" element={
-          <ProtectedRoute allowedRole="alumno">
-            <StudentLayout />
-          </ProtectedRoute>
-        }>
-          <Route path="dashboard" element={<DashboardAlumno />} />
-          <Route path="clase/:id" element={<ClaseDashboard />} />
-          <Route path="configuracion" element={<ConfiguracionAlumno />} />
-          {/* ...otras rutas de alumno... */}
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Rutas protegidas de alumno */}
+          <Route path="/alumno/*" element={
+            <ProtectedRoute allowedRole="alumno">
+              <StudentLayout />
+            </ProtectedRoute>
+          }>
+            <Route path="dashboard" element={<DashboardAlumno />} />
+            <Route path="clase/:id" element={<ClaseDashboard />} />
+            <Route path="configuracion" element={<ConfiguracionAlumno />} />
+            {/* ...otras rutas de alumno... */}
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </>
   )
 }
 
