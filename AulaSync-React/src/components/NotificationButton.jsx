@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Bell, Check, X } from "lucide-react";
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../services/invitaciones';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const NotificationButton = () => {
+    const navigate = useNavigate();
     const [showNotifMenu, setShowNotifMenu] = useState(false);
     const [notificaciones, setNotificaciones] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -44,11 +46,17 @@ const NotificationButton = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
 
-    const handleRespuesta = async (id, respuesta) => {
+    const handleRespuesta = async (id, respuesta, claseId) => {
         try {
             await responderInvitacion(id, respuesta);
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
-            fetchNotificaciones();
+            
+            // Si la respuesta es aceptar, navegar a la clase
+            if (respuesta === 'aceptar') {
+                navigate(`/alumno/clase/${claseId}`);
+            } else {
+                fetchNotificaciones();
+            }
         } catch (e) {
             toast.error('Error al responder la invitación');
         }
@@ -64,7 +72,7 @@ const NotificationButton = () => {
             >
                 <Bell className="h-6 w-6 text-gray-700" />
                 {notificaciones.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full px-1.5 text-xs font-bold">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full px-1.5 text-xs font-bold z-10">
                         {notificaciones.length}
                     </span>
                 )}
@@ -97,14 +105,14 @@ const NotificationButton = () => {
                                 <div className="flex flex-col gap-1 ml-2">
                                     <button
                                         className="bg-green-500 hover:bg-green-600 text-white rounded px-2 py-1 flex items-center"
-                                        onClick={() => handleRespuesta(inv.id, 'aceptar')}
+                                        onClick={() => handleRespuesta(inv.id, 'aceptar', inv.clase.id)}
                                         title="Aceptar"
                                     >
                                         <Check className="h-4 w-4" />
                                     </button>
                                     <button
                                         className="bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 flex items-center"
-                                        onClick={() => handleRespuesta(inv.id, 'rechazar')}
+                                        onClick={() => handleRespuesta(inv.id, 'rechazar', inv.clase.id)}
                                         title="Rechazar"
                                     >
                                         <X className="h-4 w-4" />
