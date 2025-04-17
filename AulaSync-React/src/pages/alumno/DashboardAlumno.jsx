@@ -13,6 +13,7 @@ const DashboardAlumno = () => {
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
     const [clases, setClases] = useState([]);
+    const [notificaciones, setNotificaciones] = useState([]); // Añadir este estado
     const [isLoading, setIsLoading] = useState(true);
     const [menuAbierto, setMenuAbierto] = useState(null);
     const [claseSeleccionada, setClaseSeleccionada] = useState(null);
@@ -177,10 +178,11 @@ const DashboardAlumno = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 relative">
-            <NotificationButton />
+        <div className="max-w-7xl mx-auto relative">
+            {/* Eliminar NotificationButton de aquí ya que ahora está en el layout */}
+            
             {/* Header con bienvenida y botón de unirse */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 relative">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Bienvenido a tu Dashboard</h1>
                     <p className="text-gray-600">Gestiona tus clases y actividades</p>
