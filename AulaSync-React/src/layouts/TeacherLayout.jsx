@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth';
+import NotificationButton from '../components/NotificationButton'
 
 const TeacherLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -72,18 +73,23 @@ const TeacherLayout = () => {
             {/* Main content */}
             <div className="flex-1 flex flex-col min-h-screen">
                 <header className="sticky top-0 z-20 bg-white border-b w-full">
-                    <div className="flex h-16 items-center gap-4 px-4">
-                        <button 
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                        >
-                            <span className="sr-only">Toggle menú</span>
-                            {isSidebarOpen ? (
-                                <X className="h-6 w-6" />
-                            ) : (
-                                <Menu className="h-6 w-6" />
-                            )}
-                        </button>
+                    <div className="flex h-16 items-center gap-4 px-4 justify-between">
+                        <div className="flex items-center gap-4">
+                            <button 
+                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                            >
+                                <span className="sr-only">Toggle menú</span>
+                                {isSidebarOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
+                            </button>
+                        </div>
+                        <div className="relative">
+                            <NotificationButton />
+                        </div>
                     </div>
                 </header>
                 

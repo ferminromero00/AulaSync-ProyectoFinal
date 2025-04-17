@@ -12,7 +12,14 @@ const NotificationButton = () => {
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
 
+    const role = localStorage.getItem('role');
+
     const fetchNotificaciones = async () => {
+        if (role !== 'alumno') {
+            setNotificaciones([]);
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
             const data = await obtenerInvitacionesPendientes();
@@ -24,10 +31,13 @@ const NotificationButton = () => {
     };
 
     useEffect(() => {
-        fetchNotificaciones();
-        // Actualizar notificaciones cada 30 segundos
-        const interval = setInterval(fetchNotificaciones, 30000);
-        return () => clearInterval(interval);
+        if (role === 'alumno') {
+            fetchNotificaciones();
+            const interval = setInterval(fetchNotificaciones, 30000);
+            return () => clearInterval(interval);
+        }
+        // Si no es alumno, no hace nada
+    // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -47,11 +57,10 @@ const NotificationButton = () => {
     }, [showNotifMenu]);
 
     const handleRespuesta = async (id, respuesta, claseId) => {
+        if (role !== 'alumno') return;
         try {
             await responderInvitacion(id, respuesta);
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
-            
-            // Si la respuesta es aceptar, navegar a la clase
             if (respuesta === 'aceptar') {
                 navigate(`/alumno/clase/${claseId}`);
             } else {
@@ -69,9 +78,10 @@ const NotificationButton = () => {
                 className="relative p-2 rounded-full bg-white shadow hover:bg-gray-100 transition"
                 onClick={() => setShowNotifMenu((v) => !v)}
                 aria-label="Ver notificaciones"
+                type="button"
             >
                 <Bell className="h-6 w-6 text-gray-700" />
-                {notificaciones.length > 0 && (
+                {role === 'alumno' && notificaciones.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full px-1.5 text-xs font-bold z-10">
                         {notificaciones.length}
                     </span>
@@ -87,39 +97,47 @@ const NotificationButton = () => {
                         Notificaciones
                     </div>
                     <div className="space-y-3 max-h-80 overflow-y-auto">
-                        {loading && <div>Cargando notificaciones...</div>}
-                        {!loading && notificaciones.length === 0 && (
-                            <div className="text-gray-500">No tienes invitaciones pendientes.</div>
-                        )}
-                        {!loading && notificaciones.map((inv) => (
-                            <div key={inv.id} className="bg-gray-50 rounded p-3 flex items-center justify-between">
-                                <div>
-                                    <div className="font-medium">
-                                        Invitación a <span className="text-blue-600">{inv.clase.nombre}</span>
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                        Profesor: {inv.clase.profesor}<br />
-                                        Fecha: {inv.fecha}
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-1 ml-2">
-                                    <button
-                                        className="bg-green-500 hover:bg-green-600 text-white rounded px-2 py-1 flex items-center"
-                                        onClick={() => handleRespuesta(inv.id, 'aceptar', inv.clase.id)}
-                                        title="Aceptar"
-                                    >
-                                        <Check className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        className="bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 flex items-center"
-                                        onClick={() => handleRespuesta(inv.id, 'rechazar', inv.clase.id)}
-                                        title="Rechazar"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </button>
-                                </div>
+                        {role !== 'alumno' ? (
+                            <div className="text-gray-500 text-center py-6">
+                                No hay notificaciones.
                             </div>
-                        ))}
+                        ) : (
+                            <>
+                                {loading && <div>Cargando notificaciones...</div>}
+                                {!loading && notificaciones.length === 0 && (
+                                    <div className="text-gray-500">No tienes invitaciones pendientes.</div>
+                                )}
+                                {!loading && notificaciones.map((inv) => (
+                                    <div key={inv.id} className="bg-gray-50 rounded p-3 flex items-center justify-between">
+                                        <div>
+                                            <div className="font-medium">
+                                                Invitación a <span className="text-blue-600">{inv.clase.nombre}</span>
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                Profesor: {inv.clase.profesor}<br />
+                                                Fecha: {inv.fecha}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-1 ml-2">
+                                            <button
+                                                className="bg-green-500 hover:bg-green-600 text-white rounded px-2 py-1 flex items-center"
+                                                onClick={() => handleRespuesta(inv.id, 'aceptar', inv.clase.id)}
+                                                title="Aceptar"
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                className="bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 flex items-center"
+                                                onClick={() => handleRespuesta(inv.id, 'rechazar', inv.clase.id)}
+                                                title="Rechazar"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
