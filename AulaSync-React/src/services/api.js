@@ -10,20 +10,24 @@ const handleError = (error) => {
 export const handleRequest = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const tokenTimestamp = localStorage.getItem('tokenTimestamp');
-    
-    if (!token) {
-        localStorage.clear();
-        throw new Error('NO_TOKEN');
-    }
 
-    if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
-        localStorage.clear();
-        throw new Error('TOKEN_EXPIRED');
+    // Solo exigir token si NO es un endpoint público
+    const isPublicEndpoint = url === '/registro' || url === '/registro/profesor';
+
+    if (!isPublicEndpoint) {
+        if (!token) {
+            localStorage.clear();
+            throw new Error('NO_TOKEN');
+        }
+        if (tokenTimestamp && Date.now() - parseInt(tokenTimestamp) > 3600000) {
+            localStorage.clear();
+            throw new Error('TOKEN_EXPIRED');
+        }
     }
 
     const defaultHeaders = {
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...(token && !isPublicEndpoint ? { 'Authorization': `Bearer ${token}` } : {})
     };
 
     const config = {

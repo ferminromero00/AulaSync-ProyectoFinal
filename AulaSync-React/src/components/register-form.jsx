@@ -15,7 +15,14 @@ function RegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await (role === 'alumno' ? registerStudent(data) : registerTeacher(data));
+      // Solo enviar los campos que espera el backend
+      const payload = {
+        email: data.email,
+        first_name: data.firstName, // Cambiado a snake_case
+        last_name: data.lastName,   // Cambiado a snake_case
+        plainPassword: data.password // Symfony espera 'plainPassword'
+      };
+      const response = await (role === 'alumno' ? registerStudent(payload) : registerTeacher(payload));
       navigate('/?role=' + role, { 
         state: { 
           message: 'Registro exitoso. Por favor, inicia sesión con tus credenciales.' 
