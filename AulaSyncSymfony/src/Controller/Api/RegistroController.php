@@ -290,7 +290,7 @@ class RegistroController extends AbstractController
 
             $qb = $em->getRepository(Alumno::class)->createQueryBuilder('a')
                 ->where('a.email LIKE :query')
-                ->orWhere('CONCAT(a.first_name, \' \', a.last_name) LIKE :query')
+                ->orWhere('CONCAT(a.firstName, \' \', a.lastName) LIKE :query')
                 ->setParameter('query', '%' . $query . '%')
                 ->setMaxResults(10);
 
