@@ -17,7 +17,7 @@ const ClaseDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [isInviting, setIsInviting] = useState(false);
+    const [invitingId, setInvitingId] = useState(null);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -68,19 +68,28 @@ const ClaseDashboard = () => {
 
     const handleInvitarAlumno = async (alumno) => {
         try {
-            setIsInviting(true);
+            setInvitingId(alumno.id);
             const result = await enviarInvitacion(alumno.id, id);
             if (result && result.alreadyInClass) {
                 toast.error('El alumno ya pertenece a esta clase');
+                setInvitingId(null);
                 return;
             }
             toast.success(`Invitación enviada a ${alumno.nombre}`);
             setShowSearchModal(false);
         } catch (error) {
-            console.error('Error al enviar invitación:', error);
-            toast.error(error.message || 'Error al enviar la invitación');
+            // No mostrar en consola si es error controlado
+            if (
+                error.message === 'Ya existe una invitación pendiente' ||
+                error.message === 'El alumno ya pertenece a esta clase'
+            ) {
+                toast.error(error.message);
+            } else {
+                console.error('Error al enviar invitación:', error);
+                toast.error(error.message || 'Error al enviar la invitación');
+            }
         } finally {
-            setIsInviting(false);
+            setInvitingId(null);
         }
     };
 
@@ -131,7 +140,7 @@ const ClaseDashboard = () => {
                                                 <div className="font-medium">{alumno.nombre}</div>
                                                 <div className="text-sm text-gray-500">{alumno.email}</div>
                                             </div>
-                                            {isInviting && (
+                                            {invitingId === alumno.id && (
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                                             )}
                                         </div>

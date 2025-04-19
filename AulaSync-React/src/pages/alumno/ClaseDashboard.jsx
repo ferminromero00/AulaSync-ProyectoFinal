@@ -76,8 +76,16 @@ const ClaseDashboard = () => {
             toast.success(`Invitación enviada a ${alumno.nombre}`);
             setShowSearchModal(false);
         } catch (error) {
-            console.error('Error al enviar invitación:', error);
-            toast.error(error.message || 'Error al enviar la invitación');
+            // No mostrar en consola si es error controlado
+            if (
+                error.message === 'Ya existe una invitación pendiente' ||
+                error.message === 'El alumno ya pertenece a esta clase'
+            ) {
+                toast.error(error.message);
+            } else {
+                console.error('Error al enviar invitación:', error);
+                toast.error(error.message || 'Error al enviar la invitación');
+            }
         } finally {
             setIsInviting(false);
         }

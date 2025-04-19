@@ -61,16 +61,42 @@ export const handleRequest = async (url, options = {}) => {
             throw new Error(error.error || error.message || 'Error en la petición');
         }
 
+        // NUEVO: Manejar error 400 de "Ya existe una invitación pendiente" sin mostrar error en consola
+        if (response.status === 400) {
+            const error = await response.json();
+            if (
+                error.error &&
+                (error.error.includes('Ya existe una invitación pendiente'))
+            ) {
+                // No mostrar error en consola para este caso controlado
+                throw new Error(error.error);
+            }
+            // Solo mostrar error en consola si no es el caso controlado
+            console.error('Request Error:', error);
+            throw new Error(error.error || error.message || 'Error en la petición');
+        }
+
         if (!response.ok) {
             const error = await response.json();
-            console.error('Request Error:', error);
+            // Solo mostrar error si no es el caso controlado
+            if (
+                !(error && error.error && error.error.includes('Ya existe una invitación pendiente'))
+            ) {
+                console.error('Request Error:', error);
+            }
             throw new Error(error.error || error.message || 'Error en la petición');
         }
 
         return response.json();
     } catch (error) {
         // Solo mostrar error si no es el caso controlado
-        if (!(error && error.message && error.message.includes('ya pertenece a esta clase'))) {
+        if (
+            !(error && error.message && (
+                error.message.includes('ya pertenece a esta clase') ||
+                error.message.includes('El alumno ya pertenece a esta clase') ||
+                error.message.includes('Ya existe una invitación pendiente')
+            ))
+        ) {
             console.error('Request Error:', error);
         }
         throw error;
