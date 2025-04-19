@@ -62,7 +62,9 @@ const NotificationButton = () => {
             await responderInvitacion(id, respuesta);
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
             if (respuesta === 'aceptar') {
-                navigate(`/alumno/clase/${claseId}`);
+                setShowNotifMenu(false); // Cerrar el menú
+                // Forzar recarga completa para refrescar invitaciones y clases
+                window.location.href = `/alumno/clase/${claseId}`;
             } else {
                 fetchNotificaciones();
             }

@@ -320,4 +320,50 @@ class ClaseController extends AbstractController
             );
         }
     }
+
+    #[Route('/clases/alumno', name: 'clases_alumno', methods: ['GET'])]
+    public function getClasesAlumno(EntityManagerInterface $em): JsonResponse
+    {
+        $alumno = $this->getUser();
+        if (!$alumno instanceof \App\Entity\Alumno) {
+            return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
+        }
+
+        // Obtener clases del alumno
+        $clases = $alumno->getClases();
+
+        // --- NUEVO: Marcar invitaciones pendientes como aceptadas si ya está en la clase ---
+        $repoInvitacion = $em->getRepository(\App\Entity\Invitacion::class);
+        $invitacionesPendientes = $repoInvitacion->findBy([
+            'alumno' => $alumno,
+            'estado' => 'pendiente'
+        ]);
+        $cambios = false;
+        foreach ($invitacionesPendientes as $inv) {
+            $clase = $inv->getClase();
+            if ($clase && $clase->getAlumnos()->contains($alumno)) {
+                $inv->setEstado('aceptada');
+                $cambios = true;
+            }
+        }
+        if ($cambios) {
+            $em->flush();
+        }
+        // --- FIN NUEVO ---
+
+        // ...existing code para devolver las clases del alumno...
+        $data = [];
+        foreach ($clases as $clase) {
+            $profesor = $clase->getProfesor();
+            $data[] = [
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'codigoClase' => $clase->getCodigoClase(),
+                'profesor' => $profesor ? ($profesor->getFirstName() . ' ' . $profesor->getLastName()) : null,
+                'numEstudiantes' => $clase->getAlumnos()->count(),
+                // ...otros campos si los necesitas...
+            ];
+        }
+        return new JsonResponse($data);
+    }
 }

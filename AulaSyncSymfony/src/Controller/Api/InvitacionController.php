@@ -26,6 +26,11 @@ class InvitacionController extends AbstractController
             return new JsonResponse(['error' => 'Alumno o clase no encontrados'], 404);
         }
 
+        // NUEVO: Comprobar si el alumno ya está en la clase
+        if ($clase->getAlumnos()->contains($alumno)) {
+            return new JsonResponse(['error' => 'El alumno ya pertenece a esta clase'], 409);
+        }
+
         // Verificar si ya existe una invitación pendiente
         $invitacionExistente = $em->getRepository(Invitacion::class)->findOneBy([
             'alumno' => $alumno,

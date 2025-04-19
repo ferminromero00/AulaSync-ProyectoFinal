@@ -68,7 +68,11 @@ const ClaseDashboard = () => {
     const handleInvitarAlumno = async (alumno) => {
         try {
             setIsInviting(true);
-            await enviarInvitacion(alumno.id, id);
+            const result = await enviarInvitacion(alumno.id, id);
+            if (result && result.alreadyInClass) {
+                toast.error('El alumno ya pertenece a esta clase');
+                return;
+            }
             toast.success(`Invitación enviada a ${alumno.nombre}`);
             setShowSearchModal(false);
         } catch (error) {
