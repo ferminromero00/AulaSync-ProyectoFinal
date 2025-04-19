@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { registerStudent, registerTeacher } from '../services/api'
+import { iniciarRegistro, verificarRegistro } from '../services/api'
 
 function RegisterForm() {
   const { register, handleSubmit, formState: { errors }, setError } = useForm()
@@ -13,29 +13,85 @@ function RegisterForm() {
     ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500' 
     : 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
 
+  const [step, setStep] = useState(1);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingData, setPendingData] = useState({});
+  const [codigo, setCodigo] = useState(''); // Asegúrate de que sea string vacío
+  const [verifError, setVerifError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const onSubmit = async (data) => {
+    setLoading(true);
     try {
-      // Solo enviar los campos que espera el backend
+      // Añadir el rol al payload para distinguir en el backend
       const payload = {
-        email: data.email,
-        first_name: data.firstName, // Cambiado a snake_case
-        last_name: data.lastName,   // Cambiado a snake_case
-        plainPassword: data.password // Symfony espera 'plainPassword'
+        ...data,
+        role,
       };
-      const response = await (role === 'alumno' ? registerStudent(payload) : registerTeacher(payload));
-      navigate('/?role=' + role, { 
-        state: { 
-          message: 'Registro exitoso. Por favor, inicia sesión con tus credenciales.' 
-        },
-        replace: true // Esto evita que el usuario pueda volver atrás al formulario de registro
-      })
+      await iniciarRegistro(payload);
+      setPendingEmail(data.email);
+      setPendingData(payload);
+      setStep(2);
     } catch (error) {
-      console.error('Error en el registro:', error) // Y este para ver errores
       setError('root', { 
         type: 'manual',
         message: error.message 
       })
+    } finally {
+      setLoading(false);
     }
+  }
+
+  const handleVerificar = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await verificarRegistro({ email: pendingEmail, codigo });
+        console.log('Respuesta del servidor:', response); // Agrega esto para ver la respuesta
+        navigate('/?role=' + role, {
+            state: {
+                message: 'Registro verificado. Por favor, inicia sesión.',
+            },
+            replace: true,
+        });
+    } catch (error) {
+        console.error('Error al verificar registro:', error); // Agrega esto para ver el error
+        setVerifError(error.message || 'Error al verificar el código.');
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        <span className="ml-4 text-green-700">Enviando código de verificación...</span>
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <form onSubmit={handleVerificar} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Introduce el código de verificación enviado a {pendingEmail}
+          </label>
+          <input
+            type="text"
+            value={codigo}
+            onChange={e => setCodigo(e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
+            required
+          />
+          {verifError && <p className="mt-1 text-sm text-red-600">{verifError}</p>}
+        </div>
+        <button
+          type="submit"
+          className={`w-full rounded-md px-4 py-2 text-sm font-medium text-white ${buttonColors} focus:outline-none focus:ring-2 focus:ring-offset-2`}
+        >
+          Verificar código
+        </button>
+      </form>
+    );
   }
 
   return (

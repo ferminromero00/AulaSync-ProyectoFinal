@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Entity\RegistroPendiente;
 
 #[Route('/api', name: 'api_')]
 class RegistroController extends AbstractController
@@ -23,6 +26,156 @@ class RegistroController extends AbstractController
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
+    }
+
+    #[Route('/registro/iniciar', name: 'registro_iniciar', methods: ['POST'])]
+    public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $email = $data['email'] ?? null;
+
+        // Validar email y que no exista ya
+        if (!$email || $em->getRepository(Alumno::class)->findOneBy(['email' => $email]) || $em->getRepository(Profesor::class)->findOneBy(['email' => $email])) {
+            return new JsonResponse(['error' => 'Email inválido o ya registrado'], 400);
+        }
+
+        // Generar código y guardar datos en RegistroPendiente
+        $codigo = random_int(100000, 999999);
+        $registro = new RegistroPendiente();
+        $registro->setEmail($email);
+        $registro->setDatos(json_encode($data));
+        $registro->setCodigo($codigo);
+        $registro->setFechaSolicitud(new \DateTime());
+        $em->persist($registro);
+        $em->flush();
+
+        // Enviar email
+        $emailObj = (new Email())
+            ->from('no-reply@aulasync.com')
+            ->to($email)
+            ->subject('Código de verificación AulaSync')
+            ->text("Tu código de verificación es: $codigo");
+        $mailer->send($emailObj);
+
+        return new JsonResponse(['message' => 'Código enviado al email']);
+    }
+
+    #[Route('/registro/verificar', name: 'registro_verificar', methods: ['POST'])]
+    public function verificarRegistro(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        error_log('DEBUG: Datos recibidos en verificarRegistro: ' . json_encode($data));
+        $email = $data['email'] ?? null;
+        $codigo = $data['codigo'] ?? null;
+
+        $this->logger->debug('Datos recibidos para verificación', [
+            'email' => $email,
+            'codigo' => $codigo,
+        ]);
+
+        if (!$email || !$codigo) {
+            error_log('DEBUG: Falta email o código');
+            return new JsonResponse(['error' => 'Email o código faltante'], 400);
+        }
+
+        $registro = $em->getRepository(RegistroPendiente::class)->findOneBy(['email' => $email, 'codigo' => $codigo]);
+        if (!$registro) {
+            error_log('DEBUG: No se encontró registro pendiente para email/código');
+            return new JsonResponse(['error' => 'Código incorrecto o expirado'], 400);
+        }
+
+        $datos = json_decode($registro->getDatos(), true);
+        error_log('DEBUG: Datos del registro recuperados: ' . json_encode($datos));
+        if (!$datos) {
+            error_log('DEBUG: Datos del registro no válidos');
+            return new JsonResponse(['error' => 'Datos del registro no válidos'], 400);
+        }
+
+        $isAlumno = ($datos['role'] ?? 'alumno') === 'alumno';
+        error_log('DEBUG: isAlumno=' . ($isAlumno ? 'true' : 'false'));
+
+        unset($datos['role']);
+        error_log('DEBUG: Datos enviados al formulario: ' . json_encode($datos));
+
+        if ($isAlumno) {
+            $alumno = new Alumno();
+            $form = $this->createForm(AlumnoRegistroType::class, $alumno);
+            
+            // Ajustar los datos para usar plainPassword en lugar de password
+            $formData = [
+                'email' => $datos['email'],
+                'plainPassword' => $datos['password'], // Aquí hacemos la conversión
+                'firstName' => $datos['firstName'],
+                'lastName' => $datos['lastName']
+            ];
+            
+            $form->submit($formData);
+
+            if (!$form->isValid()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = $error->getMessage();
+                }
+                error_log('DEBUG: Errores de formulario alumno: ' . json_encode($errors));
+                return new JsonResponse(['error' => $errors], 400);
+            }
+
+            $alumno->setRoles(['ROLE_ALUMNO']);
+            $alumno->setPassword($passwordHasher->hashPassword($alumno, $datos['password']));
+            $alumno->setCreatedAt(new \DateTime());
+            $alumno->setUpdateAt(new \DateTime());
+            $matricula = 'ALU' . date('Y') . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $alumno->setMatricula($matricula);
+
+            try {
+                $em->persist($alumno);
+                $em->remove($registro);
+                $em->flush();
+
+                return new JsonResponse(['message' => 'Alumno registrado correctamente'], 200);
+            } catch (\Exception $e) {
+                return new JsonResponse(['error' => 'Error al registrar el alumno: ' . $e->getMessage()], 500);
+            }
+        } else {
+            $profesor = new Profesor();
+            $form = $this->createForm(ProfesorRegistroType::class, $profesor);
+            
+            // Ajustar los datos para usar plainPassword en lugar de password
+            $formData = [
+                'email' => $datos['email'],
+                'plainPassword' => $datos['password'],
+                'firstName' => $datos['firstName'],
+                'lastName' => $datos['lastName']
+            ];
+            
+            error_log('DEBUG: Datos enviados al formulario: ' . json_encode($formData));
+            
+            $form->submit($formData);
+
+            if (!$form->isValid()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = $error->getMessage();
+                }
+                error_log('DEBUG: Errores de formulario profesor: ' . json_encode($errors));
+                return new JsonResponse(['error' => $errors], 400);
+            }
+
+            $profesor->setRoles(['ROLE_PROFESOR']);
+            $profesor->setPassword($passwordHasher->hashPassword($profesor, $datos['password']));
+            $profesor->setCreatedAt(new \DateTime());
+            $profesor->setUpdateAt(new \DateTime());
+
+            try {
+                $em->persist($profesor);
+                $em->remove($registro);
+                $em->flush();
+
+                return new JsonResponse(['message' => 'Profesor registrado correctamente'], 200);
+            } catch (\Exception $e) {
+                return new JsonResponse(['error' => 'Error al registrar el profesor: ' . $e->getMessage()], 500);
+            }
+        }
     }
 
     #[Route('/registro', name: 'registro', methods: ['POST'])]

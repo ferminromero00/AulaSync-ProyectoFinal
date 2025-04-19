@@ -12,7 +12,11 @@ export const handleRequest = async (url, options = {}) => {
     const tokenTimestamp = localStorage.getItem('tokenTimestamp');
 
     // Solo exigir token si NO es un endpoint público
-    const isPublicEndpoint = url === '/registro' || url === '/registro/profesor';
+    const isPublicEndpoint =
+        url === '/registro' ||
+        url === '/registro/profesor' ||
+        url === '/registro/iniciar' ||
+        url === '/registro/verificar';
 
     if (!isPublicEndpoint) {
         if (!token) {
@@ -136,6 +140,25 @@ export const registerTeacher = async (data) => {
         method: 'POST',
         body: JSON.stringify(data)
     });
+};
+
+export const iniciarRegistro = async (data) => {
+    return handleRequest('/registro/iniciar', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+};
+
+export const verificarRegistro = async (data) => {
+    try {
+        return await handleRequest('/registro/verificar', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    } catch (error) {
+        console.error('Error al verificar registro:', error.message);
+        throw error;
+    }
 };
 
 export default api;
