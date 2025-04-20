@@ -171,12 +171,12 @@ class ClaseController extends AbstractController
             }
 
             $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
+                // Mostrar el nombre completo, sin acortar
                 $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
                 return [
                     'id' => $alumno->getId(),
-                    'nombre' => strlen($nombreCompleto) > 20 
-                        ? substr($nombreCompleto, 0, 17) . '...' 
-                        : $nombreCompleto,
+                    'nombre' => $nombreCompleto,
+                    'email' => $alumno->getEmail(),
                 ];
             })->toArray();
 

@@ -39,8 +39,8 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
    - ❌ knplabs/knp-snappy-bundle → Generación de PDFs desde HTML usando wkhtmltopdf
 ================================================================================================================================================
 5. Validación de cuentas por correo electrónico
-   - ❌ symfony/mailer            → Envío de correos de verificación
-   - ❌ symfony/validator         → Validación de campos como email, tokens, etc.
+   - ✅ symfony/mailer            → Envío de correos de verificación
+   - ✅ symfony/validator         → Validación de campos como email, tokens, etc.
 ================================================================================================================================================
 6. Subida de archivos al servidor
    - ❌ vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades

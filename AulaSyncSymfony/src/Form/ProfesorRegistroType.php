@@ -15,7 +15,7 @@ class ProfesorRegistroType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', EmailType::class)
+            ->add('email', EmailType::class) // Valida formato de email automáticamente
             ->add('plainPassword', PasswordType::class)
             ->add('firstName', TextType::class)
             ->add('lastName', TextType::class)
