@@ -1,254 +1,302 @@
-import { useState, useEffect } from 'react';
-import { getPerfilProfesor, actualizarPerfilProfesor, cambiarPassword } from '../../services/perfil';
-import { Check, X, Edit2, Save } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { subirFotoPerfil, getPerfil, actualizarPerfil, cambiarPassword } from "../../services/perfil";
+import { Camera, X } from "lucide-react";
 
 const Configuracion = () => {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        especialidad: '',
-        departamento: ''
-    });
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [message, setMessage] = useState(null);
-    const [activeTab, setActiveTab] = useState('perfil');
-    const [editMode, setEditMode] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const [perfil, setPerfil] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [fotoFile, setFotoFile] = useState(null);
+  const [editData, setEditData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    especialidad: "",
+    departamento: ""
+  });
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    repeatPassword: ""
+  });
+  const fileInputRef = useRef();
 
-    useEffect(() => {
-        const cargarPerfil = async () => {
-            try {
-                setLoading(true);
-                const data = await getPerfilProfesor();
-                setFormData(data);
-            } catch (error) {
-                setMessage({ 
-                    type: 'error', 
-                    text: error.message || 'Error al cargar el perfil' 
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-        cargarPerfil();
-    }, []);
-
-    const handleSubmitPerfil = async (e) => {
-        e.preventDefault();
-        try {
-            await actualizarPerfilProfesor(formData);
-            setMessage({ type: 'success', text: 'Perfil actualizado correctamente' });
-            setEditMode(false);
-        } catch (error) {
-            setMessage({ type: 'error', text: error.message || 'Error al actualizar el perfil' });
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      console.log("[Configuracion.jsx] Iniciando fetchPerfil");
+      try {
+        const data = await getPerfil();
+        console.log("[Configuracion.jsx] Datos perfil recibidos:", data);
+        if (data) {
+          setPerfil(data);
+          setFotoPreview(data.fotoPerfilUrl || null);
+          setEditData({
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            email: data.email || '',
+            especialidad: data.especialidad || '',
+            departamento: data.departamento || ''
+          });
         }
+      } catch (error) {
+        console.error("[Configuracion.jsx] Error fetching perfil:", error);
+        toast.error("Error al cargar perfil. Por favor, inténtalo de nuevo.");
+      }
+      setIsLoading(false);
     };
+    fetchPerfil();
+  }, []);
 
-    const handleSubmitPassword = async (e) => {
-        e.preventDefault();
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
-            return;
-        }
-        try {
-            await cambiarPassword(passwordData);
-            setMessage({ type: 'success', text: 'Contraseña actualizada correctamente' });
-            setPasswordData({
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            });
-        } catch (error) {
-            setMessage({ type: 'error', text: error.message || 'Error al cambiar la contraseña' });
-        }
-    };
+  // Sincronizar editData si cambia perfil
+  useEffect(() => {
+    if (perfil) {
+      setEditData({
+        firstName: perfil.firstName || '',
+        lastName: perfil.lastName || '',
+        email: perfil.email || '',
+        especialidad: perfil.especialidad || '',
+        departamento: perfil.departamento || ''
+      });
+    }
+  }, [perfil]);
 
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFotoFile(file);
+      setFotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleFotoUpload = async (e) => {
+    e.preventDefault();
+    if (!fotoFile) return;
+    try {
+      const formData = new FormData();
+      formData.append("foto", fotoFile);
+      const data = await subirFotoPerfil(formData);
+      setPerfil((prev) => ({ ...prev, fotoPerfilUrl: data.fotoPerfilUrl }));
+      toast.success("Foto de perfil actualizada");
+      setFotoFile(null);
+    } catch {
+      toast.error("Error al subir la foto");
+    }
+  };
+
+  const handleRemoveFoto = () => {
+    setFotoFile(null);
+    setFotoPreview(perfil?.fotoPerfilUrl || null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswords({ ...passwords, [e.target.name]: e.target.value });
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (passwords.newPassword !== passwords.repeatPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+    try {
+      await cambiarPassword({
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword
+      });
+      toast.success("Contraseña actualizada correctamente");
+      setPasswords({ currentPassword: "", newPassword: "", repeatPassword: "" });
+    } catch (error) {
+      toast.error("Error al cambiar la contraseña");
+    }
+  };
+
+  const handlePerfilSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await actualizarPerfil(editData);
+      setPerfil(prev => ({ ...prev, ...editData }));
+      toast.success("Perfil actualizado correctamente");
+    } catch (error) {
+      toast.error("Error al actualizar el perfil");
+    }
+  };
+
+  if (isLoading) {
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm">
-                {/* Header */}
-                <div className="border-b p-6">
-                    <h1 className="text-2xl font-bold text-gray-900 text-center">Configuración de la cuenta</h1>
-                </div>
-
-                {/* Tabs */}
-                <div className="border-b border-gray-200">
-                    <nav className="flex justify-center space-x-8">
-                        <button
-                            className={`${
-                                activeTab === 'perfil'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                            onClick={() => setActiveTab('perfil')}
-                        >
-                            Perfil
-                        </button>
-                        <button
-                            className={`${
-                                activeTab === 'seguridad'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                            onClick={() => setActiveTab('seguridad')}
-                        >
-                            Seguridad
-                        </button>
-                    </nav>
-                </div>
-
-                {/* Mensajes de feedback */}
-                {message && (
-                    <div className={`m-4 p-4 rounded-md ${
-                        message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                    }`}>
-                        <p className="text-sm text-center">{message.text}</p>
-                    </div>
-                )}
-
-                {/* Contenido */}
-                <div className="p-6">
-                    {activeTab === 'perfil' && (
-                        <form onSubmit={handleSubmitPerfil} className="space-y-6 max-w-xl mx-auto">
-                            <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    onClick={() => setEditMode(!editMode)}
-                                    className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                                >
-                                    {editMode ? (
-                                        <>
-                                            <X className="h-4 w-4 mr-1" />
-                                            Cancelar
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Edit2 className="h-4 w-4 mr-1" />
-                                            Editar
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                                    <input
-                                        type="text"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                                        disabled={!editMode}
-                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Apellidos</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                        disabled={!editMode}
-                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    />
-                                </div>
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                        disabled={!editMode}
-                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    />
-                                </div>
-                                {/* Eliminar campos de especialidad y departamento */}
-                                {/* 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Especialidad</label>
-                                    <input
-                                        type="text"
-                                        value={formData.especialidad}
-                                        onChange={(e) => setFormData({...formData, especialidad: e.target.value})}
-                                        disabled={!editMode}
-                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Departamento</label>
-                                    <input
-                                        type="text"
-                                        value={formData.departamento}
-                                        onChange={(e) => setFormData({...formData, departamento: e.target.value})}
-                                        disabled={!editMode}
-                                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    />
-                                </div>
-                                */}
-                            </div>
-                            {editMode && (
-                                <div className="flex justify-end">
-                                    <button
-                                        type="submit"
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                    >
-                                        <Save className="h-4 w-4 mr-2" />
-                                        Guardar cambios
-                                    </button>
-                                </div>
-                            )}
-                        </form>
-                    )}
-
-                    {activeTab === 'seguridad' && (
-                        <form onSubmit={handleSubmitPassword} className="space-y-6 max-w-xl mx-auto">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Contraseña actual</label>
-                                <input
-                                    type="password"
-                                    value={passwordData.currentPassword}
-                                    onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Nueva contraseña</label>
-                                <input
-                                    type="password"
-                                    value={passwordData.newPassword}
-                                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
-                                <input
-                                    type="password"
-                                    value={passwordData.confirmPassword}
-                                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                                    required
-                                />
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    type="submit"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                >
-                                    Actualizar contraseña
-                                </button>
-                            </div>
-                        </form>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
     );
+  }
+
+  return (
+    <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
+      <h2 className="text-xl font-semibold mb-6">Configuración de Perfil</h2>
+      
+      {/* Foto de perfil */}
+      <form onSubmit={handleFotoUpload}>
+        <div className="flex items-center gap-6 mb-6">
+          <div className="relative">
+            <img
+              src={fotoPreview || "/default-avatar.png"}
+              alt="Foto de perfil"
+              className="w-24 h-24 rounded-full object-cover border"
+            />
+            <button
+              type="button"
+              className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700"
+              onClick={() => fileInputRef.current.click()}
+              title="Cambiar foto"
+            >
+              <Camera className="h-5 w-5" />
+            </button>
+            {fotoFile && (
+              <button
+                type="button"
+                className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                onClick={handleRemoveFoto}
+                title="Quitar selección"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFotoChange}
+          />
+          <div>
+            <div className="font-medium">
+              {perfil ? `${perfil.firstName} ${perfil.lastName}` : ''}
+            </div>
+            <div className="text-gray-500 text-sm">
+              {perfil?.email || ''}
+            </div>
+          </div>
+        </div>
+        {fotoFile && (
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Guardar foto de perfil
+          </button>
+        )}
+      </form>
+
+      {/* Formulario de datos personales */}
+      <form onSubmit={handlePerfilSubmit} className="space-y-4 mt-8">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-1">Nombre</label>
+            <input
+              type="text"
+              name="firstName"
+              value={editData.firstName}
+              onChange={e => setEditData({ ...editData, firstName: e.target.value })}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-1">Apellidos</label>
+            <input
+              type="text"
+              name="lastName"
+              value={editData.lastName}
+              onChange={e => setEditData({ ...editData, lastName: e.target.value })}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={editData.email}
+            onChange={e => setEditData({ ...editData, email: e.target.value })}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Especialidad</label>
+          <input
+            type="text"
+            name="especialidad"
+            value={editData.especialidad}
+            onChange={e => setEditData({ ...editData, especialidad: e.target.value })}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Departamento</label>
+          <input
+            type="text"
+            name="departamento"
+            value={editData.departamento}
+            onChange={e => setEditData({ ...editData, departamento: e.target.value })}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Guardar cambios
+        </button>
+      </form>
+
+      {/* Cambiar contraseña */}
+      <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-8">
+        <h3 className="font-semibold text-lg mb-2">Cambiar contraseña</h3>
+        <div>
+          <label className="block text-sm font-medium mb-1">Contraseña actual</label>
+          <input
+            type="password"
+            name="currentPassword"
+            value={passwords.currentPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Nueva contraseña</label>
+          <input
+            type="password"
+            name="newPassword"
+            value={passwords.newPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Repetir nueva contraseña</label>
+          <input
+            type="password"
+            name="repeatPassword"
+            value={passwords.repeatPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Cambiar contraseña
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default Configuracion;

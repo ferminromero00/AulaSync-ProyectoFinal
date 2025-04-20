@@ -23,14 +23,25 @@ class AlumnoController extends AbstractController
     public function getPerfil(): JsonResponse
     {
         $alumno = $this->getUser();
-
-        return new JsonResponse([
+        // Log para depuración
+        error_log("[AlumnoController] getPerfil usuario: " . ($alumno ? $alumno->getEmail() : 'null'));
+        error_log("[AlumnoController] getPerfil datos: " . json_encode([
             'firstName' => $alumno->getFirstName(),
             'lastName' => $alumno->getLastName(),
             'email' => $alumno->getEmail(),
             'curso' => $alumno->getCurso(),
-            'matricula' => $alumno->getMatricula()
-        ]);
+            'matricula' => $alumno->getMatricula(),
+            'fotoPerfilUrl' => $alumno->getProfileImage() ?? null
+        ]));
+        return new JsonResponse([
+            'id' => $alumno->getId(), // <-- Añadido el campo id
+            'firstName' => $alumno->getFirstName(),
+            'lastName' => $alumno->getLastName(),
+            'email' => $alumno->getEmail(),
+            'curso' => $alumno->getCurso(),
+            'matricula' => $alumno->getMatricula(),
+            'fotoPerfilUrl' => $alumno->getProfileImage() ?? null // Add null coalescing operator
+        ], 200, ['Content-Type' => 'application/json']);
     }
 
     #[Route('/perfil', name: 'api_alumno_perfil_update', methods: ['PUT'])]

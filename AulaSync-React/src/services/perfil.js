@@ -2,12 +2,12 @@ import api from './api';
 
 export const getPerfilProfesor = async () => {
     const response = await api.get('/profesor/perfil');
-    return response;
+    return response.data;
 };
 
 export const actualizarPerfilProfesor = async (datos) => {
     const response = await api.put('/profesor/perfil', datos);
-    return response;
+    return response.data;
 };
 
 export const cambiarPassword = async (passwords) => {
@@ -17,15 +17,85 @@ export const cambiarPassword = async (passwords) => {
 
 export const getPerfilAlumno = async () => {
     const response = await api.get('/alumno/perfil');
-    return response;
+    return response.data;
 };
 
 export const actualizarPerfilAlumno = async (datos) => {
     const response = await api.put('/alumno/perfil', datos);
-    return response;
+    return response.data;
 };
 
 export const cambiarPasswordAlumno = async (passwords) => {
     const response = await api.put('/alumno/password', passwords);
     return response;
+};
+
+export const getPerfil = async () => {
+    const role = localStorage.getItem('role');
+    try {
+        console.log("[getPerfil] Rol detectado:", role);
+        
+        if (!role) {
+            throw new Error('No hay rol definido');
+        }
+
+        const response = role === 'profesor' 
+            ? await api.get('/profesor/perfil')
+            : role === 'alumno' 
+                ? await api.get('/alumno/perfil')
+                : null;
+
+        if (!response) {
+            throw new Error('Rol no reconocido');
+        }
+
+        console.log("[getPerfil] Respuesta completa:", response);
+
+        // Si response.data existe, úsalo, si no, usa response directamente
+        const data = response.data !== undefined ? response.data : response;
+
+        console.log("[getPerfil] Datos recibidos:", data);
+
+        if (!data) {
+            throw new Error('Respuesta sin datos');
+        }
+
+        // Transformar y proporcionar valores por defecto
+        const transformedData = {
+            id: data.id,
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            email: data.email || '',
+            especialidad: data.especialidad || '',
+            departamento: data.departamento || '',
+            curso: data.curso || '',
+            fotoPerfilUrl: data.fotoPerfilUrl || null,
+            nombre: data.nombre || `${data.firstName || ''} ${data.lastName || ''}`.trim()
+        };
+
+        console.log("[getPerfil] Datos transformados:", transformedData);
+        return transformedData;
+
+    } catch (error) {
+        console.error('[getPerfil] Error:', error);
+        throw error;
+    }
+};
+
+export async function subirFotoPerfil(formData) {
+    const res = await api.post('/perfil/foto', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+}
+
+export const actualizarPerfil = async (datos) => {
+    const role = localStorage.getItem('role');
+    if (role === 'profesor') {
+        return await actualizarPerfilProfesor(datos);
+    } else if (role === 'alumno') {
+        return await actualizarPerfilAlumno(datos);
+    } else {
+        throw new Error('Rol no reconocido');
+    }
 };

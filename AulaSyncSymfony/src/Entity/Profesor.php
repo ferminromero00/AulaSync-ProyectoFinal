@@ -47,6 +47,9 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $departamento = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $profileImage = null; // Ruta de la foto de perfil
+
     #[ORM\OneToMany(mappedBy: 'profesor', targetEntity: Clase::class)]
     private Collection $clases;
 
@@ -171,6 +174,17 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDepartamento(string $departamento): static
     {
         $this->departamento = $departamento;
+        return $this;
+    }
+
+    public function getProfileImage(): ?string
+    {
+        return $this->profileImage;
+    }
+
+    public function setProfileImage(?string $profileImage): self
+    {
+        $this->profileImage = $profileImage;
         return $this;
     }
 

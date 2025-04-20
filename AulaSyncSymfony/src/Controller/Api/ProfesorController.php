@@ -16,14 +16,35 @@ class ProfesorController extends AbstractController
     public function getPerfil(): JsonResponse
     {
         $profesor = $this->getUser();
-        
-        return new JsonResponse([
-            'firstName' => $profesor->getFirstName(),
-            'lastName' => $profesor->getLastName(),
-            'email' => $profesor->getEmail(),
-            'especialidad' => $profesor->getEspecialidad(),
-            'departamento' => $profesor->getDepartamento()
-        ]);
+        if (!$profesor) {
+            return new JsonResponse(['error' => 'No autenticado'], 401);
+        }
+
+        try {
+            $data = [
+                'id' => $profesor->getId(),
+                'firstName' => $profesor->getFirstName() ?: '',
+                'lastName' => $profesor->getLastName() ?: '',
+                'email' => $profesor->getEmail() ?: '',
+                'especialidad' => $profesor->getEspecialidad() ?: '',
+                'departamento' => $profesor->getDepartamento() ?: '',
+                'fotoPerfilUrl' => $profesor->getProfileImage() ?: null,
+                'nombre' => ($profesor->getFirstName() . ' ' . $profesor->getLastName()) ?: ''
+            ];
+
+            error_log("[ProfesorController] Datos a enviar: " . json_encode($data));
+
+            return new JsonResponse($data, 200, [
+                'Content-Type' => 'application/json'
+            ]);
+        } catch (\Exception $e) {
+            error_log("[ProfesorController] Error: " . $e->getMessage());
+            return new JsonResponse(
+                ['error' => 'Error interno del servidor'], 
+                500,
+                ['Content-Type' => 'application/json']
+            );
+        }
     }
 
     #[Route('/perfil', name: 'api_profesor_perfil_update', methods: ['PUT'])]

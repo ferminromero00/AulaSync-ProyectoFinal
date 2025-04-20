@@ -49,6 +49,9 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $matricula = null; 
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $profileImage = null; // Ruta de la foto de perfil
+
     #[ORM\ManyToMany(targetEntity: Clase::class, mappedBy: "alumnos")]
     private Collection $clases;
 
@@ -186,6 +189,17 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->matricula = $matricula;
 
+        return $this;
+    }
+
+    public function getProfileImage(): ?string
+    {
+        return $this->profileImage;
+    }
+
+    public function setProfileImage(?string $profileImage): self
+    {
+        $this->profileImage = $profileImage;
         return $this;
     }
 
