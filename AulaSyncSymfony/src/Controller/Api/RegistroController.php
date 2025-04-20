@@ -126,6 +126,7 @@ class RegistroController extends AbstractController
             $alumno->setUpdateAt(new \DateTime());
             $matricula = 'ALU' . date('Y') . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
             $alumno->setMatricula($matricula);
+            $alumno->setProfileImage('/uploads/perfiles/default.png'); // Ruta relativa accesible desde el frontend
 
             try {
                 $em->persist($alumno);
@@ -165,6 +166,7 @@ class RegistroController extends AbstractController
             $profesor->setPassword($passwordHasher->hashPassword($profesor, $datos['password']));
             $profesor->setCreatedAt(new \DateTime());
             $profesor->setUpdateAt(new \DateTime());
+            $profesor->setProfileImage('/uploads/perfiles/default.png'); // Ruta relativa accesible desde el frontend
 
             try {
                 $em->persist($profesor);
@@ -201,6 +203,7 @@ class RegistroController extends AbstractController
         $alumno->setUpdateAt(new \DateTime());
         $matricula = 'ALU' . date('Y') . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
         $alumno->setMatricula($matricula);
+        $alumno->setProfileImage('/uploads/perfiles/default.png'); // Ruta relativa accesible desde el frontend
 
         try {
             $em->persist($alumno);
@@ -238,6 +241,7 @@ class RegistroController extends AbstractController
         $profesor->setPassword($passwordHasher->hashPassword($profesor, $form->get('plainPassword')->getData()));
         $profesor->setCreatedAt(new \DateTime());
         $profesor->setUpdateAt(new \DateTime());
+        $profesor->setProfileImage('/uploads/perfiles/default.png'); // Ruta relativa accesible desde el frontend
 
         try {
             $em->persist($profesor);

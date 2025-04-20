@@ -129,7 +129,7 @@ const ConfiguracionAlumno = () => {
         <div className="flex items-center gap-6 mb-6">
           <div className="relative">
             <img
-              src={fotoPreview || "/default-avatar.png"}
+              src={fotoPreview || (perfil?.fotoPerfilUrl || "/default-avatar.png")}
               alt="Foto de perfil"
               className="w-24 h-24 rounded-full object-cover border"
             />

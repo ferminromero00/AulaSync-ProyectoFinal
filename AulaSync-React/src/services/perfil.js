@@ -1,4 +1,5 @@
 import api from './api';
+import { API_BASE_URL } from '../config/config';
 
 export const getPerfilProfesor = async () => {
     const response = await api.get('/profesor/perfil');
@@ -69,7 +70,7 @@ export const getPerfil = async () => {
             especialidad: data.especialidad || '',
             departamento: data.departamento || '',
             curso: data.curso || '',
-            fotoPerfilUrl: data.fotoPerfilUrl || null,
+            fotoPerfilUrl: data.fotoPerfilUrl ? `${API_BASE_URL}${data.fotoPerfilUrl}` : null,
             nombre: data.nombre || `${data.firstName || ''} ${data.lastName || ''}`.trim()
         };
 
