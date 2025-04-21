@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Form\FotoPerfilType;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/api/profesor')]
 class ProfesorController extends AbstractController
@@ -53,15 +56,15 @@ class ProfesorController extends AbstractController
         $profesor = $this->getUser();
         $data = json_decode($request->getContent(), true);
 
-        $profesor->setFirstName($data['firstName']);
-        $profesor->setLastName($data['lastName']);
-        $profesor->setEmail($data['email']);
-        $profesor->setEspecialidad($data['especialidad']);
-        $profesor->setDepartamento($data['departamento']);
+        $form = $this->createForm(ConfiguracionProfesorType::class, $profesor);
+        $form->submit($data);
 
-        $em->flush();
+        if ($form->isValid()) {
+            $em->flush();
+            return new JsonResponse(['message' => 'Perfil actualizado correctamente']);
+        }
 
-        return new JsonResponse(['message' => 'Perfil actualizado correctamente']);
+        return new JsonResponse(['error' => 'Datos inválidos'], 400);
     }
 
     #[Route('/password', name: 'api_profesor_password_update', methods: ['PUT'])]
@@ -83,5 +86,47 @@ class ProfesorController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'Contraseña actualizada correctamente']);
+    }
+
+    #[Route('/perfil/foto', name: 'api_profesor_foto_update', methods: ['POST'])]
+    public function actualizarFotoPerfil(
+        Request $request, 
+        EntityManagerInterface $em,
+        SluggerInterface $slugger
+    ): JsonResponse
+    {
+        $profesor = $this->getUser();
+        $form = $this->createForm(FotoPerfilType::class);
+        $form->submit($request->files->all());
+
+        if ($form->isValid()) {
+            $fotoFile = $form->get('foto')->getData();
+            
+            if ($fotoFile) {
+                $originalFilename = pathinfo($fotoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$fotoFile->guessExtension();
+
+                try {
+                    $fotoFile->move(
+                        $this->getParameter('fotos_perfil_directory'),
+                        $newFilename
+                    );
+                    
+                    // Actualizar ruta en la base de datos
+                    $profesor->setProfileImage($newFilename);
+                    $em->flush();
+
+                    return new JsonResponse([
+                        'message' => 'Foto de perfil actualizada correctamente',
+                        'fotoPerfilUrl' => '/uploads/fotos_perfil/' . $newFilename
+                    ]);
+                } catch (FileException $e) {
+                    return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
+                }
+            }
+        }
+
+        return new JsonResponse(['error' => 'Archivo inválido'], 400);
     }
 }

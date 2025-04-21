@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProfesorRepository::class)]
 class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
@@ -49,6 +50,13 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $profileImage = null; // Ruta de la foto de perfil
+
+    #[Assert\File(
+        maxSize: '2M',
+        mimeTypes: ['image/jpeg', 'image/png'],
+        mimeTypesMessage: 'Por favor sube una imagen JPG o PNG válida'
+    )]
+    public $profilePicture; // Hazlo público o usa getter/setter
 
     #[ORM\OneToMany(mappedBy: 'profesor', targetEntity: Clase::class)]
     private Collection $clases;

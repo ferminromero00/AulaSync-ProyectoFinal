@@ -44,8 +44,8 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
 ================================================================================================================================================
 6. Subida de archivos al servidor
    - ❌ vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades
-   - ❌ symfony/form              → Formularios de subida
-   - ❌ symfony/validator         → Validación de archivos
+   - ✅ symfony/form              → Formularios de subida
+   - ✅ symfony/validator         → Validación de archivos
 ================================================================================================================================================
 7. Importación y exportación de datos
    - ❌ league/csv                → Lectura y escritura de archivos CSV (importar/exportar datos)
