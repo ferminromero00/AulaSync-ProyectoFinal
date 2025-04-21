@@ -34,7 +34,7 @@ export const cambiarPasswordAlumno = async (passwords) => {
 export const getPerfil = async () => {
     const role = localStorage.getItem('role');
     try {
-        console.log("[getPerfil] Rol detectado:", role);
+        // console.log("[getPerfil] Rol detectado:", role); // innecesario
         
         if (!role) {
             throw new Error('No hay rol definido');
@@ -50,12 +50,14 @@ export const getPerfil = async () => {
             throw new Error('Rol no reconocido');
         }
 
-        console.log("[getPerfil] Respuesta completa:", response);
+        // Log 1: Muestra la respuesta completa del servidor
+        // console.log("[getPerfil] Respuesta completa:", response); // Eliminado
 
         // Si response.data existe, úsalo, si no, usa response directamente
         const data = response.data !== undefined ? response.data : response;
 
-        console.log("[getPerfil] Datos recibidos:", data);
+        // Log 2: Muestra los datos extraídos de la respuesta
+        // console.log("[getPerfil] Datos recibidos:", data); // Eliminado
 
         if (!data) {
             throw new Error('Respuesta sin datos');
@@ -74,7 +76,8 @@ export const getPerfil = async () => {
             nombre: data.nombre || `${data.firstName || ''} ${data.lastName || ''}`.trim()
         };
 
-        console.log("[getPerfil] Datos transformados:", transformedData);
+        // Log 3: Muestra los datos después de transformarlos
+        // console.log("[getPerfil] Datos transformados:", transformedData); // Puedes dejarlo si lo necesitas, si no, elimínalo también
         return transformedData;
 
     } catch (error) {
