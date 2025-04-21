@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth'
 import NotificationButton from '../components/NotificationButton'
+import AvatarButton from '../components/AvatarButton'
 
 const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -75,8 +76,9 @@ const StudentLayout = () => {
                             </button>
                             <span className="text-lg font-semibold">AulaSync</span>
                         </div>
-                        <div className="relative">
+                        <div className="flex items-center gap-4">
                             <NotificationButton />
+                            <AvatarButton size={40} />
                         </div>
                     </div>
                 </header>

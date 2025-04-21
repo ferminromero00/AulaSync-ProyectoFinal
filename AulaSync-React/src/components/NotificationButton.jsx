@@ -74,7 +74,7 @@ const NotificationButton = () => {
     };
 
     return (
-        <div className="fixed top-4 right-8 z-50">
+        <div className="relative">
             <button
                 ref={notifBtnRef}
                 className="relative p-2 rounded-full bg-white shadow hover:bg-gray-100 transition"
