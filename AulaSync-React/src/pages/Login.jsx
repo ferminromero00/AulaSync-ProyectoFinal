@@ -71,7 +71,7 @@ export default function LoginPage() {
                 onClick={() => setRole('alumno')}
                 className={`flex-1 py-2 px-4 rounded-md transition-all duration-300 ${
                   role === 'alumno'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >

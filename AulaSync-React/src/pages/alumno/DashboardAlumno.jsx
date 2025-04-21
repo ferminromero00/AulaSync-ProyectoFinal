@@ -178,105 +178,88 @@ const DashboardAlumno = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto relative">
-            {/* Eliminar NotificationButton de aquí ya que ahora está en el layout */}
-            
-            {/* Header con bienvenida y botón de unirse */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div className="space-y-8 p-6"> {/* Cambiado para coincidir con el layout del profesor */}
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"> {/* Mejorado el espaciado */}
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Bienvenido a tu Dashboard</h1>
-                    <p className="text-gray-600">Gestiona tus clases y actividades</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800"> {/* Ajustado el tamaño y color */}
+                        Dashboard del Alumno
+                    </h1>
+                    <p className="mt-1 text-gray-500">
+                        Bienvenido de nuevo, aquí está el resumen de tu actividad
+                    </p>
                 </div>
                 <button
                     onClick={() => setMostrarModal(true)}
-                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 mt-4 md:mt-0"
+                    className={
+                        "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    }
                 >
                     <Plus className="h-5 w-5 mr-2" />
                     Unirse a clase
                 </button>
             </div>
 
-            {/* Stats en cards más atractivas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Ajustado el grid */}
                 {stats.map((stat, index) => (
                     <div key={index} 
-                         className="bg-white rounded-lg shadow-sm p-6 transition-all hover:shadow-md">
-                        <div className="flex items-center justify-between">
-                            <div className={`p-3 rounded-lg ${stat.color}`}>
+                         className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md"> {/* Mejorado el diseño de la card */}
+                        <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${stat.color}`} />
+                        <div className="flex items-center gap-4">
+                            <div className={`rounded-lg p-3 ${stat.color}`}>
                                 <stat.icon className="h-6 w-6" />
                             </div>
-                            <div className="text-right">
-                                <p className="text-2xl font-bold">{stat.value}</p>
-                                <p className="text-gray-600">{stat.label}</p>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+                                <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Listado de clases con nuevo diseño */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-lg font-semibold mb-4">Mis Clases</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {clases.length > 0 ? clases.map(clase => (
-                        <div key={clase.id} className="relative block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100">
+            {/* Listado de clases */}
+            <div className="bg-white rounded-xl shadow-sm"> {/* Ajustado para coincidir con el estilo del profesor */}
+                <div className="border-b border-gray-100">
+                    <div className="px-6 py-4">
+                        <h2 className="text-lg font-semibold">Mis Clases</h2>
+                        <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
+                    </div>
+                </div>
+                <div className="p-6">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {clases.length > 0 ? clases.map(clase => (
                             <Link
+                                key={clase.id}
                                 to={`/alumno/clase/${clase.id}`}
+                                className="group block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100"
                             >
                                 <div className="flex items-center gap-4 mb-3">
-                                    <div className="bg-green-100 p-3 rounded-lg">
-                                        <BookOpen className="h-6 w-6 text-green-600" />
+                                    <div className="bg-blue-100 p-3 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                        <BookOpen className="h-6 w-6 text-blue-600" />
                                     </div>
                                     <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
                                 </div>
-                                <div className="space-y-1 text-sm text-gray-600">
-                                    <p>Profesor: {clase.profesor}</p>
-                                    <p>Estudiantes: {clase.numEstudiantes}</p>
-                                    <p>Código: {clase.codigoClase}</p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <Users className="h-4 w-4 mr-2" />
+                                        <span>{clase.numEstudiantes} estudiantes</span>
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <BookOpen className="h-4 w-4 mr-2" />
+                                        <span>Código: {clase.codigoClase}</span>
+                                    </div>
                                 </div>
                             </Link>
-                            {/* Botón de menú mejorado */}
-                            <button
-                                className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-200 transition-colors duration-200"
-                                onClick={() => handleMenuClick(clase.id)}
-                                aria-label="Opciones de clase"
-                            >
-                                <MoreVertical className="h-5 w-5 text-gray-500" />
-                            </button>
-                            
-                            {/* Menú desplegable mejorado */}
-                            {menuAbierto === clase.id && (
-                                <div className="absolute top-12 right-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 animate-fadeIn">
-                                    <button
-                                        className="w-full px-4 py-2 text-left flex items-center space-x-2 text-red-600 hover:bg-red-50 transition-colors duration-200"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setClaseSeleccionada(clase);
-                                            setShowConfirmModal(true);
-                                            setMenuAbierto(null);
-                                        }}
-                                    >
-                                        <LogOut className="h-4 w-4" />
-                                        <span>Salir de la clase</span>
-                                    </button>
-                                </div>
-                            )}
-                            
-                            {/* Overlay para cerrar el menú al hacer clic fuera */}
-                            {menuAbierto === clase.id && (
-                                <div 
-                                    className="fixed inset-0 z-40"
-                                    onClick={() => setMenuAbierto(null)}
-                                />
-                            )}
-                        </div>
-                    )) : (
-                        <div className="col-span-full text-center py-8 text-gray-500">
-                            <BookOpen className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                            <p>No estás inscrito en ninguna clase</p>
-                            <p className="text-sm">Usa el botón "Unirse a clase" para empezar</p>
-                        </div>
-                    )}
+                        )) : (
+                            <div className="col-span-full text-center py-8">
+                                <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                                <p className="text-gray-500 mb-1">No estás inscrito en ninguna clase</p>
+                                <p className="text-sm text-gray-400">Usa el botón "Unirse a clase" para empezar</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
