@@ -14,7 +14,6 @@ class FotoPerfilType extends AbstractType
     {
         $builder
             ->add('foto', FileType::class, [
-                'label' => 'Foto de perfil',
                 'mapped' => false,
                 'required' => true,
                 'constraints' => [
@@ -24,7 +23,7 @@ class FotoPerfilType extends AbstractType
                             'image/jpeg',
                             'image/png',
                         ],
-                        'mimeTypesMessage' => 'Por favor sube una imagen JPG o PNG válida (máx. 2MB)',
+                        'mimeTypesMessage' => 'Por favor sube una imagen JPG o PNG válida',
                     ])
                 ],
             ])
@@ -35,7 +34,7 @@ class FotoPerfilType extends AbstractType
     {
         $resolver->setDefaults([
             'csrf_protection' => false,
-            'allow_extra_fields' => true
+            'data_class' => null
         ]);
     }
 }

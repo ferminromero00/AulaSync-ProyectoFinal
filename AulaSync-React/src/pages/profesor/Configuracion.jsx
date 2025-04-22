@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 import { subirFotoPerfil, getPerfil, actualizarPerfil, cambiarPassword } from "../../services/perfil";
 import { Camera, X } from "lucide-react";
 
-const Configuracion = () => {
+export default function ConfiguracionProfesor() {
   const [perfil, setPerfil] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fotoPreview, setFotoPreview] = useState(null);
@@ -21,6 +21,7 @@ const Configuracion = () => {
     repeatPassword: ""
   });
   const fileInputRef = useRef();
+  const [foto, setFoto] = useState(null);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -67,22 +68,39 @@ const Configuracion = () => {
       setFotoFile(file);
       setFotoPreview(URL.createObjectURL(file));
     }
+    setFoto(e.target.files[0]);
   };
 
   const handleFotoUpload = async (e) => {
     e.preventDefault();
-    if (!fotoFile) return;
-    try {
-      const formData = new FormData();
-      formData.append("foto", fotoFile);
-      const data = await subirFotoPerfil(formData);
-      setPerfil((prev) => ({ ...prev, fotoPerfilUrl: data.fotoPerfilUrl }));
-      toast.success("Foto de perfil actualizada");
-      setFotoFile(null);
-    } catch {
-      toast.error("Error al subir la foto");
+    if (!fotoFile) {
+        toast.error("No se ha seleccionado ningún archivo");
+        return;
     }
-  };
+
+    const formData = new FormData();
+    formData.append('foto', fotoFile);
+
+    try {
+        const data = await subirFotoPerfil(formData);
+        
+        if (data.fotoPerfilUrl) {
+            setPerfil(prev => ({
+                ...prev,
+                fotoPerfilUrl: data.fotoPerfilUrl
+            }));
+            setFotoPreview(data.fotoPerfilUrl);
+            toast.success("Foto de perfil actualizada correctamente");
+        } else {
+            throw new Error('No se recibió la URL de la imagen');
+        }
+        
+        setFotoFile(null);
+    } catch (error) {
+        console.error('Error en subida:', error);
+        toast.error(error.message || "Error al subir la foto");
+    }
+};
 
   const handleRemoveFoto = () => {
     setFotoFile(null);
@@ -298,5 +316,3 @@ const Configuracion = () => {
     </div>
   );
 };
-
-export default Configuracion;

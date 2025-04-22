@@ -95,38 +95,50 @@ class ProfesorController extends AbstractController
         SluggerInterface $slugger
     ): JsonResponse
     {
-        $profesor = $this->getUser();
-        $form = $this->createForm(FotoPerfilType::class);
-        $form->submit($request->files->all());
-
-        if ($form->isValid()) {
-            $fotoFile = $form->get('foto')->getData();
+        try {
+            $profesor = $this->getUser();
             
-            if ($fotoFile) {
-                $originalFilename = pathinfo($fotoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$fotoFile->guessExtension();
-
-                try {
-                    $fotoFile->move(
-                        $this->getParameter('fotos_perfil_directory'),
-                        $newFilename
-                    );
-                    
-                    // Actualizar ruta en la base de datos
-                    $profesor->setProfileImage($newFilename);
-                    $em->flush();
-
-                    return new JsonResponse([
-                        'message' => 'Foto de perfil actualizada correctamente',
-                        'fotoPerfilUrl' => '/uploads/fotos_perfil/' . $newFilename
-                    ]);
-                } catch (FileException $e) {
-                    return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
-                }
+            /** @var UploadedFile $uploadedFile */
+            $uploadedFile = $request->files->get('foto');
+            
+            if (!$uploadedFile) {
+                return new JsonResponse([
+                    'error' => 'No se encontró el archivo',
+                    'files' => $request->files->all(),
+                    'post' => $request->request->all()
+                ], 400);
             }
-        }
 
-        return new JsonResponse(['error' => 'Archivo inválido'], 400);
+            // Validar el tipo MIME
+            $mimeType = $uploadedFile->getMimeType();
+            if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+                return new JsonResponse([
+                    'error' => 'Tipo de archivo no válido. Solo se permiten imágenes JPG y PNG'
+                ], 400);
+            }
+
+            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+
+            try {
+                $uploadedFile->move(
+                    $this->getParameter('fotos_perfil_directory'),
+                    $newFilename
+                );
+                
+                $profesor->setProfileImage($newFilename);
+                $em->flush();
+
+                return new JsonResponse([
+                    'message' => 'Foto de perfil actualizada correctamente',
+                    'fotoPerfilUrl' => '/uploads/fotos_perfil/' . $newFilename
+                ]);
+            } catch (FileException $e) {
+                return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
+            }
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
     }
 }

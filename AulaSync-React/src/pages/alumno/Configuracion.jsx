@@ -11,6 +11,7 @@ const ConfiguracionAlumno = () => {
   const [editData, setEditData] = useState({ firstName: "", lastName: "", email: "" });
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", repeatPassword: "" });
   const fileInputRef = useRef();
+  const [foto, setFoto] = useState(null);
 
   // Cargar datos del perfil al montar
   useEffect(() => {
@@ -53,6 +54,7 @@ const ConfiguracionAlumno = () => {
       setFotoFile(file);
       setFotoPreview(URL.createObjectURL(file));
     }
+    setFoto(e.target.files[0]);
   };
 
   const handleFotoUpload = async (e) => {
