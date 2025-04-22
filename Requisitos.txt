@@ -43,7 +43,7 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
    - ✅ symfony/validator         → Validación de campos como email, tokens, etc.
 ================================================================================================================================================
 6. Subida de archivos al servidor
-   - ❌ vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades
+   - ✅ vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades
    - ✅ symfony/form              → Formularios de subida
    - ✅ symfony/validator         → Validación de archivos
 ================================================================================================================================================
