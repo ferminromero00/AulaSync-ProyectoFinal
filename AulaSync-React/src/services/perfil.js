@@ -87,10 +87,19 @@ export const getPerfil = async () => {
 };
 
 export async function subirFotoPerfil(formData) {
-    const res = await api.post('/perfil/foto', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return res.data;
+    const role = localStorage.getItem('role');
+    const endpoint = role === 'profesor' ? '/profesor/perfil/foto' : '/alumno/perfil/foto';
+    try {
+        console.log('Token:', localStorage.getItem('token')); // Debug
+        const response = await api.post(endpoint, formData);
+        if (!response) {
+            throw new Error('No se recibió respuesta del servidor');
+        }
+        return response;
+    } catch (error) {
+        console.error('Error subiendo foto:', error);
+        throw error;
+    }
 }
 
 export const actualizarPerfil = async (datos) => {

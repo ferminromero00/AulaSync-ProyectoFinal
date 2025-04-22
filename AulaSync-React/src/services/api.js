@@ -116,14 +116,38 @@ export const api = {
         }
     },
 
-    async post(endpoint, data) {
+    async post(endpoint, data, customConfig = {}) {
         try {
-            return await handleRequest(endpoint, {
+            const token = localStorage.getItem('token');
+            let config = {
                 method: 'POST',
-                body: JSON.stringify(data)
-            });
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                ...customConfig
+            };
+
+            // No establecer Content-Type para FormData
+            if (!(data instanceof FormData)) {
+                config.headers['Content-Type'] = 'application/json';
+                config.body = JSON.stringify(data);
+            } else {
+                // Eliminar Content-Type para FormData
+                delete config.headers['Content-Type'];
+                config.body = data;
+            }
+
+            const response = await fetch(`${BASE_URL}${endpoint}`, config);
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error en la petición');
+            }
+            
+            return response.json();
         } catch (error) {
-            handleError(error);
+            console.error('Request Error:', error);
+            throw error;
         }
     }
 };

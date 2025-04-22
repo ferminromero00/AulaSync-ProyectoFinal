@@ -32,6 +32,7 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             jwt: ~
+            entry_point: jwt
         api_profesor:
             pattern: ^/api/profesor
             stateless: true
@@ -43,6 +44,7 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             jwt: ~
+            entry_point: jwt
         api_clases_alumno:       # Nuevo firewall para alumnos accediendo a clases
             pattern: ^/api/clases/\d+/alumno
             stateless: true
@@ -74,10 +76,11 @@ security:
         - { path: ^/api/alumno/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/profesor/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/registro, roles: PUBLIC_ACCESS }
+        - { path: ^/api/profesor/perfil/foto, roles: ROLE_PROFESOR }
+        - { path: ^/api/profesor, roles: ROLE_PROFESOR }
         - { path: ^/api/invitaciones/enviar, roles: [ROLE_PROFESOR, ROLE_ALUMNO] }  # Permitir ambos roles
         - { path: ^/api/invitaciones, roles: ROLE_ALUMNO }  # El resto de rutas de invitaciones solo para alumnos
         - { path: ^/api/alumno, roles: ROLE_ALUMNO }
-        - { path: ^/api/profesor, roles: ROLE_PROFESOR }
         - { path: ^/api/clases/\d+/alumno, roles: ROLE_ALUMNO }  # Para alumnos
         - { path: ^/api/clases, roles: ROLE_PROFESOR }           # Para profesores
         - { path: ^/api/profesor/clases, roles: ROLE_PROFESOR }

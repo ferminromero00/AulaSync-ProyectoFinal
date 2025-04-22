@@ -5,12 +5,15 @@ namespace App\Controller\Api;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;  // Agregar este import
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Form\FotoPerfilType;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[Route('/api/profesor')]
 class ProfesorController extends AbstractController
@@ -88,57 +91,60 @@ class ProfesorController extends AbstractController
         return new JsonResponse(['message' => 'Contraseña actualizada correctamente']);
     }
 
-    #[Route('/perfil/foto', name: 'api_profesor_foto_update', methods: ['POST'])]
-    public function actualizarFotoPerfil(
-        Request $request, 
-        EntityManagerInterface $em,
-        SluggerInterface $slugger
-    ): JsonResponse
+    #[Route('/perfil/foto', name: 'api_profesor_foto_perfil', methods: ['POST'])]
+    public function actualizarFotoPerfil(Request $request, FileUploader $fileUploader, EntityManagerInterface $em): JsonResponse
     {
+        /** @var Profesor $profesor */
+        $profesor = $this->getUser();
+        
+        /** @var UploadedFile $foto */
+        $foto = $request->files->get('foto');
+        
+        if (!$foto) {
+            return new JsonResponse(['error' => 'No se ha subido ninguna foto'], Response::HTTP_BAD_REQUEST);
+        }
+
         try {
-            $profesor = $this->getUser();
+            // Validar tamaño y tipo de archivo
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            if ($foto->getSize() > $maxSize) {
+                return new JsonResponse(['error' => 'El archivo es demasiado grande'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $allowedTypes = ['image/jpeg', 'image/png'];
+            if (!in_array($foto->getMimeType(), $allowedTypes)) {
+                return new JsonResponse(['error' => 'Tipo de archivo no permitido'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Eliminar foto anterior si existe
+            $oldFilename = $profesor->getFotoPerfilFilename();
+            if ($oldFilename && $oldFilename !== 'default.png') {
+                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . $oldFilename;
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
+
+            // Subir nueva foto
+            $fileName = $fileUploader->upload($foto);
             
-            /** @var UploadedFile $uploadedFile */
-            $uploadedFile = $request->files->get('foto');
+            // Actualizar rutas en la base de datos
+            $profesor->setFotoPerfilFilename($fileName);
+            $profesor->setProfileImage('/uploads/perfiles/' . $fileName);
+
+            $em->persist($profesor);
+            $em->flush();
+
+            return new JsonResponse([
+                'message' => 'Foto de perfil actualizada correctamente',
+                'fotoPerfilUrl' => $profesor->getProfileImage()
+            ]);
             
-            if (!$uploadedFile) {
-                return new JsonResponse([
-                    'error' => 'No se encontró el archivo',
-                    'files' => $request->files->all(),
-                    'post' => $request->request->all()
-                ], 400);
-            }
-
-            // Validar el tipo MIME
-            $mimeType = $uploadedFile->getMimeType();
-            if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
-                return new JsonResponse([
-                    'error' => 'Tipo de archivo no válido. Solo se permiten imágenes JPG y PNG'
-                ], 400);
-            }
-
-            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
-
-            try {
-                $uploadedFile->move(
-                    $this->getParameter('fotos_perfil_directory'),
-                    $newFilename
-                );
-                
-                $profesor->setProfileImage($newFilename);
-                $em->flush();
-
-                return new JsonResponse([
-                    'message' => 'Foto de perfil actualizada correctamente',
-                    'fotoPerfilUrl' => '/uploads/fotos_perfil/' . $newFilename
-                ]);
-            } catch (FileException $e) {
-                return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
-            }
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+            return new JsonResponse(
+                ['error' => $e->getMessage()], 
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

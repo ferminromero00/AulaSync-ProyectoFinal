@@ -79,17 +79,17 @@ export default function ConfiguracionProfesor() {
     }
 
     const formData = new FormData();
-    formData.append('foto', fotoFile);
+    formData.append('foto', fotoFile); // Asegurarse que el nombre del campo sea 'foto'
 
     try {
-        const data = await subirFotoPerfil(formData);
+        const response = await subirFotoPerfil(formData);
         
-        if (data.fotoPerfilUrl) {
+        if (response.fotoPerfilUrl) {
             setPerfil(prev => ({
                 ...prev,
-                fotoPerfilUrl: data.fotoPerfilUrl
+                fotoPerfilUrl: response.fotoPerfilUrl
             }));
-            setFotoPreview(data.fotoPerfilUrl);
+            setFotoPreview(response.fotoPerfilUrl);
             toast.success("Foto de perfil actualizada correctamente");
         } else {
             throw new Error('No se recibió la URL de la imagen');
