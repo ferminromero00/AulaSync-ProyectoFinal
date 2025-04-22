@@ -79,26 +79,24 @@ export default function ConfiguracionProfesor() {
     }
 
     const formData = new FormData();
-    formData.append('foto', fotoFile); // Asegurarse que el nombre del campo sea 'foto'
+    formData.append('foto', fotoFile);
 
     try {
         const response = await subirFotoPerfil(formData);
-        
         if (response.fotoPerfilUrl) {
-            setPerfil(prev => ({
-                ...prev,
-                fotoPerfilUrl: response.fotoPerfilUrl
-            }));
-            setFotoPreview(response.fotoPerfilUrl);
             toast.success("Foto de perfil actualizada correctamente");
+            // Recargar la página después de una pequeña pausa para asegurar que 
+            // la transacción se complete y el toast se muestre
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         } else {
             throw new Error('No se recibió la URL de la imagen');
         }
-        
-        setFotoFile(null);
     } catch (error) {
         console.error('Error en subida:', error);
         toast.error(error.message || "Error al subir la foto");
+        setFotoFile(null);
     }
 };
 

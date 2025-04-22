@@ -59,18 +59,30 @@ const ConfiguracionAlumno = () => {
 
   const handleFotoUpload = async (e) => {
     e.preventDefault();
-    if (!fotoFile) return;
-    try {
-      const formData = new FormData();
-      formData.append("foto", fotoFile);
-      const data = await subirFotoPerfil(formData);
-      setPerfil((prev) => ({ ...prev, fotoPerfilUrl: data.fotoPerfilUrl }));
-      toast.success("Foto de perfil actualizada");
-      setFotoFile(null);
-    } catch {
-      toast.error("Error al subir la foto");
+    if (!fotoFile) {
+        toast.error("No se ha seleccionado ningún archivo");
+        return;
     }
-  };
+
+    const formData = new FormData();
+    formData.append('foto', fotoFile);
+
+    try {
+        const response = await subirFotoPerfil(formData);
+        
+        if (response.success) {
+            // Recargar la página para actualizar todas las imágenes
+            window.location.reload();
+        } else {
+            throw new Error('Error al actualizar la foto de perfil');
+        }
+        
+    } catch (error) {
+        console.error('Error en subida:', error);
+        toast.error(error.message || "Error al subir la foto");
+        setFotoFile(null);
+    }
+};
 
   const handleRemoveFoto = () => {
     setFotoFile(null);

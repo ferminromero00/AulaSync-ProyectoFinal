@@ -1,43 +1,66 @@
+# config/packages/doctrine.yaml
 doctrine:
     dbal:
         default_connection: default
         connections:
             default:
+                # Toma host, user, pass, name… de tu DATABASE_URL
                 url: '%env(resolve:DATABASE_URL)%'
+                driver: pdo_mysql
+                server_version: '8.0.32'  # Versión específica en lugar de env var
+
+                # Opciones de PDO: INIT_COMMAND, TIMEOUT, ERRMODE, EMULATE_PREPARES, BUFFERED_QUERY
                 options:
-                    1001: true  # PDO::MYSQL_ATTR_USE_BUFFERED_QUERY
-                persistent: true
-                server_version: '8.0.32'
-                charset: utf8mb4
+                    # PDO::MYSQL_ATTR_INIT_COMMAND = 1002
+                    1002: 'SET SESSION wait_timeout=600'
+                    # PDO::ATTR_TIMEOUT          = 2
+                    2: 5
+                    # PDO::ATTR_ERRMODE          = 3
+                    # PDO::ERRMODE_EXCEPTION     = 2
+                    3: 2
+                    # PDO::ATTR_EMULATE_PREPARES = 20
+                    20: false
+                    # PDO::MYSQL_ATTR_USE_BUFFERED_QUERY = 1000
+                    1000: true
+
+                logging:  '%kernel.debug%'
+                profiling: '%kernel.debug%'
+
     orm:
-        auto_generate_proxy_classes: true
-        enable_lazy_ghost_objects: true
+        auto_generate_proxy_classes: '%kernel.debug%'
+        enable_lazy_ghost_objects:    true
         report_fields_where_declared: true
-        validate_xml_mapping: true
-        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        validate_xml_mapping:         true
+        naming_strategy:              doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
         mappings:
             App:
-                type: attribute
-                is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
+                type:       attribute
+                is_bundle:  false
+                dir:        '%kernel.project_dir%/src/Entity'
+                prefix:     'App\Entity'
+                alias:      App
         controller_resolver:
             auto_mapping: false
 
+# —— Entorno de pruebas ——  
+# Aplica un sufijo al nombre de la BD (p.ej. mydb_testXYZ)
 when@test:
     doctrine:
         dbal:
-            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+            connections:
+                default:
+                    dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 
+# —— Producción ——  
+# Desactiva proxies automáticos y habilita cache pools
 when@prod:
     doctrine:
         orm:
             auto_generate_proxy_classes: false
-            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            proxy_dir:                   '%kernel.build_dir%/doctrine/orm/Proxies'
             metadata_cache_driver:
                 type: pool
                 pool: doctrine.system_cache_pool

@@ -11,40 +11,57 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Form\FotoPerfilType;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Service\DatabaseConnectionService;
+use App\Service\FileUploader;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Form\ConfiguracionAlumnoType;
 
 #[Route('/api/alumno')]
 class AlumnoController extends AbstractController
 {
     private EntityManagerInterface $em;
+    private $databaseService;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, DatabaseConnectionService $databaseService)
     {
         $this->em = $em;
+        $this->databaseService = $databaseService;
     }
 
     #[Route('/perfil', name: 'api_alumno_perfil_get', methods: ['GET'])]
     public function getPerfil(): JsonResponse
     {
-        $alumno = $this->getUser();
-        // Log para depuración
-        error_log("[AlumnoController] getPerfil usuario: " . ($alumno ? $alumno->getEmail() : 'null'));
-        error_log("[AlumnoController] getPerfil datos: " . json_encode([
-            'firstName' => $alumno->getFirstName(),
-            'lastName' => $alumno->getLastName(),
-            'email' => $alumno->getEmail(),
-            'curso' => $alumno->getCurso(),
-            'matricula' => $alumno->getMatricula(),
-            'fotoPerfilUrl' => $alumno->getProfileImage() ?? null
-        ]));
-        return new JsonResponse([
-            'id' => $alumno->getId(), // <-- Añadido el campo id
-            'firstName' => $alumno->getFirstName(),
-            'lastName' => $alumno->getLastName(),
-            'email' => $alumno->getEmail(),
-            'curso' => $alumno->getCurso(),
-            'matricula' => $alumno->getMatricula(),
-            'fotoPerfilUrl' => $alumno->getProfileImage() ?? null // Add null coalescing operator
-        ], 200, ['Content-Type' => 'application/json']);
+        try {
+            $connection = $this->databaseService->getConnection();
+            $alumno = $this->getUser();
+            // Log para depuración
+            error_log("[AlumnoController] getPerfil usuario: " . ($alumno ? $alumno->getEmail() : 'null'));
+            error_log("[AlumnoController] getPerfil datos: " . json_encode([
+                'firstName' => $alumno->getFirstName(),
+                'lastName' => $alumno->getLastName(),
+                'email' => $alumno->getEmail(),
+                'curso' => $alumno->getCurso(),
+                'matricula' => $alumno->getMatricula(),
+                'fotoPerfilUrl' => $alumno->getProfileImage() ?? null
+            ]));
+            $response = new JsonResponse([
+                'id' => $alumno->getId(), // <-- Añadido el campo id
+                'firstName' => $alumno->getFirstName(),
+                'lastName' => $alumno->getLastName(),
+                'email' => $alumno->getEmail(),
+                'curso' => $alumno->getCurso(),
+                'matricula' => $alumno->getMatricula(),
+                'fotoPerfilUrl' => $alumno->getProfileImage() ?? null // Add null coalescing operator
+            ], 200, ['Content-Type' => 'application/json']);
+
+            $this->databaseService->closeConnection();
+            return $response;
+
+        } catch (\Exception $e) {
+            $this->databaseService->closeConnection();
+            return new JsonResponse(['error' => 'Error de conexión'], 500);
+        }
     }
 
     #[Route('/perfil', name: 'api_alumno_perfil_update', methods: ['PUT'])]
@@ -106,44 +123,54 @@ class AlumnoController extends AbstractController
     }
 
     #[Route('/perfil/foto', name: 'api_alumno_foto_update', methods: ['POST'])]
-    public function actualizarFotoPerfil(
-        Request $request, 
-        EntityManagerInterface $em,
-        SluggerInterface $slugger
-    ): JsonResponse
+    public function actualizarFotoPerfil(Request $request, EntityManagerInterface $em, FileUploader $fileUploader): JsonResponse
     {
+        /** @var Alumno $alumno */
         $alumno = $this->getUser();
-        $form = $this->createForm(FotoPerfilType::class);
-        $form->submit($request->files->all());
-
-        if ($form->isValid()) {
-            $fotoFile = $form->get('foto')->getData();
-            
-            if ($fotoFile) {
-                $originalFilename = pathinfo($fotoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$fotoFile->guessExtension();
-
-                try {
-                    $fotoFile->move(
-                        $this->getParameter('fotos_perfil_directory'),
-                        $newFilename
-                    );
-                    
-                    // Actualizar ruta en la base de datos
-                    $alumno->setProfileImage($newFilename);
-                    $em->flush();
-
-                    return new JsonResponse([
-                        'message' => 'Foto de perfil actualizada correctamente',
-                        'fotoPerfilUrl' => '/uploads/fotos_perfil/' . $newFilename
-                    ]);
-                } catch (FileException $e) {
-                    return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
-                }
-            }
+        
+        /** @var UploadedFile $foto */
+        $foto = $request->files->get('foto');
+        
+        if (!$foto) {
+            return new JsonResponse(['error' => 'No se ha subido ninguna foto'], Response::HTTP_BAD_REQUEST);
         }
 
-        return new JsonResponse(['error' => 'Archivo inválido'], 400);
+        try {
+            $em->beginTransaction();
+            
+            // Eliminar foto anterior si existe
+            $oldFilename = $alumno->getFotoPerfilFilename();
+            if ($oldFilename && $oldFilename !== 'default.png') {
+                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . $oldFilename;
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
+
+            // Subir nueva foto
+            $fileName = $fileUploader->upload($foto);
+            
+            // Actualizar rutas en la base de datos
+            $alumno->setFotoPerfilFilename($fileName);
+            $alumno->setProfileImage('/uploads/fotos_perfil/' . $fileName);
+
+            $em->flush();
+            $em->commit();
+
+            return new JsonResponse([
+                'message' => 'Foto de perfil actualizada correctamente',
+                'fotoPerfilUrl' => $alumno->getProfileImage(),
+                'success' => true
+            ]);
+            
+        } catch (\Exception $e) {
+            if ($em->getConnection()->isTransactionActive()) {
+                $em->rollback();
+            }
+            return new JsonResponse(
+                ['error' => $e->getMessage()], 
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }

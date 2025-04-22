@@ -105,17 +105,6 @@ class ProfesorController extends AbstractController
         }
 
         try {
-            // Validar tamaño y tipo de archivo
-            $maxSize = 5 * 1024 * 1024; // 5MB
-            if ($foto->getSize() > $maxSize) {
-                return new JsonResponse(['error' => 'El archivo es demasiado grande'], Response::HTTP_BAD_REQUEST);
-            }
-
-            $allowedTypes = ['image/jpeg', 'image/png'];
-            if (!in_array($foto->getMimeType(), $allowedTypes)) {
-                return new JsonResponse(['error' => 'Tipo de archivo no permitido'], Response::HTTP_BAD_REQUEST);
-            }
-
             // Eliminar foto anterior si existe
             $oldFilename = $profesor->getFotoPerfilFilename();
             if ($oldFilename && $oldFilename !== 'default.png') {
@@ -130,7 +119,7 @@ class ProfesorController extends AbstractController
             
             // Actualizar rutas en la base de datos
             $profesor->setFotoPerfilFilename($fileName);
-            $profesor->setProfileImage('/uploads/perfiles/' . $fileName);
+            $profesor->setProfileImage('/uploads/fotos_perfil/' . $fileName); // Cambiar a la ruta correcta
 
             $em->persist($profesor);
             $em->flush();
