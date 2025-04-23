@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
-import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus } from 'lucide-react';
+import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const Clases = () => {
     const [clases, setClases] = useState([]);
@@ -11,6 +12,8 @@ const Clases = () => {
     const [nuevaClase, setNuevaClase] = useState({
         nombre: ''
     });
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
 
     const cargarClases = async () => {
         try {
@@ -29,16 +32,20 @@ const Clases = () => {
     }, []);
 
     const handleEliminarClase = async (claseId) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar esta clase?')) {
-            try {
-                await eliminarClase(claseId);
-                // Actualizar el estado local inmediatamente
-                setClases(prevClases => prevClases.filter(clase => clase.id !== claseId));
-                setMenuAbierto(null);
-            } catch (error) {
-                console.error('Error al eliminar la clase:', error);
-                alert(error.message);
-            }
+        setClaseSeleccionada(clases.find(clase => clase.id === claseId));
+        setMenuAbierto(null);
+        setShowConfirmModal(true);
+    };
+
+    const confirmarEliminacion = async () => {
+        try {
+            await eliminarClase(claseSeleccionada.id);
+            setClases(prevClases => prevClases.filter(clase => clase.id !== claseSeleccionada.id));
+            setShowConfirmModal(false);
+            toast.success('Clase eliminada correctamente');
+        } catch (error) {
+            console.error('Error al eliminar la clase:', error);
+            toast.error('Error al eliminar la clase');
         }
     };
 
@@ -199,6 +206,37 @@ const Clases = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmación */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+                        <div className="flex items-center justify-center mb-4 text-amber-500">
+                            <AlertTriangle className="h-12 w-12" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-center mb-2">
+                            ¿Eliminar clase?
+                        </h3>
+                        <p className="text-gray-600 text-center mb-6">
+                            ¿Estás seguro de que quieres eliminar la clase "{claseSeleccionada?.nombre}"? Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmarEliminacion}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
