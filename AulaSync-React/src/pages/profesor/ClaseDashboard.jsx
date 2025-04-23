@@ -6,7 +6,6 @@ import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
-import NotificationButton from '../../components/NotificationButton';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -206,7 +205,6 @@ const ClaseDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {role === 'alumno' && <NotificationButton />}
             {/* Header de la clase */}
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

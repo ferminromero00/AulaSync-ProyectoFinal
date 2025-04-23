@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check } from "lucide-react"
+import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check, Users } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../../services/invitaciones';
 import { Link, useNavigate } from "react-router-dom"
