@@ -209,12 +209,10 @@ class ClaseController extends AbstractController
             }
 
             $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
-                $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
                 return [
                     'id' => $alumno->getId(),
-                    'nombre' => strlen($nombreCompleto) > 20 
-                        ? substr($nombreCompleto, 0, 17) . '...' 
-                        : $nombreCompleto,
+                    'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
+                    'email' => $alumno->getEmail() // Añadir email aquí
                 ];
             })->toArray();
 

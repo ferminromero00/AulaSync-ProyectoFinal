@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -17,6 +17,7 @@ const ClaseDashboard = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
+    const [showAlumnosModal, setShowAlumnosModal] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -185,27 +186,33 @@ const ClaseDashboard = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Lista de estudiantes - Reducido de lg:w-1/4 a lg:w-1/5 */}
+                    {/* Lista de estudiantes */}
                     <div className="lg:w-1/5 bg-white rounded-lg shadow p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
-                            {role === 'profesor' && (
-                                <button
-                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                                    title="Añadir estudiante"
-                                    onClick={() => setShowSearchModal(true)}
-                                >
-                                    <UserPlus className="h-5 w-5 text-gray-600" />
-                                </button>
-                            )}
+                            <button
+                                onClick={() => setShowAlumnosModal(true)}
+                                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                                title="Ver lista completa"
+                            >
+                                <MoreVertical className="h-5 w-5 text-gray-600" />
+                            </button>
                         </div>
                         {clase.estudiantes && clase.estudiantes.length > 0 ? (
                             <ul className="space-y-2">
-                                {clase.estudiantes.map((estudiante) => (
+                                {clase.estudiantes.slice(0, 5).map((estudiante) => (
                                     <li key={estudiante.id} className="text-gray-700">
                                         {estudiante.nombre}
                                     </li>
                                 ))}
+                                {clase.estudiantes.length > 5 && (
+                                    <li 
+                                        className="text-blue-600 text-sm cursor-pointer hover:text-blue-800"
+                                        onClick={() => setShowAlumnosModal(true)}
+                                    >
+                                        Ver todos ({clase.estudiantes.length})
+                                    </li>
+                                )}
                             </ul>
                         ) : (
                             <p className="text-sm text-gray-500">No hay estudiantes inscritos.</p>
@@ -222,6 +229,34 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal de lista completa de alumnos */}
+            {showAlumnosModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-lg relative">
+                        <button
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowAlumnosModal(false)}
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+                        <h3 className="text-xl font-semibold mb-4">Lista de Alumnos</h3>
+                        {clase.estudiantes && clase.estudiantes.length > 0 ? (
+                            <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                                {clase.estudiantes.map((estudiante) => (
+                                    <li key={estudiante.id} className="py-3 flex items-center justify-between">
+                                        <div>
+                                            <div className="font-medium">{estudiante.nombre}</div>
+                                            <div className="text-sm text-gray-500">{estudiante.email}</div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500">No hay estudiantes inscritos.</p>
+                        )}
+                    </div>
+                </div>
+            )}
             {renderStudentSearchModal()}
         </div>
     );
