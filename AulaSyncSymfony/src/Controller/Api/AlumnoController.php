@@ -67,18 +67,35 @@ class AlumnoController extends AbstractController
     #[Route('/perfil', name: 'api_alumno_perfil_update', methods: ['PUT'])]
     public function actualizarPerfil(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $alumno = $this->getUser();
-        $data = json_decode($request->getContent(), true);
+        try {
+            $alumno = $this->getUser();
+            $data = json_decode($request->getContent(), true);
 
-        $form = $this->createForm(ConfiguracionAlumnoType::class, $alumno);
-        $form->submit($data);
+            // Validar datos
+            if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['email'])) {
+                return new JsonResponse(['error' => 'Faltan campos requeridos'], 400);
+            }
 
-        if ($form->isValid()) {
+            // Actualizar datos
+            $alumno->setFirstName($data['firstName']);
+            $alumno->setLastName($data['lastName']);
+            $alumno->setEmail($data['email']);
+            $alumno->setUpdateAt(new \DateTime());
+            
+            $em->persist($alumno);
             $em->flush();
-            return new JsonResponse(['message' => 'Perfil actualizado correctamente']);
-        }
 
-        return new JsonResponse(['error' => 'Datos inválidos'], 400);
+            return new JsonResponse([
+                'message' => 'Perfil actualizado correctamente',
+                'data' => [
+                    'firstName' => $alumno->getFirstName(),
+                    'lastName' => $alumno->getLastName(),
+                    'email' => $alumno->getEmail()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al actualizar el perfil: ' . $e->getMessage()], 500);
+        }
     }
 
     #[Route('/password', name: 'api_alumno_password_update', methods: ['PUT'])]

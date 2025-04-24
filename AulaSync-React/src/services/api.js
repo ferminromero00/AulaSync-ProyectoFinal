@@ -149,39 +149,33 @@ export const api = {
             console.error('Request Error:', error);
             throw error;
         }
-    }
-};
+    },
 
-export const registerStudent = async (data) => {
-    return handleRequest('/registro', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    });
-};
-
-export const registerTeacher = async (data) => {
-    return handleRequest('/registro/profesor', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    });
-};
-
-export const iniciarRegistro = async (data) => {
-    return handleRequest('/registro/iniciar', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    });
-};
-
-export const verificarRegistro = async (data) => {
-    try {
-        return await handleRequest('/registro/verificar', {
-            method: 'POST',
-            body: JSON.stringify(data),
+    // Agregar método PUT
+    async put(endpoint, data) {
+        return handleRequest(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
         });
-    } catch (error) {
-        console.error('Error al verificar registro:', error.message);
-        throw error;
+    },
+
+    async iniciarRegistro(data) {
+        return handleRequest('/registro/iniciar', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    async verificarRegistro(data) {
+        try {
+            return await handleRequest('/registro/verificar', {
+                method: 'POST',
+                body: JSON.stringify(data),
+            });
+        } catch (error) {
+            console.error('Error al verificar registro:', error.message);
+            throw error;
+        }
     }
 };
 

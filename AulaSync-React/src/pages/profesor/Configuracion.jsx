@@ -116,6 +116,10 @@ export default function ConfiguracionProfesor() {
       toast.error("Las contraseñas no coinciden");
       return;
     }
+    if (passwords.newPassword.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
     try {
       await cambiarPassword({
         currentPassword: passwords.currentPassword,
@@ -124,18 +128,30 @@ export default function ConfiguracionProfesor() {
       toast.success("Contraseña actualizada correctamente");
       setPasswords({ currentPassword: "", newPassword: "", repeatPassword: "" });
     } catch (error) {
-      toast.error("Error al cambiar la contraseña");
+      toast.error(error.response?.data?.message || "Error al cambiar la contraseña");
     }
   };
 
   const handlePerfilSubmit = async (e) => {
     e.preventDefault();
     try {
-      await actualizarPerfil(editData);
-      setPerfil(prev => ({ ...prev, ...editData }));
-      toast.success("Perfil actualizado correctamente");
+        if (!editData.firstName || !editData.lastName || !editData.email) {
+            toast.error("Todos los campos son obligatorios");
+            return;
+        }
+
+        console.log('Enviando datos:', editData); // Debug
+        const response = await actualizarPerfil(editData);
+        
+        if (response.success) {
+            setPerfil(prev => ({ ...prev, ...editData }));
+            toast.success(response.message || "Perfil actualizado correctamente");
+        } else {
+            throw new Error(response.error || "Error al actualizar el perfil");
+        }
     } catch (error) {
-      toast.error("Error al actualizar el perfil");
+        console.error('Error en handlePerfilSubmit:', error);
+        toast.error(error.message || "Error al actualizar el perfil");
     }
   };
 

@@ -56,18 +56,43 @@ class ProfesorController extends AbstractController
     #[Route('/perfil', name: 'api_profesor_perfil_update', methods: ['PUT'])]
     public function actualizarPerfil(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $profesor = $this->getUser();
-        $data = json_decode($request->getContent(), true);
+        try {
+            $profesor = $this->getUser();
+            $data = json_decode($request->getContent(), true);
+            
+            error_log("[ProfesorController] Datos recibidos: " . json_encode($data));
 
-        $form = $this->createForm(ConfiguracionProfesorType::class, $profesor);
-        $form->submit($data);
+            // Validar datos
+            if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['email'])) {
+                return new JsonResponse(['error' => 'Faltan campos requeridos'], 400);
+            }
 
-        if ($form->isValid()) {
+            // Actualizar datos
+            $profesor->setFirstName($data['firstName']);
+            $profesor->setLastName($data['lastName']);
+            $profesor->setEmail($data['email']);
+            
+            if (isset($data['especialidad'])) {
+                $profesor->setEspecialidad($data['especialidad']);
+            }
+            if (isset($data['departamento'])) {
+                $profesor->setDepartamento($data['departamento']);
+            }
+
+            $em->persist($profesor);
             $em->flush();
-            return new JsonResponse(['message' => 'Perfil actualizado correctamente']);
-        }
 
-        return new JsonResponse(['error' => 'Datos inválidos'], 400);
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Perfil actualizado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            error_log("[ProfesorController] Error actualizando perfil: " . $e->getMessage());
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Error al actualizar el perfil'
+            ], 500);
+        }
     }
 
     #[Route('/password', name: 'api_profesor_password_update', methods: ['PUT'])]

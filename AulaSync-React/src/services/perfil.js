@@ -7,8 +7,13 @@ export const getPerfilProfesor = async () => {
 };
 
 export const actualizarPerfilProfesor = async (datos) => {
-    const response = await api.put('/profesor/perfil', datos);
-    return response.data;
+    try {
+        const response = await api.put('/profesor/perfil', datos);
+        return response;
+    } catch (error) {
+        console.error('Error en actualizarPerfilProfesor:', error);
+        throw error;
+    }
 };
 
 export const cambiarPassword = async (passwords) => {

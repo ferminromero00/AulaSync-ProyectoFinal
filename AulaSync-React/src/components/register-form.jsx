@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { iniciarRegistro, verificarRegistro } from '../services/api'
+import api from '../services/api'
 
 function RegisterForm() {
   const { register, handleSubmit, formState: { errors }, setError } = useForm()
@@ -23,12 +23,11 @@ function RegisterForm() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // Añadir el rol al payload para distinguir en el backend
       const payload = {
         ...data,
         role,
       };
-      await iniciarRegistro(payload);
+      await api.iniciarRegistro(payload);
       setPendingEmail(data.email);
       setPendingData(payload);
       setStep(2);
@@ -45,7 +44,7 @@ function RegisterForm() {
   const handleVerificar = async (e) => {
     e.preventDefault();
     try {
-        const response = await verificarRegistro({ email: pendingEmail, codigo });
+        const response = await api.verificarRegistro({ email: pendingEmail, codigo });
         console.log('Respuesta del servidor:', response); // Agrega esto para ver la respuesta
         navigate('/?role=' + role, {
             state: {
