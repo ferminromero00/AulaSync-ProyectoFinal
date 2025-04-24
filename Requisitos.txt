@@ -55,7 +55,7 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
    - ❌ vich/uploader-bundle      → Organización de rutas de archivos
 ================================================================================================================================================
 9. Ficheros de Logs
-   - ❌ monolog/monolog           → Sistema de logs para registrar errores, acciones, etc.
+   - ✅ monolog/monolog           → Sistema de logs para registrar errores, acciones, etc.
 ================================================================================================================================================
 10. Integración con IA
     - ❌ openai-php/client → Consumir APIs de IA (como ChatGPT)

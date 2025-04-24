@@ -1,6 +1,33 @@
 monolog:
     channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - deprecation
+        - api
+        - user_actions
+
+    handlers:
+        api:
+            type: rotating_file
+            path: "%kernel.logs_dir%/api.log"
+            level: debug
+            channels: ["api"]
+            max_files: 10
+            formatter: monolog.formatter.line
+        user_actions:
+            type: rotating_file
+            path: "%kernel.logs_dir%/user_actions.log"
+            level: info
+            channels: ["user_actions"]
+            max_files: 10
+            formatter: monolog.formatter.line
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/main.log"
+            level: debug
+            channels: ["!event"]
+        console:
+            type: console
+            process_psr_3_messages: false
+            channels: ["!event", "!doctrine", "!console"]
 
 when@dev:
     monolog:
@@ -10,14 +37,20 @@ when@dev:
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
                 channels: ["!event"]
-            # uncomment to get logging in your browser
-            # you may have to allow bigger header sizes in your Web server configuration
-            #firephp:
-            #    type: firephp
-            #    level: info
-            #chromephp:
-            #    type: chromephp
-            #    level: info
+            api:
+                type: rotating_file
+                path: "%kernel.logs_dir%\\api_dev.log"  # Usa doble backslash para Windows
+                level: debug
+                channels: ["api"]
+                max_files: 10
+                formatter: monolog.formatter.json
+            user_actions:
+                type: rotating_file
+                path: "%kernel.logs_dir%\\user_actions_dev.log"  # Usa doble backslash para Windows
+                level: info
+                channels: ["user_actions"]
+                max_files: 10
+                formatter: monolog.formatter.json
             console:
                 type: console
                 process_psr_3_messages: false
@@ -50,6 +83,20 @@ when@prod:
                 type: stream
                 path: php://stderr
                 level: debug
+                formatter: monolog.formatter.json
+            api:
+                type: rotating_file
+                path: "%kernel.logs_dir%/api.log"
+                level: debug
+                channels: ["api"]
+                max_files: 10
+                formatter: monolog.formatter.json
+            user_actions:
+                type: rotating_file
+                path: "%kernel.logs_dir%/user_actions.log"
+                level: info
+                channels: ["user_actions"]
+                max_files: 10
                 formatter: monolog.formatter.json
             console:
                 type: console

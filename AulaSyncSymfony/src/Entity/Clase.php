@@ -126,6 +126,14 @@ class Clase
         return $this;
     }
 
+    public function removeAllAlumnos(): self
+    {
+        foreach ($this->alumnos as $alumno) {
+            $this->removeAlumno($alumno);
+        }
+        return $this;
+    }
+
     private function generarCodigoClase(): string
     {
         // Generar un código aleatorio de 6 caracteres alfanuméricos

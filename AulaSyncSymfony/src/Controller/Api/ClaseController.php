@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Clase;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,10 +14,22 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 #[Route('/api', name: 'api_')]
 class ClaseController extends AbstractController
 {
+    private $apiLogger;
+    private $userActionsLogger;
+
+    public function __construct(
+        LoggerInterface $apiLogger,
+        LoggerInterface $userActionsLogger
+    ) {
+        $this->apiLogger = $apiLogger;
+        $this->userActionsLogger = $userActionsLogger;
+    }
+
     #[Route('/clases', name: 'clases_crear', methods: ['POST'])]
     public function crearClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
         try {
+            $this->apiLogger->debug('Iniciando creación de clase');
             $data = json_decode($request->getContent(), true);
             $profesor = $this->getUser();
             
@@ -38,7 +51,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => $clase->getCodigoClase(), // <-- Usar el código real de la base de datos
+                    'codigoClase' => $clase->getCodigoClase(),
                     'profesor' => [
                         'nombre' => $profesor->getFirstName() . ' ' . $profesor->getLastName(),
                         'especialidad' => $profesor->getEspecialidad()
@@ -46,6 +59,7 @@ class ClaseController extends AbstractController
                 ]
             ], JsonResponse::HTTP_CREATED);
         } catch (\Exception $e) {
+            $this->apiLogger->error('Error al crear clase: ' . $e->getMessage());
             return new JsonResponse(['error' => 'Error al crear la clase'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -73,7 +87,7 @@ class ClaseController extends AbstractController
                     'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
                     'ultimaActividad' => $clase->getCreatedAt()->format('d/m/Y'),
                     'estado' => 'Activa',
-                    'codigoClase' => $clase->getCodigoClase(),  // Usar el código generado aleatoriamente
+                    'codigoClase' => $clase->getCodigoClase(),
                     'profesor' => [
                         'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName(),
                         'especialidad' => $clase->getProfesor()->getEspecialidad()
@@ -93,7 +107,6 @@ class ClaseController extends AbstractController
         try {
             $profesor = $this->getUser();
             
-            // Obtener total de clases
             $totalClases = $em->createQueryBuilder()
                 ->select('COUNT(c.id)')
                 ->from(Clase::class, 'c')
@@ -102,7 +115,6 @@ class ClaseController extends AbstractController
                 ->getQuery()
                 ->getSingleScalarResult();
 
-            // Obtener suma total de estudiantes
             $totalEstudiantes = $em->createQueryBuilder()
                 ->select('SUM(c.numEstudiantes)')
                 ->from(Clase::class, 'c')
@@ -136,7 +148,6 @@ class ClaseController extends AbstractController
                 );
             }
 
-            // Verificar que el profesor actual es el propietario de la clase
             if ($clase->getProfesor() !== $this->getUser()) {
                 return new JsonResponse(
                     ['error' => 'No tienes permiso para eliminar esta clase'], 
@@ -144,11 +155,30 @@ class ClaseController extends AbstractController
                 );
             }
 
+            // 1. Eliminar todas las invitaciones asociadas
+            $invitaciones = $em->getRepository(\App\Entity\Invitacion::class)
+                ->findBy(['clase' => $clase]);
+            foreach ($invitaciones as $invitacion) {
+                $em->remove($invitacion);
+            }
+            $em->flush();
+
+            // 2. Eliminar las relaciones con alumnos
+            $clase->removeAllAlumnos();
+            $em->flush();
+
+            // 3. Finalmente eliminar la clase
             $em->remove($clase);
             $em->flush();
             
+            $this->userActionsLogger->info('Clase eliminada', [
+                'id' => $id,
+                'usuario' => $this->getUser()->getEmail()
+            ]);
+            
             return new JsonResponse(['message' => 'Clase eliminada correctamente']);
         } catch (\Exception $e) {
+            $this->apiLogger->error('Error al eliminar clase: ' . $e->getMessage());
             return new JsonResponse(
                 ['error' => 'Error al eliminar la clase'], 
                 JsonResponse::HTTP_INTERNAL_SERVER_ERROR
@@ -171,7 +201,6 @@ class ClaseController extends AbstractController
             }
 
             $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
-                // Mostrar el nombre completo, sin acortar
                 $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
                 return [
                     'id' => $alumno->getId(),
@@ -212,7 +241,7 @@ class ClaseController extends AbstractController
                 return [
                     'id' => $alumno->getId(),
                     'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
-                    'email' => $alumno->getEmail() // Añadir email aquí
+                    'email' => $alumno->getEmail()
                 ];
             })->toArray();
 
@@ -231,19 +260,13 @@ class ClaseController extends AbstractController
     #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET'])]
     public function buscarClasePorCodigoAlumno(string $codigo, EntityManagerInterface $em): JsonResponse
     {
-        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Código recibido: " . $codigo); // Log 1
+        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Código recibido: " . $codigo);
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
         if (!$clase) {
-            // Para debug (remover en producción)
-            // $clase = new Clase();
-            // $clase->setNombre("Clase de prueba");
-            // $clase->setCodigoClase($codigo);
-            // $clase->setCreatedAt(new \DateTime());
-            \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase no encontrada con código: " . $codigo); // Log 2
+            \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase no encontrada con código: " . $codigo);
             return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
-        // Si se desea, se pueden incluir otros detalles
-        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase encontrada: " . $clase->getNombre()); // Log 3
+        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase encontrada: " . $clase->getNombre());
         return new JsonResponse([
             'id' => $clase->getId(),
             'nombre' => $clase->getNombre(),
@@ -256,15 +279,15 @@ class ClaseController extends AbstractController
     public function unirseAClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Datos recibidos: " . json_encode($data)); // Log 1
+        \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Datos recibidos: " . json_encode($data));
         if (empty($data['codigo'])) {
-            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - No se proporcionó código"); // Log 2
+            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - No se proporcionó código");
             return new JsonResponse(['error' => 'No se proporcionó código'], JsonResponse::HTTP_BAD_REQUEST);
         }
         
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $data['codigo']]);
         if (!$clase) {
-            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Clase no encontrada con código: " . $data['codigo']); // Log 3
+            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Clase no encontrada con código: " . $data['codigo']);
             return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
         
@@ -327,10 +350,8 @@ class ClaseController extends AbstractController
             return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
         }
 
-        // Obtener clases del alumno
         $clases = $alumno->getClases();
 
-        // --- NUEVO: Marcar invitaciones pendientes como aceptadas si ya está en la clase ---
         $repoInvitacion = $em->getRepository(\App\Entity\Invitacion::class);
         $invitacionesPendientes = $repoInvitacion->findBy([
             'alumno' => $alumno,
@@ -347,9 +368,7 @@ class ClaseController extends AbstractController
         if ($cambios) {
             $em->flush();
         }
-        // --- FIN NUEVO ---
 
-        // ...existing code para devolver las clases del alumno...
         $data = [];
         foreach ($clases as $clase) {
             $profesor = $clase->getProfesor();
@@ -359,7 +378,6 @@ class ClaseController extends AbstractController
                 'codigoClase' => $clase->getCodigoClase(),
                 'profesor' => $profesor ? ($profesor->getFirstName() . ' ' . $profesor->getLastName()) : null,
                 'numEstudiantes' => $clase->getAlumnos()->count(),
-                // ...otros campos si los necesitas...
             ];
         }
         return new JsonResponse($data);
