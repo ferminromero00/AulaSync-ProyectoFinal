@@ -20,11 +20,9 @@ const ClaseDashboard = () => {
     const [invitingId, setInvitingId] = useState(null);
     const [showAlumnosModal, setShowAlumnosModal] = useState(false);
     const [showAnuncioModal, setShowAnuncioModal] = useState(false);
-    const [tipoAnuncio, setTipoAnuncio] = useState('mensaje');
     const [anuncioData, setAnuncioData] = useState({
         titulo: '',
-        contenido: '',
-        fechaEntrega: ''
+        contenido: ''
     });
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
@@ -106,12 +104,12 @@ const ClaseDashboard = () => {
         try {
             await crearAnuncio({
                 ...anuncioData,
-                tipo: tipoAnuncio,
+                tipo: 'mensaje',
                 claseId: id
             });
             toast.success('Anuncio creado correctamente');
             setShowAnuncioModal(false);
-            // Aquí podrías actualizar la lista de anuncios
+            setAnuncioData({ titulo: '', contenido: '' }); // Limpiar el formulario
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         }
@@ -214,87 +212,71 @@ const ClaseDashboard = () => {
 
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">Crear Anuncio</h3>
+                <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-100 p-2 rounded-lg">
+                                <Bell className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900">Nuevo Anuncio</h3>
+                        </div>
                         <button 
-                            onClick={() => setShowAnuncioModal(false)}
-                            className="text-gray-500 hover:text-gray-700"
+                            onClick={() => {
+                                setShowAnuncioModal(false);
+                                setAnuncioData({ titulo: '', contenido: '' });
+                            }}
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <X className="h-5 w-5" />
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
 
-                    <form onSubmit={handleCreateAnuncio} className="space-y-4">
+                    <form onSubmit={handleCreateAnuncio} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Tipo de Anuncio
-                            </label>
-                            <select
-                                value={tipoAnuncio}
-                                onChange={(e) => setTipoAnuncio(e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                                <option value="mensaje">Mensaje</option>
-                                <option value="tarea">Tarea</option>
-                                <option value="examen">Examen</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Título
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Título del anuncio
                             </label>
                             <input
                                 type="text"
                                 value={anuncioData.titulo}
                                 onChange={(e) => setAnuncioData({...anuncioData, titulo: e.target.value})}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                placeholder="Ej: Recordatorio importante"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Contenido
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Contenido del mensaje
                             </label>
                             <textarea
                                 value={anuncioData.contenido}
                                 onChange={(e) => setAnuncioData({...anuncioData, contenido: e.target.value})}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                rows={4}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                                rows={6}
+                                placeholder="Escribe aquí tu mensaje..."
                                 required
                             />
                         </div>
 
-                        {(tipoAnuncio === 'tarea' || tipoAnuncio === 'examen') && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Fecha de Entrega
-                                </label>
-                                <input
-                                    type="datetime-local"
-                                    value={anuncioData.fechaEntrega}
-                                    onChange={(e) => setAnuncioData({...anuncioData, fechaEntrega: e.target.value})}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    required
-                                />
-                            </div>
-                        )}
-
-                        <div className="flex justify-end gap-2 pt-4">
+                        <div className="flex justify-end gap-3 pt-4">
                             <button
                                 type="button"
-                                onClick={() => setShowAnuncioModal(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                                onClick={() => {
+                                    setShowAnuncioModal(false);
+                                    setAnuncioData({ titulo: '', contenido: '' });
+                                }}
+                                className="px-6 py-2.5 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+                                className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
                             >
-                                Crear Anuncio
+                                <Bell className="h-4 w-4" />
+                                Publicar anuncio
                             </button>
                         </div>
                     </form>
