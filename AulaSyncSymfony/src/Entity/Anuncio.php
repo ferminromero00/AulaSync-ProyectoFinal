@@ -14,9 +14,6 @@ class Anuncio
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $titulo = null;
-
     #[ORM\Column(type: Types::TEXT)]
     private ?string $contenido = null;
 
@@ -33,17 +30,6 @@ class Anuncio
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTitulo(): ?string
-    {
-        return $this->titulo;
-    }
-
-    public function setTitulo(string $titulo): self
-    {
-        $this->titulo = $titulo;
-        return $this;
     }
 
     public function getContenido(): ?string

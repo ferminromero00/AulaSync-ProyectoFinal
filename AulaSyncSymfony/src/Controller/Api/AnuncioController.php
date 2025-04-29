@@ -24,7 +24,6 @@ class AnuncioController extends AbstractController
         }
 
         $anuncio = new Anuncio();
-        $anuncio->setTitulo($data['titulo']);
         $anuncio->setContenido($data['contenido']);
         $anuncio->setTipo($data['tipo']);
         $anuncio->setClase($clase);
@@ -58,7 +57,6 @@ class AnuncioController extends AbstractController
                 'anuncios' => array_map(function($anuncio) {
                     return [
                         'id' => $anuncio->getId(),
-                        'titulo' => $anuncio->getTitulo(),
                         'contenido' => $anuncio->getContenido(),
                         'tipo' => $anuncio->getTipo(),
                         'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s')

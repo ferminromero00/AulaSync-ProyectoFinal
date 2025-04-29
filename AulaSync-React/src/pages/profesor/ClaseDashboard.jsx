@@ -21,7 +21,6 @@ const ClaseDashboard = () => {
     const [showAlumnosModal, setShowAlumnosModal] = useState(false);
     const [showAnuncioModal, setShowAnuncioModal] = useState(false);
     const [anuncioData, setAnuncioData] = useState({
-        titulo: '',
         contenido: ''
     });
     const [anuncios, setAnuncios] = useState([]);
@@ -121,14 +120,14 @@ const ClaseDashboard = () => {
         e.preventDefault();
         try {
             await crearAnuncio({
-                ...anuncioData,
+                contenido: anuncioData.contenido,
                 tipo: 'mensaje',
                 claseId: id
             });
             toast.success('Anuncio creado correctamente');
             setShowAnuncioModal(false);
-            setAnuncioData({ titulo: '', contenido: '' }); // Limpiar el formulario
-            fetchAnuncios(); // Recargar anuncios
+            setAnuncioData({ contenido: '' });
+            fetchAnuncios();
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         }
@@ -259,7 +258,7 @@ const ClaseDashboard = () => {
                         <button 
                             onClick={() => {
                                 setShowAnuncioModal(false);
-                                setAnuncioData({ titulo: '', contenido: '' });
+                                setAnuncioData({ contenido: '' });
                             }}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                         >
@@ -270,21 +269,7 @@ const ClaseDashboard = () => {
                     <form onSubmit={handleCreateAnuncio} className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Título del anuncio
-                            </label>
-                            <input
-                                type="text"
-                                value={anuncioData.titulo}
-                                onChange={(e) => setAnuncioData({...anuncioData, titulo: e.target.value})}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                                placeholder="Ej: Recordatorio importante"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Contenido del mensaje
+                                Mensaje
                             </label>
                             <textarea
                                 value={anuncioData.contenido}
@@ -301,7 +286,7 @@ const ClaseDashboard = () => {
                                 type="button"
                                 onClick={() => {
                                     setShowAnuncioModal(false);
-                                    setAnuncioData({ titulo: '', contenido: '' });
+                                    setAnuncioData({ contenido: '' });
                                 }}
                                 className="px-6 py-2.5 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                             >
@@ -429,7 +414,6 @@ const ClaseDashboard = () => {
                                                 <X className="h-5 w-5 text-gray-600" />
                                             </button>
                                         )}
-                                        <h3 className="font-medium text-lg mb-2">{anuncio.titulo}</h3>
                                         <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
                                         <div className="text-sm text-gray-500">
                                             Publicado el {new Date(anuncio.fechaCreacion).toLocaleString()}
