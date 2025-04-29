@@ -6,7 +6,7 @@ import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
-import { crearAnuncio, obtenerAnuncios } from '../../services/anuncios';
+import { crearAnuncio, obtenerAnuncios, eliminarAnuncio } from '../../services/anuncios';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -135,6 +135,16 @@ const ClaseDashboard = () => {
             fetchAnuncios(); // Recargar anuncios
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
+        }
+    };
+
+    const handleDeleteAnuncio = async (anuncioId) => {
+        try {
+            await eliminarAnuncio(anuncioId);
+            toast.success('Anuncio eliminado correctamente');
+            fetchAnuncios(); // Recargar anuncios
+        } catch (error) {
+            toast.error(error.message || 'Error al eliminar el anuncio');
         }
     };
 
@@ -406,7 +416,16 @@ const ClaseDashboard = () => {
                         {anuncios.length > 0 ? (
                             <div className="space-y-4">
                                 {anuncios.map((anuncio) => (
-                                    <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg">
+                                    <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
+                                        {role === 'profesor' && (
+                                            <button
+                                                onClick={() => handleDeleteAnuncio(anuncio.id)}
+                                                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                title="Eliminar anuncio"
+                                            >
+                                                <X className="h-5 w-5 text-gray-600" />
+                                            </button>
+                                        )}
                                         <h3 className="font-medium text-lg mb-2">{anuncio.titulo}</h3>
                                         <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
                                         <div className="text-sm text-gray-500">

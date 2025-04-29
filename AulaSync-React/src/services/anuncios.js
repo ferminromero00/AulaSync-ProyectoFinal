@@ -19,3 +19,12 @@ export const obtenerAnuncios = async (claseId) => {
         throw error.response?.data?.error || 'Error al obtener los anuncios';
     }
 };
+
+export const eliminarAnuncio = async (anuncioId) => {
+    try {
+        const response = await api.delete(`/anuncios/${anuncioId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || 'Error al eliminar el anuncio';
+    }
+};
