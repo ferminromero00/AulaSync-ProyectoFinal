@@ -6,6 +6,7 @@ import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
+import { crearAnuncio } from '../../services/anuncios';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -18,6 +19,13 @@ const ClaseDashboard = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [invitingId, setInvitingId] = useState(null);
     const [showAlumnosModal, setShowAlumnosModal] = useState(false);
+    const [showAnuncioModal, setShowAnuncioModal] = useState(false);
+    const [tipoAnuncio, setTipoAnuncio] = useState('mensaje');
+    const [anuncioData, setAnuncioData] = useState({
+        titulo: '',
+        contenido: '',
+        fechaEntrega: ''
+    });
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -90,6 +98,22 @@ const ClaseDashboard = () => {
             }
         } finally {
             setInvitingId(null);
+        }
+    };
+
+    const handleCreateAnuncio = async (e) => {
+        e.preventDefault();
+        try {
+            await crearAnuncio({
+                ...anuncioData,
+                tipo: tipoAnuncio,
+                claseId: id
+            });
+            toast.success('Anuncio creado correctamente');
+            setShowAnuncioModal(false);
+            // Aquí podrías actualizar la lista de anuncios
+        } catch (error) {
+            toast.error(error.message || 'Error al crear el anuncio');
         }
     };
 
@@ -185,6 +209,100 @@ const ClaseDashboard = () => {
         );
     };
 
+    const renderAnuncioModal = () => {
+        if (!showAnuncioModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Crear Anuncio</h3>
+                        <button 
+                            onClick={() => setShowAnuncioModal(false)}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleCreateAnuncio} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Tipo de Anuncio
+                            </label>
+                            <select
+                                value={tipoAnuncio}
+                                onChange={(e) => setTipoAnuncio(e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                                <option value="mensaje">Mensaje</option>
+                                <option value="tarea">Tarea</option>
+                                <option value="examen">Examen</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Título
+                            </label>
+                            <input
+                                type="text"
+                                value={anuncioData.titulo}
+                                onChange={(e) => setAnuncioData({...anuncioData, titulo: e.target.value})}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Contenido
+                            </label>
+                            <textarea
+                                value={anuncioData.contenido}
+                                onChange={(e) => setAnuncioData({...anuncioData, contenido: e.target.value})}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                rows={4}
+                                required
+                            />
+                        </div>
+
+                        {(tipoAnuncio === 'tarea' || tipoAnuncio === 'examen') && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Fecha de Entrega
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={anuncioData.fechaEntrega}
+                                    onChange={(e) => setAnuncioData({...anuncioData, fechaEntrega: e.target.value})}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-2 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => setShowAnuncioModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+                            >
+                                Crear Anuncio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -221,7 +339,10 @@ const ClaseDashboard = () => {
                             </div>
                         </div>
                         <div className="mt-4 flex md:mt-0 md:ml-4">
-                            <button className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <button 
+                                onClick={() => setShowAnuncioModal(true)}
+                                className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                            >
                                 <Bell className="h-4 w-4 mr-2" />
                                 Publicar anuncio
                             </button>
@@ -286,6 +407,7 @@ const ClaseDashboard = () => {
             </div>
             {renderStudentSearchModal()}
             {renderAlumnosModal()}
+            {renderAnuncioModal()}
         </div>
     );
 };
