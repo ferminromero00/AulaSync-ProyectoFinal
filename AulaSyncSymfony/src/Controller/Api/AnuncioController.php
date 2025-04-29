@@ -44,25 +44,29 @@ class AnuncioController extends AbstractController
     }
 
     #[Route('/api/anuncios/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]
-    public function obtenerAnuncios(int $claseId, ClaseRepository $claseRepository): JsonResponse
+    public function obtenerAnuncios(int $claseId, ClaseRepository $claseRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        $clase = $claseRepository->find($claseId);
-        if (!$clase) {
-            return $this->json(['error' => 'Clase no encontrada'], 404);
-        }
+        try {
+            $clase = $claseRepository->find($claseId);
+            if (!$clase) {
+                return $this->json(['error' => 'Clase no encontrada'], 404);
+            }
 
-        $anuncios = $clase->getAnuncios();
-        
-        return $this->json([
-            'anuncios' => array_map(function($anuncio) {
-                return [
-                    'id' => $anuncio->getId(),
-                    'titulo' => $anuncio->getTitulo(),
-                    'contenido' => $anuncio->getContenido(),
-                    'tipo' => $anuncio->getTipo(),
-                    'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s')
-                ];
-            }, $anuncios->toArray())
-        ]);
+            $anuncios = $entityManager->getRepository(Anuncio::class)->findBy(['clase' => $clase], ['fechaCreacion' => 'DESC']);
+            
+            return $this->json([
+                'anuncios' => array_map(function($anuncio) {
+                    return [
+                        'id' => $anuncio->getId(),
+                        'titulo' => $anuncio->getTitulo(),
+                        'contenido' => $anuncio->getContenido(),
+                        'tipo' => $anuncio->getTipo(),
+                        'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s')
+                    ];
+                }, $anuncios)
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Error al obtener los anuncios'], 500);
+        }
     }
 }

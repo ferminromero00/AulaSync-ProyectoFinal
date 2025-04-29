@@ -12,8 +12,10 @@ export const crearAnuncio = async (anuncioData) => {
 export const obtenerAnuncios = async (claseId) => {
     try {
         const response = await api.get(`/anuncios/${claseId}`);
-        return response.data.anuncios;
+        console.log('Respuesta anuncios:', response); // Debug
+        return response.anuncios || [];
     } catch (error) {
+        console.error('Error en obtenerAnuncios:', error);
         throw error.response?.data?.error || 'Error al obtener los anuncios';
     }
 };

@@ -49,9 +49,17 @@ const ClaseDashboard = () => {
     const fetchAnuncios = async () => {
         try {
             const data = await obtenerAnuncios(id);
-            setAnuncios(data);
+            console.log('Anuncios obtenidos:', data); // Debug
+            if (Array.isArray(data)) {
+                setAnuncios(data);
+            } else {
+                console.error('La respuesta no es un array:', data);
+                setAnuncios([]);
+            }
         } catch (error) {
+            console.error('Error al cargar los anuncios:', error);
             toast.error('Error al cargar los anuncios');
+            setAnuncios([]);
         }
     };
 
