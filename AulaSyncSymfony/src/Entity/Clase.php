@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\Entity\Alumno;
+use App\Entity\Anuncio;
 
 #[ORM\Entity(repositoryClass: ClaseRepository::class)]
 class Clase
@@ -36,9 +37,13 @@ class Clase
     #[ORM\JoinTable(name: 'clase_alumno')]
     private Collection $alumnos;
 
+    #[ORM\OneToMany(mappedBy: 'clase', targetEntity: Anuncio::class, orphanRemoval: true)]
+    private Collection $anuncios;
+
     public function __construct()
     {
         $this->alumnos = new ArrayCollection();
+        $this->anuncios = new ArrayCollection();
         $this->codigoClase = $this->generarCodigoClase();
     }
 
@@ -130,6 +135,30 @@ class Clase
     {
         foreach ($this->alumnos as $alumno) {
             $this->removeAlumno($alumno);
+        }
+        return $this;
+    }
+
+    public function getAnuncios(): Collection
+    {
+        return $this->anuncios;
+    }
+
+    public function addAnuncio(Anuncio $anuncio): self
+    {
+        if (!$this->anuncios->contains($anuncio)) {
+            $this->anuncios->add($anuncio);
+            $anuncio->setClase($this);
+        }
+        return $this;
+    }
+
+    public function removeAnuncio(Anuncio $anuncio): self
+    {
+        if ($this->anuncios->removeElement($anuncio)) {
+            if ($anuncio->getClase() === $this) {
+                $anuncio->setClase(null);
+            }
         }
         return $this;
     }

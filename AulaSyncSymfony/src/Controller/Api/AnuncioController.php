@@ -42,4 +42,27 @@ class AnuncioController extends AbstractController
             'id' => $anuncio->getId()
         ]);
     }
+
+    #[Route('/api/anuncios/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]
+    public function obtenerAnuncios(int $claseId, ClaseRepository $claseRepository): JsonResponse
+    {
+        $clase = $claseRepository->find($claseId);
+        if (!$clase) {
+            return $this->json(['error' => 'Clase no encontrada'], 404);
+        }
+
+        $anuncios = $clase->getAnuncios();
+        
+        return $this->json([
+            'anuncios' => array_map(function($anuncio) {
+                return [
+                    'id' => $anuncio->getId(),
+                    'titulo' => $anuncio->getTitulo(),
+                    'contenido' => $anuncio->getContenido(),
+                    'tipo' => $anuncio->getTipo(),
+                    'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s')
+                ];
+            }, $anuncios->toArray())
+        ]);
+    }
 }

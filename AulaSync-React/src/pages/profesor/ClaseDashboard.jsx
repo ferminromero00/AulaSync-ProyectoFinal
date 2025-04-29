@@ -6,7 +6,7 @@ import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
-import { crearAnuncio } from '../../services/anuncios';
+import { crearAnuncio, obtenerAnuncios } from '../../services/anuncios';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -24,6 +24,7 @@ const ClaseDashboard = () => {
         titulo: '',
         contenido: ''
     });
+    const [anuncios, setAnuncios] = useState([]);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -44,6 +45,19 @@ const ClaseDashboard = () => {
         };
         fetchClase();
     }, [id, navigate]);
+
+    const fetchAnuncios = async () => {
+        try {
+            const data = await obtenerAnuncios(id);
+            setAnuncios(data);
+        } catch (error) {
+            toast.error('Error al cargar los anuncios');
+        }
+    };
+
+    useEffect(() => {
+        fetchAnuncios();
+    }, [id]);
 
     const handleSearchAlumnos = async (query) => {
         if (!query.trim()) {
@@ -110,6 +124,7 @@ const ClaseDashboard = () => {
             toast.success('Anuncio creado correctamente');
             setShowAnuncioModal(false);
             setAnuncioData({ titulo: '', contenido: '' }); // Limpiar el formulario
+            fetchAnuncios(); // Recargar anuncios
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         }
@@ -380,10 +395,24 @@ const ClaseDashboard = () => {
                     {/* Contenido principal - Ajustado para ocupar más espacio */}
                     <div className="lg:w-4/5 bg-white rounded-lg shadow p-6">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
-                        <div className="text-gray-500 text-center py-8">
-                            <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                            <p>No hay anuncios publicados</p>
-                        </div>
+                        {anuncios.length > 0 ? (
+                            <div className="space-y-4">
+                                {anuncios.map((anuncio) => (
+                                    <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg">
+                                        <h3 className="font-medium text-lg mb-2">{anuncio.titulo}</h3>
+                                        <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
+                                        <div className="text-sm text-gray-500">
+                                            Publicado el {new Date(anuncio.fechaCreacion).toLocaleString()}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-gray-500 text-center py-8">
+                                <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                                <p>No hay anuncios publicados</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
