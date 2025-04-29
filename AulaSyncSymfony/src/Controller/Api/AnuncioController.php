@@ -28,10 +28,7 @@ class AnuncioController extends AbstractController
         $anuncio->setTipo($data['tipo']);
         $anuncio->setClase($clase);
         $anuncio->setFechaCreacion(new \DateTime());
-        
-        if (isset($data['fechaEntrega'])) {
-            $anuncio->setFechaEntrega(new \DateTime($data['fechaEntrega']));
-        }
+        $anuncio->setAutor($clase->getProfesor()); // Asignar el profesor de la clase como autor
 
         $entityManager->persist($anuncio);
         $entityManager->flush();
@@ -51,20 +48,36 @@ class AnuncioController extends AbstractController
                 return $this->json(['error' => 'Clase no encontrada'], 404);
             }
 
-            $anuncios = $entityManager->getRepository(Anuncio::class)->findBy(['clase' => $clase], ['fechaCreacion' => 'DESC']);
+            $anuncios = $entityManager->getRepository(Anuncio::class)
+                ->createQueryBuilder('a')
+                ->select('a', 'p')
+                ->leftJoin('a.autor', 'p')
+                ->where('a.clase = :clase')
+                ->setParameter('clase', $clase)
+                ->orderBy('a.fechaCreacion', 'DESC')
+                ->getQuery()
+                ->getResult();
             
             return $this->json([
                 'anuncios' => array_map(function($anuncio) {
+                    $autor = $anuncio->getAutor();
                     return [
                         'id' => $anuncio->getId(),
                         'contenido' => $anuncio->getContenido(),
                         'tipo' => $anuncio->getTipo(),
-                        'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s')
+                        'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s'),
+                        'autor' => $autor ? [
+                            'id' => $autor->getId(),
+                            'nombre' => $autor->getFirstName() . ' ' . $autor->getLastName()
+                        ] : null
                     ];
                 }, $anuncios)
             ]);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Error al obtener los anuncios'], 500);
+            return $this->json([
+                'error' => 'Error al obtener los anuncios',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
 

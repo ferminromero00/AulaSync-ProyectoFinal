@@ -27,6 +27,10 @@ class Anuncio
     #[ORM\JoinColumn(nullable: false)]
     private ?Clase $clase = null;
 
+    #[ORM\ManyToOne(targetEntity: Profesor::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Profesor $autor = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -73,6 +77,17 @@ class Anuncio
     public function setClase(?Clase $clase): self
     {
         $this->clase = $clase;
+        return $this;
+    }
+
+    public function getAutor(): ?Profesor
+    {
+        return $this->autor;
+    }
+
+    public function setAutor(?Profesor $autor): self
+    {
+        $this->autor = $autor;
         return $this;
     }
 }

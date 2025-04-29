@@ -415,8 +415,10 @@ const ClaseDashboard = () => {
                                             </button>
                                         )}
                                         <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
-                                        <div className="text-sm text-gray-500">
-                                            Publicado el {new Date(anuncio.fechaCreacion).toLocaleString()}
+                                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                                            <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                            <span>•</span>
+                                            <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
                                         </div>
                                     </div>
                                 ))}
