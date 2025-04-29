@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -25,6 +25,8 @@ const ClaseDashboard = () => {
         contenido: ''
     });
     const [anuncios, setAnuncios] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [anuncioToDelete, setAnuncioToDelete] = useState(null);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -133,14 +135,16 @@ const ClaseDashboard = () => {
     };
 
     const handleDeleteAnuncio = async (anuncioId) => {
-        if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
-            return;
-        }
-        
+        setAnuncioToDelete(anuncioId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeleteAnuncio = async () => {
         try {
-            await eliminarAnuncio(anuncioId);
-            setAnuncios(prevAnuncios => prevAnuncios.filter(a => a.id !== anuncioId));
+            await eliminarAnuncio(anuncioToDelete);
+            setAnuncios(prevAnuncios => prevAnuncios.filter(a => a.id !== anuncioToDelete));
             toast.success('Anuncio eliminado correctamente');
+            setShowDeleteModal(false);
         } catch (error) {
             console.error('Error al eliminar anuncio:', error);
             toast.error('Error al eliminar el anuncio');
@@ -442,6 +446,38 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de confirmación para eliminar anuncio */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+                        <div className="flex items-center justify-center mb-4 text-red-500">
+                            <AlertTriangle className="h-12 w-12" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-center mb-2">
+                            ¿Eliminar anuncio?
+                        </h3>
+                        <p className="text-gray-600 text-center mb-6">
+                            Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmDeleteAnuncio}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {renderStudentSearchModal()}
             {renderAlumnosModal()}
             {renderAnuncioModal()}

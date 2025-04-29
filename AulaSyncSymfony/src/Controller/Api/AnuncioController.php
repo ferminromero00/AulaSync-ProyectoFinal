@@ -69,4 +69,29 @@ class AnuncioController extends AbstractController
             return $this->json(['error' => 'Error al obtener los anuncios'], 500);
         }
     }
+
+    #[Route('/api/anuncios/{id}', name: 'eliminar_anuncio', methods: ['DELETE'])]
+    public function eliminarAnuncio(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            $anuncio = $entityManager->getRepository(Anuncio::class)->find($id);
+            
+            if (!$anuncio) {
+                return $this->json(['error' => 'Anuncio no encontrado'], 404);
+            }
+
+            // Solo el profesor de la clase puede eliminar anuncios
+            $user = $this->getUser();
+            if ($anuncio->getClase()->getProfesor()->getEmail() !== $user->getUserIdentifier()) {
+                return $this->json(['error' => 'No tienes permiso para eliminar este anuncio'], 403);
+            }
+
+            $entityManager->remove($anuncio);
+            $entityManager->flush();
+
+            return $this->json(['message' => 'Anuncio eliminado correctamente']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Error al eliminar el anuncio'], 500);
+        }
+    }
 }

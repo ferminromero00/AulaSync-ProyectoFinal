@@ -159,6 +159,12 @@ export const api = {
         });
     },
 
+    async delete(endpoint) {
+        return handleRequest(endpoint, {
+            method: 'DELETE'
+        });
+    },
+
     async iniciarRegistro(data) {
         return handleRequest('/registro/iniciar', {
             method: 'POST',
