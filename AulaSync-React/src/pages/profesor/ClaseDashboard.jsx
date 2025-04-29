@@ -48,14 +48,8 @@ const ClaseDashboard = () => {
 
     const fetchAnuncios = async () => {
         try {
-            const data = await obtenerAnuncios(id);
-            console.log('Anuncios obtenidos:', data); // Debug
-            if (Array.isArray(data)) {
-                setAnuncios(data);
-            } else {
-                console.error('La respuesta no es un array:', data);
-                setAnuncios([]);
-            }
+            const anunciosData = await obtenerAnuncios(id);
+            setAnuncios(anunciosData);
         } catch (error) {
             console.error('Error al cargar los anuncios:', error);
             toast.error('Error al cargar los anuncios');
@@ -139,12 +133,17 @@ const ClaseDashboard = () => {
     };
 
     const handleDeleteAnuncio = async (anuncioId) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
+            return;
+        }
+        
         try {
             await eliminarAnuncio(anuncioId);
+            setAnuncios(prevAnuncios => prevAnuncios.filter(a => a.id !== anuncioId));
             toast.success('Anuncio eliminado correctamente');
-            fetchAnuncios(); // Recargar anuncios
         } catch (error) {
-            toast.error(error.message || 'Error al eliminar el anuncio');
+            console.error('Error al eliminar anuncio:', error);
+            toast.error('Error al eliminar el anuncio');
         }
     };
 

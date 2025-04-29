@@ -22,9 +22,20 @@ export const obtenerAnuncios = async (claseId) => {
 
 export const eliminarAnuncio = async (anuncioId) => {
     try {
-        const response = await api.delete(`/anuncios/${anuncioId}`);
-        return response.data;
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/anuncios/${anuncioId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al eliminar el anuncio');
+        }
+
+        return true;
     } catch (error) {
-        throw error.response?.data?.error || 'Error al eliminar el anuncio';
+        throw error;
     }
 };
