@@ -402,7 +402,7 @@ const ClaseDashboard = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Lista de estudiantes */}
-                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6 h-fit sticky top-8">
+                    <div className="lg:w-[280px] shrink-0 bg-white rounded-lg shadow p-6 h-fit sticky top-8">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <div className="flex items-center gap-2">
@@ -424,17 +424,23 @@ const ClaseDashboard = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                        <div className="min-h-[200px] max-h-[280px] overflow-y-auto">
                             {clase.estudiantes && clase.estudiantes.length > 0 ? (
-                                <ul className="space-y-2">
-                                    {clase.estudiantes.slice(0, 5).map((estudiante) => (
-                                        <li key={estudiante.id} className="text-gray-700">
+                                <ul className="space-y-3">
+                                    {clase.estudiantes.slice(0, 4).map((estudiante) => (
+                                        <li key={estudiante.id} className="text-gray-700 py-1.5 px-2 rounded-md hover:bg-gray-50">
                                             {estudiante.nombre}
                                         </li>
                                     ))}
-                                    {clase.estudiantes.length > 5 && (
-                                        <li className="text-blue-600 text-sm cursor-pointer" onClick={() => setShowAlumnosModal(true)}>
-                                            Ver todos...
+                                    {clase.estudiantes.length > 4 && (
+                                        <li className="text-center text-gray-500 py-2 border-t">
+                                            <span className="block text-lg mb-1">•••</span>
+                                            <button 
+                                                onClick={() => setShowAlumnosModal(true)}
+                                                className="text-blue-600 hover:text-blue-800 text-sm"
+                                            >
+                                                Ver todos ({clase.estudiantes.length})
+                                            </button>
                                         </li>
                                     )}
                                 </ul>
@@ -444,37 +450,39 @@ const ClaseDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Contenido principal */}
-                    <div className="lg:w-4/5 bg-white rounded-lg shadow p-6">
+                    {/* Contenido principal - Anuncios */}
+                    <div className="flex-1 bg-white rounded-lg shadow p-6">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
-                        {anuncios.length > 0 ? (
-                            <div className="space-y-4">
-                                {anuncios.map((anuncio) => (
-                                    <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
-                                        {role === 'profesor' && (
-                                            <button
-                                                onClick={() => handleDeleteAnuncio(anuncio.id)}
-                                                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
-                                                title="Eliminar anuncio"
-                                            >
-                                                <X className="h-5 w-5 text-gray-600" />
-                                            </button>
-                                        )}
-                                        <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
-                                        <div className="text-sm text-gray-500 flex items-center gap-2">
-                                            <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
-                                            <span>•</span>
-                                            <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
+                        <div className="min-h-[calc(100vh-300px)]">
+                            {anuncios.length > 0 ? (
+                                <div className="space-y-4">
+                                    {anuncios.map((anuncio) => (
+                                        <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
+                                            {role === 'profesor' && (
+                                                <button
+                                                    onClick={() => handleDeleteAnuncio(anuncio.id)}
+                                                    className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                    title="Eliminar anuncio"
+                                                >
+                                                    <X className="h-5 w-5 text-gray-600" />
+                                                </button>
+                                            )}
+                                            <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
+                                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                                                <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                <span>•</span>
+                                                <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-gray-500 text-center py-8">
-                                <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                                <p>No hay anuncios publicados</p>
-                            </div>
-                        )}
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-gray-500 text-center py-8">
+                                    <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                                    <p>No hay anuncios publicados</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
