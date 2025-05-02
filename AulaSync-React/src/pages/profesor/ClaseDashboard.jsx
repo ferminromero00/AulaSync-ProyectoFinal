@@ -567,13 +567,12 @@ const ClaseDashboard = () => {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
-                    {/* Botón de cierre ajustado */}
+                    {/* Botón de cerrar reposicionado más arriba */}
                     <button
                         onClick={() => setShowTareaModal(false)}
-                        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors w-8 h-8 flex items-center justify-center"
-                        title="Cerrar"
+                        className="absolute -top-3 -right-3 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg"
                     >
-                        <X className="h-6 w-6 text-gray-500" />
+                        <X className="h-6 w-6 text-white" />
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
@@ -621,9 +620,68 @@ const ClaseDashboard = () => {
                         )}
                     </div>
 
-                    {/* Panel derecho - Entrega de tarea (solo para alumnos) */}
-                    {role === 'alumno' && (
+                    {/* Panel derecho - Vista de profesor (entregas) o alumno (subir tarea) */}
+                    {role === 'profesor' ? (
                         <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200">
+                            <div className="sticky top-8">
+                                {/* Añadido mb-8 para dar más espacio */}
+                                <div className="flex items-center justify-between mb-8">
+                                    <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
+                                    <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
+                                        0 entregas
+                                    </span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {/* Estado general de entregas */}
+                                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="text-center">
+                                                <p className="text-sm text-gray-500">Entregadas</p>
+                                                <p className="text-2xl font-semibold text-gray-900">0</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm text-gray-500">Pendientes</p>
+                                                <p className="text-2xl font-semibold text-gray-900">
+                                                    {clase?.estudiantes?.length || 0}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Lista de estudiantes y sus estados */}
+                                    <div className="bg-white rounded-lg border border-gray-200">
+                                        <div className="p-4 border-b border-gray-200">
+                                            <h5 className="font-medium text-gray-900">Estado por estudiante</h5>
+                                        </div>
+                                        <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
+                                            {clase?.estudiantes?.map((estudiante) => (
+                                                <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                        <p className="text-sm text-gray-500">Sin entregar</p>
+                                                    </div>
+                                                    <span className="px-2 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                                                        Pendiente
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // Vista de alumno (el código existente para la entrega de tareas)
+                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative">
+                            {/* Botón de cierre para vista de alumno */}
+                            <button
+                                onClick={() => setShowTareaModal(false)}
+                                className="absolute -top-12 right-0 p-2 rounded-full hover:bg-gray-100 transition-colors w-8 h-8 flex items-center justify-center bg-white shadow-sm"
+                                title="Cerrar"
+                            >
+                                <X className="h-6 w-6 text-gray-500" />
+                            </button>
                             <div className="sticky top-8">
                                 <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                                 
