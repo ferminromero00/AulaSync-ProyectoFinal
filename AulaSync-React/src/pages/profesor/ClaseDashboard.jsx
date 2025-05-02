@@ -26,6 +26,8 @@ const ClaseDashboard = () => {
     const [anuncios, setAnuncios] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [anuncioToDelete, setAnuncioToDelete] = useState(null);
+    const [isDeletingAnuncio, setIsDeletingAnuncio] = useState(false);
+    const [isCreatingAnuncio, setIsCreatingAnuncio] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -119,6 +121,7 @@ const ClaseDashboard = () => {
     const handleCreateAnuncio = async (e) => {
         e.preventDefault();
         try {
+            setIsCreatingAnuncio(true);
             await crearAnuncio({
                 contenido: anuncioData.contenido,
                 tipo: 'mensaje',
@@ -130,6 +133,8 @@ const ClaseDashboard = () => {
             fetchAnuncios();
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
+        } finally {
+            setIsCreatingAnuncio(false);
         }
     };
 
@@ -140,6 +145,7 @@ const ClaseDashboard = () => {
 
     const confirmDeleteAnuncio = async () => {
         try {
+            setIsDeletingAnuncio(true);
             await eliminarAnuncio(anuncioToDelete);
             setAnuncios(prevAnuncios => prevAnuncios.filter(a => a.id !== anuncioToDelete));
             toast.success('Anuncio eliminado correctamente');
@@ -147,6 +153,9 @@ const ClaseDashboard = () => {
         } catch (error) {
             console.error('Error al eliminar anuncio:', error);
             toast.error('Error al eliminar el anuncio');
+        } finally {
+            setIsDeletingAnuncio(false);
+            setAnuncioToDelete(null);
         }
     };
 
@@ -294,13 +303,47 @@ const ClaseDashboard = () => {
                             </button>
                             <button
                                 type="submit"
-                                className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
+                                className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                                disabled={isCreatingAnuncio}
                             >
-                                <Bell className="h-4 w-4" />
-                                Publicar anuncio
+                                {isCreatingAnuncio ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white"></div>
+                                        <span>Creando anuncio...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Bell className="h-4 w-4" />
+                                        <span>Publicar anuncio</span>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        );
+    };
+
+    const renderDeletingOverlay = () => {
+        if (!isDeletingAnuncio) return null;
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+                <div className="bg-white rounded-lg p-4 flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600"></div>
+                    <span>Eliminando anuncio...</span>
+                </div>
+            </div>
+        );
+    };
+
+    const renderCreatingOverlay = () => {
+        if (!isCreatingAnuncio) return null;
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+                <div className="bg-white rounded-lg p-4 flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600"></div>
+                    <span>Creando anuncio...</span>
                 </div>
             </div>
         );
@@ -326,6 +369,8 @@ const ClaseDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {renderDeletingOverlay()}
+            {renderCreatingOverlay()}
             {/* Header de la clase */}
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -455,9 +500,17 @@ const ClaseDashboard = () => {
                             </button>
                             <button
                                 onClick={confirmDeleteAnuncio}
-                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                disabled={isDeletingAnuncio}
                             >
-                                Eliminar
+                                {isDeletingAnuncio ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white"></div>
+                                        <span>Eliminando...</span>
+                                    </>
+                                ) : (
+                                    'Eliminar'
+                                )}
                             </button>
                         </div>
                     </div>
