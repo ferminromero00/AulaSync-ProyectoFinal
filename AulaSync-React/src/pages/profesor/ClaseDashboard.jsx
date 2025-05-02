@@ -401,8 +401,8 @@ const ClaseDashboard = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Lista de estudiantes - Reducido de lg:w-1/4 a lg:w-1/5 */}
-                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6">
+                    {/* Lista de estudiantes */}
+                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6 h-fit sticky top-8">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <div className="flex items-center gap-2">
@@ -415,7 +415,6 @@ const ClaseDashboard = () => {
                                         <UserPlus className="h-5 w-5 text-gray-600" />
                                     </button>
                                 )}
-                                {/* Botón para abrir el modal de alumnos */}
                                 <button
                                     className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
                                     title="Ver lista completa"
@@ -425,25 +424,27 @@ const ClaseDashboard = () => {
                                 </button>
                             </div>
                         </div>
-                        {clase.estudiantes && clase.estudiantes.length > 0 ? (
-                            <ul className="space-y-2">
-                                {clase.estudiantes.slice(0, 5).map((estudiante) => (
-                                    <li key={estudiante.id} className="text-gray-700">
-                                        {estudiante.nombre}
-                                    </li>
-                                ))}
-                                {clase.estudiantes.length > 5 && (
-                                    <li className="text-blue-600 text-sm cursor-pointer" onClick={() => setShowAlumnosModal(true)}>
-                                        Ver todos...
-                                    </li>
-                                )}
-                            </ul>
-                        ) : (
-                            <p className="text-sm text-gray-500">No hay estudiantes inscritos.</p>
-                        )}
+                        <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                            {clase.estudiantes && clase.estudiantes.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {clase.estudiantes.slice(0, 5).map((estudiante) => (
+                                        <li key={estudiante.id} className="text-gray-700">
+                                            {estudiante.nombre}
+                                        </li>
+                                    ))}
+                                    {clase.estudiantes.length > 5 && (
+                                        <li className="text-blue-600 text-sm cursor-pointer" onClick={() => setShowAlumnosModal(true)}>
+                                            Ver todos...
+                                        </li>
+                                    )}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-gray-500">No hay estudiantes inscritos.</p>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Contenido principal - Ajustado para ocupar más espacio */}
+                    {/* Contenido principal */}
                     <div className="lg:w-4/5 bg-white rounded-lg shadow p-6">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
                         {anuncios.length > 0 ? (
