@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -566,37 +566,117 @@ const ClaseDashboard = () => {
         if (!showTareaModal || !tareaSeleccionada) return null;
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 relative">
+                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
+                    {/* Botón de cierre ajustado */}
                     <button
-                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
                         onClick={() => setShowTareaModal(false)}
+                        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors w-8 h-8 flex items-center justify-center"
+                        title="Cerrar"
                     >
-                        <X className="h-6 w-6" />
+                        <X className="h-6 w-6 text-gray-500" />
                     </button>
-                    <h3 className="text-2xl font-bold mb-2 text-blue-700 flex items-center gap-2">
-                        <BookOpen className="h-6 w-6" /> {tareaSeleccionada.titulo}
-                    </h3>
-                    <div className="mb-2 text-gray-600">
-                        <span className="font-semibold">Fecha de entrega:</span>{" "}
-                        {tareaSeleccionada.fechaEntrega
-                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
-                            : "Sin fecha"}
+
+                    {/* Panel izquierdo - Detalles de la tarea */}
+                    <div className="p-8 flex-1">
+                        <div className="mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                                <BookOpen className="h-7 w-7 text-blue-600" />
+                                {tareaSeleccionada.titulo}
+                            </h3>
+                            <div className="text-sm text-gray-500">
+                                Publicado por {tareaSeleccionada.autor?.nombre} · {new Date(tareaSeleccionada.fechaCreacion).toLocaleString()}
+                            </div>
+                        </div>
+
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-amber-600" />
+                            <span className="text-amber-800">
+                                <span className="font-medium">Fecha de entrega:</span>{" "}
+                                {tareaSeleccionada.fechaEntrega
+                                    ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
+                                    : "Sin fecha límite"}
+                            </span>
+                        </div>
+
+                        <div className="mb-6">
+                            <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
+                            <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
+                                {tareaSeleccionada.contenido || tareaSeleccionada.descripcion}
+                            </div>
+                        </div>
+
+                        {tareaSeleccionada.archivoUrl && (
+                            <div className="border-t pt-6">
+                                <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
+                                <a
+                                    href={tareaSeleccionada.archivoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                    <FileText className="h-5 w-5" />
+                                    Descargar material
+                                </a>
+                            </div>
+                        )}
                     </div>
-                    <div className="mb-4">
-                        <span className="font-semibold text-gray-700">Descripción:</span>
-                        <p className="mt-1 text-gray-800 whitespace-pre-line">{tareaSeleccionada.contenido || tareaSeleccionada.descripcion}</p>
-                    </div>
-                    {tareaSeleccionada.archivoUrl && (
-                        <div className="mb-4">
-                            <span className="font-semibold text-gray-700">Archivo adjunto:</span>
-                            <a
-                                href={tareaSeleccionada.archivoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block mt-1 text-blue-600 underline"
-                            >
-                                Descargar archivo
-                            </a>
+
+                    {/* Panel derecho - Entrega de tarea (solo para alumnos) */}
+                    {role === 'alumno' && (
+                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200">
+                            <div className="sticky top-8">
+                                <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
+                                
+                                <div className="space-y-6">
+                                    {/* Estado de la entrega */}
+                                    <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                        <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                            <Calendar className="h-5 w-5" />
+                                            <span className="font-medium">Pendiente de entrega</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Fecha límite: {new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString()}
+                                        </p>
+                                    </div>
+
+                                    {/* Formulario de entrega */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Comentarios (opcional)
+                                            </label>
+                                            <textarea
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                rows="4"
+                                                placeholder="Añade comentarios sobre tu entrega..."
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Archivo de entrega
+                                            </label>
+                                            <div className="flex items-center justify-center w-full">
+                                                <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                    <FileText className="h-8 w-8 mb-2" />
+                                                    <span className="text-sm text-center">
+                                                        Arrastra tu archivo aquí o haz clic para seleccionar
+                                                    </span>
+                                                    <input type="file" className="hidden" />
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                                        >
+                                            <FileText className="h-5 w-5" />
+                                            Entregar tarea
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -730,23 +810,20 @@ const ClaseDashboard = () => {
                                                         <X className="h-5 w-5 text-gray-600" />
                                                     </button>
                                                 )}
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <BookOpen className="h-5 w-5 text-blue-600" />
-                                                    <span className="font-semibold text-blue-700">{anuncio.titulo || "Tarea"}</span>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <BookOpen className="h-5 w-5 text-blue-600" />
+                                                        <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
+                                                    </div>
                                                 </div>
-                                                <div className="text-xs text-gray-500 flex items-center gap-2 mb-1">
-                                                    <span>
-                                                        <span className="font-semibold">Entrega:</span>{" "}
-                                                        {anuncio.fechaEntrega
-                                                            ? new Date(anuncio.fechaEntrega).toLocaleString()
-                                                            : "Sin fecha"}
-                                                    </span>
+                                                <div className="text-sm text-gray-600">
+                                                    <Calendar className="h-4 w-4 inline mr-1" />
+                                                    Entregar antes del {anuncio.fechaEntrega
+                                                        ? new Date(anuncio.fechaEntrega).toLocaleString()
+                                                        : "Sin fecha límite"}
                                                 </div>
-                                                <div className="text-gray-700 mb-1">
-                                                    {recortarTexto(anuncio.contenido || anuncio.descripcion, 80)}
-                                                </div>
-                                                <div className="text-xs text-gray-500 flex items-center gap-2">
-                                                    <span>{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                <div className="mt-2 text-xs text-gray-500">
+                                                    Ver detalles →
                                                 </div>
                                             </div>
                                         ) : (
