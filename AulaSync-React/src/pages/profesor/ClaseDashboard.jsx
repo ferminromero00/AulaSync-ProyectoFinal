@@ -654,14 +654,6 @@ const ClaseDashboard = () => {
                     ) : (
                         // Vista de alumno (el código existente para la entrega de tareas)
                         <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative">
-                            {/* Botón de cierre para vista de alumno */}
-                            <button
-                                onClick={() => setShowTareaModal(false)}
-                                className="absolute -top-12 right-0 p-2 rounded-full hover:bg-gray-100 transition-colors w-8 h-8 flex items-center justify-center bg-white shadow-sm"
-                                title="Cerrar"
-                            >
-                                <X className="h-6 w-6 text-gray-500" />
-                            </button>
                             <div className="sticky top-8">
                                 <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                                 
