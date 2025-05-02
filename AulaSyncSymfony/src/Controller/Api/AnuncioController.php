@@ -61,7 +61,8 @@ class AnuncioController extends AbstractController
             $qb = $entityManager->getRepository(Anuncio::class)->createQueryBuilder('a');
             $anuncios = $qb
                 ->select('a.id', 'a.contenido', 'a.tipo', 'a.fechaCreacion', 
-                        'p.id as autorId', 'p.first_name', 'p.last_name')
+                         'a.fechaEntrega', 'a.titulo', 'a.archivoUrl',
+                         'p.id as autorId', 'p.first_name', 'p.last_name')
                 ->leftJoin('a.autor', 'p')
                 ->where('a.clase = :clase')
                 ->setParameter('clase', $clase)
@@ -75,6 +76,9 @@ class AnuncioController extends AbstractController
                     'contenido' => $anuncio['contenido'],
                     'tipo' => $anuncio['tipo'],
                     'fechaCreacion' => $anuncio['fechaCreacion']->format('Y-m-d H:i:s'),
+                    'fechaEntrega' => $anuncio['fechaEntrega'] ? $anuncio['fechaEntrega']->format('Y-m-d H:i:s') : null,
+                    'titulo' => $anuncio['titulo'] ?? null,
+                    'archivoUrl' => $anuncio['archivoUrl'] ?? null,
                     'autor' => [
                         'id' => $anuncio['autorId'],
                         'nombre' => trim($anuncio['first_name'] . ' ' . $anuncio['last_name'])

@@ -34,6 +34,8 @@ const ClaseDashboard = () => {
     const [anuncioToDelete, setAnuncioToDelete] = useState(null);
     const [isDeletingAnuncio, setIsDeletingAnuncio] = useState(false);
     const [isCreatingAnuncio, setIsCreatingAnuncio] = useState(false);
+    const [showTareaModal, setShowTareaModal] = useState(false);
+    const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -179,6 +181,17 @@ const ClaseDashboard = () => {
             setIsDeletingAnuncio(false);
             setAnuncioToDelete(null);
         }
+    };
+
+    const handleOpenTarea = (tarea) => {
+        setTareaSeleccionada(tarea);
+        setShowTareaModal(true);
+    };
+
+    // NUEVO: función para recortar texto con puntos suspensivos
+    const recortarTexto = (texto, max = 80) => {
+        if (!texto) return '';
+        return texto.length > max ? texto.slice(0, max) + '...' : texto;
     };
 
     const renderStudentSearchModal = () => {
@@ -549,6 +562,48 @@ const ClaseDashboard = () => {
         );
     };
 
+    const renderTareaModal = () => {
+        if (!showTareaModal || !tareaSeleccionada) return null;
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 relative">
+                    <button
+                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                        onClick={() => setShowTareaModal(false)}
+                    >
+                        <X className="h-6 w-6" />
+                    </button>
+                    <h3 className="text-2xl font-bold mb-2 text-blue-700 flex items-center gap-2">
+                        <BookOpen className="h-6 w-6" /> {tareaSeleccionada.titulo}
+                    </h3>
+                    <div className="mb-2 text-gray-600">
+                        <span className="font-semibold">Fecha de entrega:</span>{" "}
+                        {tareaSeleccionada.fechaEntrega
+                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
+                            : "Sin fecha"}
+                    </div>
+                    <div className="mb-4">
+                        <span className="font-semibold text-gray-700">Descripción:</span>
+                        <p className="mt-1 text-gray-800 whitespace-pre-line">{tareaSeleccionada.contenido || tareaSeleccionada.descripcion}</p>
+                    </div>
+                    {tareaSeleccionada.archivoUrl && (
+                        <div className="mb-4">
+                            <span className="font-semibold text-gray-700">Archivo adjunto:</span>
+                            <a
+                                href={tareaSeleccionada.archivoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block mt-1 text-blue-600 underline"
+                            >
+                                Descargar archivo
+                            </a>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -656,25 +711,64 @@ const ClaseDashboard = () => {
                         <div className="min-h-[calc(100vh-300px)]">
                             {anuncios.length > 0 ? (
                                 <div className="space-y-4">
-                                    {anuncios.map((anuncio) => (
-                                        <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
-                                            {role === 'profesor' && (
-                                                <button
-                                                    onClick={() => handleDeleteAnuncio(anuncio.id)}
-                                                    className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
-                                                    title="Eliminar anuncio"
-                                                >
-                                                    <X className="h-5 w-5 text-gray-600" />
-                                                </button>
-                                            )}
-                                            <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
-                                            <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
-                                                <span>•</span>
-                                                <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
+                                    {anuncios.map((anuncio) =>
+                                        anuncio.tipo === "tarea" ? (
+                                            <div
+                                                key={anuncio.id}
+                                                className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition"
+                                                onClick={() => handleOpenTarea(anuncio)}
+                                            >
+                                                {role === 'profesor' && (
+                                                    <button
+                                                        onClick={e => {
+                                                            e.stopPropagation();
+                                                            handleDeleteAnuncio(anuncio.id);
+                                                        }}
+                                                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                        title="Eliminar tarea"
+                                                    >
+                                                        <X className="h-5 w-5 text-gray-600" />
+                                                    </button>
+                                                )}
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <BookOpen className="h-5 w-5 text-blue-600" />
+                                                    <span className="font-semibold text-blue-700">{anuncio.titulo || "Tarea"}</span>
+                                                </div>
+                                                <div className="text-xs text-gray-500 flex items-center gap-2 mb-1">
+                                                    <span>
+                                                        <span className="font-semibold">Entrega:</span>{" "}
+                                                        {anuncio.fechaEntrega
+                                                            ? new Date(anuncio.fechaEntrega).toLocaleString()
+                                                            : "Sin fecha"}
+                                                    </span>
+                                                </div>
+                                                <div className="text-gray-700 mb-1">
+                                                    {recortarTexto(anuncio.contenido || anuncio.descripcion, 80)}
+                                                </div>
+                                                <div className="text-xs text-gray-500 flex items-center gap-2">
+                                                    <span>{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ) : (
+                                            <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
+                                                {role === 'profesor' && (
+                                                    <button
+                                                        onClick={() => handleDeleteAnuncio(anuncio.id)}
+                                                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                        title="Eliminar anuncio"
+                                                    >
+                                                        <X className="h-5 w-5 text-gray-600" />
+                                                    </button>
+                                                )}
+                                                <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
+                                                <div className="text-sm text-gray-500 flex items-center gap-2">
+                                                    <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-gray-500 text-center py-8">
@@ -729,6 +823,7 @@ const ClaseDashboard = () => {
             {renderStudentSearchModal()}
             {renderAlumnosModal()}
             {renderAnuncioModal()}
+            {renderTareaModal()}
         </div>
     );
 };
