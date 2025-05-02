@@ -10,43 +10,73 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class AnuncioController extends AbstractController
 {
     #[Route('/api/anuncios/crear', name: 'crear_anuncio', methods: ['POST'])]
     public function crearAnuncio(Request $request, EntityManagerInterface $entityManager, ClaseRepository $claseRepository): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        
-        $clase = $claseRepository->find($data['claseId']);
-        if (!$clase) {
-            return $this->json(['error' => 'Clase no encontrada'], 404);
-        }
-
-        $anuncio = new Anuncio();
-        $anuncio->setContenido($data['contenido']);
-        $anuncio->setTipo($data['tipo']);
-        $anuncio->setClase($clase);
-        $anuncio->setFechaCreacion(new \DateTime());
-        $anuncio->setAutor($clase->getProfesor());
-
-        // Campos adicionales para tareas
-        if ($data['tipo'] === 'tarea') {
-            $anuncio->setTitulo($data['titulo']);
-            $anuncio->setFechaEntrega(new \DateTime($data['fechaEntrega']));
-            // Aquí iría la lógica para manejar el archivo
-            if (isset($data['archivoUrl'])) {
-                $anuncio->setArchivoUrl($data['archivoUrl']);
+        try {
+            $data = json_decode($request->get('data'), true);
+            if (!$data) {
+                throw new \Exception('Error al decodificar los datos JSON');
             }
+
+            $clase = $claseRepository->find($data['claseId']);
+            if (!$clase) {
+                return $this->json(['error' => 'Clase no encontrada'], 404);
+            }
+
+            $anuncio = new Anuncio();
+            $anuncio->setContenido($data['contenido']);
+            $anuncio->setTipo($data['tipo']);
+            $anuncio->setClase($clase);
+            $anuncio->setFechaCreacion(new \DateTime());
+            $anuncio->setAutor($clase->getProfesor());
+
+            if ($data['tipo'] === 'tarea') {
+                $anuncio->setTitulo($data['titulo']);
+                
+                // Hacer la fecha de entrega opcional
+                if (!empty($data['fechaEntrega'])) {
+                    $anuncio->setFechaEntrega(new \DateTime($data['fechaEntrega']));
+                }
+                
+                $archivo = $request->files->get('archivo');
+                if ($archivo) {
+                    $originalFilename = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                    
+                    // Sanitizar nombre de archivo de forma segura sin depender de transliterator
+                    $safeFilename = preg_replace('/[^a-zA-Z0-9]/', '_', $originalFilename);
+                    $safeFilename = strtolower($safeFilename);
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$archivo->guessExtension();
+
+                    try {
+                        $archivo->move(
+                            $this->getParameter('archivos_tareas_directory'),
+                            $newFilename
+                        );
+                        $anuncio->setArchivoUrl('/uploads/tareas/'.$newFilename);
+                    } catch (FileException $e) {
+                        return $this->json(['error' => 'Error al subir el archivo: '.$e->getMessage()], 500);
+                    }
+                }
+            }
+
+            $entityManager->persist($anuncio);
+            $entityManager->flush();
+
+            return $this->json([
+                'message' => 'Anuncio creado correctamente',
+                'id' => $anuncio->getId(),
+                'archivoUrl' => $anuncio->getArchivoUrl()
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'Error al crear el anuncio: ' . $e->getMessage()
+            ], 500);
         }
-
-        $entityManager->persist($anuncio);
-        $entityManager->flush();
-
-        return $this->json([
-            'message' => 'Anuncio creado correctamente',
-            'id' => $anuncio->getId()
-        ]);
     }
 
     #[Route('/api/anuncios/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]

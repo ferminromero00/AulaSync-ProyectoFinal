@@ -138,7 +138,9 @@ const ClaseDashboard = () => {
             if (anuncioData.tipo === 'tarea') {
                 dataToSend = {
                     ...dataToSend,
-                    contenido: anuncioData.descripcion
+                    contenido: anuncioData.descripcion,
+                    // Solo incluir fechaEntrega si tiene un valor
+                    ...(anuncioData.fechaEntrega ? { fechaEntrega: anuncioData.fechaEntrega } : {})
                 };
             }
 
@@ -388,20 +390,10 @@ const ClaseDashboard = () => {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                                            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
                                             disabled={isCreatingAnuncio}
                                         >
-                                            {isCreatingAnuncio ? (
-                                                <>
-                                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white"></div>
-                                                    <span>Creando anuncio...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Bell className="h-4 w-4" />
-                                                    <span>Publicar anuncio</span>
-                                                </>
-                                            )}
+                                            Publicar anuncio
                                         </button>
                                     </div>
                                 </form>
@@ -460,8 +452,7 @@ const ClaseDashboard = () => {
                                             onChange={(e) => setAnuncioData({...anuncioData, descripcion: e.target.value})}
                                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
                                             rows={4}
-                                            placeholder="Describe los detalles y requisitos de la tarea..."
-                                            required
+                                            placeholder="Describe los detalles y requisitos de la tarea... (opcional)"
                                         />
                                     </div>
 
@@ -475,7 +466,6 @@ const ClaseDashboard = () => {
                                                 value={anuncioData.fechaEntrega}
                                                 onChange={(e) => setAnuncioData({...anuncioData, fechaEntrega: e.target.value})}
                                                 className="w-full h-[72px] px-4 flex items-center rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                                                required
                                             />
                                         </div>
 
@@ -513,20 +503,10 @@ const ClaseDashboard = () => {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                                            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
                                             disabled={isCreatingAnuncio}
                                         >
-                                            {isCreatingAnuncio ? (
-                                                <>
-                                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white"></div>
-                                                    <span>Creando tarea...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <BookOpen className="h-4 w-4" />
-                                                    <span>Publicar tarea</span>
-                                                </>
-                                            )}
+                                            Publicar tarea
                                         </button>
                                     </div>
                                 </form>
@@ -938,17 +918,10 @@ const ClaseDashboard = () => {
                             </button>
                             <button
                                 onClick={confirmDeleteAnuncio}
-                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
                                 disabled={isDeletingAnuncio}
                             >
-                                {isDeletingAnuncio ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white"></div>
-                                        <span>Eliminando...</span>
-                                    </>
-                                ) : (
-                                    'Eliminar'
-                                )}
+                                Eliminar
                             </button>
                         </div>
                     </div>

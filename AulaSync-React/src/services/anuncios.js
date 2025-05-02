@@ -1,10 +1,23 @@
 import api from './api';
 
-export const crearAnuncio = async (anuncioData) => {
+export const crearAnuncio = async (data) => {
     try {
-        const response = await api.post('/anuncios/crear', anuncioData);
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+        
+        if (data.archivo) {
+            formData.append('archivo', data.archivo);
+        }
+
+        const response = await api.post('/anuncios/crear', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
         return response.data;
     } catch (error) {
+        console.error('Error en crearAnuncio:', error);
         throw error.response?.data?.error || 'Error al crear el anuncio';
     }
 };
