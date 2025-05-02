@@ -28,7 +28,17 @@ class AnuncioController extends AbstractController
         $anuncio->setTipo($data['tipo']);
         $anuncio->setClase($clase);
         $anuncio->setFechaCreacion(new \DateTime());
-        $anuncio->setAutor($clase->getProfesor()); // Asignar el profesor de la clase como autor
+        $anuncio->setAutor($clase->getProfesor());
+
+        // Campos adicionales para tareas
+        if ($data['tipo'] === 'tarea') {
+            $anuncio->setTitulo($data['titulo']);
+            $anuncio->setFechaEntrega(new \DateTime($data['fechaEntrega']));
+            // Aquí iría la lógica para manejar el archivo
+            if (isset($data['archivoUrl'])) {
+                $anuncio->setArchivoUrl($data['archivoUrl']);
+            }
+        }
 
         $entityManager->persist($anuncio);
         $entityManager->flush();
@@ -48,30 +58,32 @@ class AnuncioController extends AbstractController
                 return $this->json(['error' => 'Clase no encontrada'], 404);
             }
 
-            $anuncios = $entityManager->getRepository(Anuncio::class)
-                ->createQueryBuilder('a')
-                ->select('a', 'p')
+            $qb = $entityManager->getRepository(Anuncio::class)->createQueryBuilder('a');
+            $anuncios = $qb
+                ->select('a.id', 'a.contenido', 'a.tipo', 'a.fechaCreacion', 
+                        'p.id as autorId', 'p.first_name', 'p.last_name')
                 ->leftJoin('a.autor', 'p')
                 ->where('a.clase = :clase')
                 ->setParameter('clase', $clase)
                 ->orderBy('a.fechaCreacion', 'DESC')
                 ->getQuery()
                 ->getResult();
-            
-            return $this->json([
-                'anuncios' => array_map(function($anuncio) {
-                    $autor = $anuncio->getAutor();
-                    return [
-                        'id' => $anuncio->getId(),
-                        'contenido' => $anuncio->getContenido(),
-                        'tipo' => $anuncio->getTipo(),
-                        'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s'),
-                        'autor' => $autor ? [
-                            'id' => $autor->getId(),
-                            'nombre' => $autor->getFirstName() . ' ' . $autor->getLastName()
-                        ] : null
-                    ];
-                }, $anuncios)
+
+            $formattedAnuncios = array_map(function($anuncio) {
+                return [
+                    'id' => $anuncio['id'],
+                    'contenido' => $anuncio['contenido'],
+                    'tipo' => $anuncio['tipo'],
+                    'fechaCreacion' => $anuncio['fechaCreacion']->format('Y-m-d H:i:s'),
+                    'autor' => [
+                        'id' => $anuncio['autorId'],
+                        'nombre' => trim($anuncio['first_name'] . ' ' . $anuncio['last_name'])
+                    ]
+                ];
+            }, $anuncios);
+
+            return $this->json(['anuncios' => $formattedAnuncios], 200, [], [
+                'groups' => ['anuncio']
             ]);
         } catch (\Exception $e) {
             return $this->json([

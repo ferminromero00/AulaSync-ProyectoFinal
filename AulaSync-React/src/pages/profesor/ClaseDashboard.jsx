@@ -128,14 +128,30 @@ const ClaseDashboard = () => {
         e.preventDefault();
         try {
             setIsCreatingAnuncio(true);
-            await crearAnuncio({
-                contenido: anuncioData.contenido,
-                tipo: 'mensaje',
+            let dataToSend = {
+                ...anuncioData,
                 claseId: id
-            });
-            toast.success('Anuncio creado correctamente');
+            };
+
+            if (anuncioData.tipo === 'tarea') {
+                dataToSend = {
+                    ...dataToSend,
+                    contenido: anuncioData.descripcion
+                };
+            }
+
+            await crearAnuncio(dataToSend);
+            toast.success(anuncioData.tipo === 'tarea' ? 'Tarea creada correctamente' : 'Anuncio creado correctamente');
             setShowAnuncioModal(false);
-            setAnuncioData({ contenido: '' });
+            setAnuncioData({
+                contenido: '',
+                tipo: '',
+                titulo: '',
+                fechaEntrega: '',
+                archivo: null,
+                descripcion: ''
+            });
+            setShowTipoSelector(true);
             fetchAnuncios();
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');

@@ -12,11 +12,18 @@ export const crearAnuncio = async (anuncioData) => {
 export const obtenerAnuncios = async (claseId) => {
     try {
         const response = await api.get(`/anuncios/${claseId}`);
-        console.log('Respuesta anuncios:', response); // Debug
-        return response.anuncios || [];
+        console.log('Respuesta del servidor:', response); // Debug temporal
+
+        // Si la respuesta ya es el objeto con anuncios, úsalo directamente
+        const anuncios = response.anuncios || [];
+        if (!Array.isArray(anuncios)) {
+            throw new Error('Formato de respuesta inválido');
+        }
+
+        return anuncios;
     } catch (error) {
         console.error('Error en obtenerAnuncios:', error);
-        throw error.response?.data?.error || 'Error al obtener los anuncios';
+        throw error.response?.data?.error || error.message || 'Error al obtener los anuncios';
     }
 };
 

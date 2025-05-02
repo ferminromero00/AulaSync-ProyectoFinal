@@ -17,8 +17,17 @@ class Anuncio
     #[ORM\Column(type: Types::TEXT)]
     private ?string $contenido = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $tipo = null;
+    #[ORM\Column(length: 255)]
+    private ?string $tipo = 'mensaje';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $titulo = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $fechaEntrega = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $archivoUrl = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $fechaCreacion = null;
@@ -55,6 +64,39 @@ class Anuncio
     public function setTipo(string $tipo): self
     {
         $this->tipo = $tipo;
+        return $this;
+    }
+
+    public function getTitulo(): ?string
+    {
+        return $this->titulo;
+    }
+
+    public function setTitulo(?string $titulo): self
+    {
+        $this->titulo = $titulo;
+        return $this;
+    }
+
+    public function getFechaEntrega(): ?\DateTimeInterface
+    {
+        return $this->fechaEntrega;
+    }
+
+    public function setFechaEntrega(?\DateTimeInterface $fechaEntrega): self
+    {
+        $this->fechaEntrega = $fechaEntrega;
+        return $this;
+    }
+
+    public function getArchivoUrl(): ?string
+    {
+        return $this->archivoUrl;
+    }
+
+    public function setArchivoUrl(?string $archivoUrl): self
+    {
+        $this->archivoUrl = $archivoUrl;
         return $this;
     }
 
