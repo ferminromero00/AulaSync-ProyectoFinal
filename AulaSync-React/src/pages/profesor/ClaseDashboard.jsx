@@ -819,12 +819,11 @@ const ClaseDashboard = () => {
                                     {clase.estudiantes.length > 4 && (
                                         <li className="text-center text-gray-500 py-2 border-t">
                                             <span className="block text-lg mb-1">•••</span>
-                                            <button 
-                                                onClick={() => setShowAlumnosModal(true)}
-                                                className="text-blue-600 hover:text-blue-800 text-sm"
+                                            <div 
+                                                className="text-blue-600 text-sm"
                                             >
-                                                Ver todos ({clase.estudiantes.length})
-                                            </button>
+                                                Alumnos totales ({clase.estudiantes.length})
+                                            </div>
                                         </li>
                                     )}
                                 </ul>
