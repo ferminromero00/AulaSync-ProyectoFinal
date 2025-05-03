@@ -578,7 +578,7 @@ const ClaseDashboard = () => {
                             <Calendar className="h-5 w-5 text-amber-600" />
                             <span className="text-amber-800">
                                 <span className="font-medium">Fecha de entrega:</span>{" "}
-                                {tareaSeleccionada.fechaEntrega
+                                {tareaSeleccionada?.fechaEntrega
                                     ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
                                     : "Sin fecha límite"}
                             </span>
@@ -672,7 +672,9 @@ const ClaseDashboard = () => {
                                             <span className="font-medium">Pendiente de entrega</span>
                                         </div>
                                         <p className="text-sm text-gray-600">
-                                            Fecha límite: {new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString()}
+                                            Fecha límite: {tareaSeleccionada.fechaEntrega 
+                                                ? new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString()
+                                                : "Sin fecha límite"}
                                         </p>
                                     </div>
 
@@ -855,7 +857,7 @@ const ClaseDashboard = () => {
                                                 </div>
                                                 <div className="text-sm text-gray-600">
                                                     <Calendar className="h-4 w-4 inline mr-1" />
-                                                    Entregar antes del {anuncio.fechaEntrega
+                                                    {anuncio.fechaEntrega 
                                                         ? new Date(anuncio.fechaEntrega).toLocaleString()
                                                         : "Sin fecha límite"}
                                                 </div>
