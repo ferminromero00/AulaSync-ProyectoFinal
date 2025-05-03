@@ -25,6 +25,7 @@ const DashboardAlumno = () => {
     const [tareasCount, setTareasCount] = useState(0);
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
+    const [notifLoading, setNotifLoading] = useState(false);
     const navigate = useNavigate();
 
     const stats = [
@@ -149,11 +150,14 @@ const DashboardAlumno = () => {
 
     const handleRespuesta = async (id, respuesta) => {
         try {
+            setNotifLoading(true);
             await responderInvitacion(id, respuesta);
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
             fetchNotificaciones();
         } catch (e) {
             toast.error('Error al responder la invitación');
+        } finally {
+            setNotifLoading(false);
         }
     };
 
@@ -184,6 +188,15 @@ const DashboardAlumno = () => {
 
     return (
         <div className="space-y-8 p-6"> {/* Cambiado para coincidir con el layout del profesor */}
+            {/* Overlay de carga para notificaciones */}
+            {notifLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                        <span className="text-lg text-gray-700">Procesando invitación...</span>
+                    </div>
+                </div>
+            )}
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"> {/* Mejorado el espaciado */}
                 <div>

@@ -9,6 +9,7 @@ const NotificationButton = () => {
     const [showNotifMenu, setShowNotifMenu] = useState(false);
     const [notificaciones, setNotificaciones] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [notifLoading, setNotifLoading] = useState(false);
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
 
@@ -59,6 +60,7 @@ const NotificationButton = () => {
     const handleRespuesta = async (id, respuesta, claseId) => {
         if (role !== 'alumno') return;
         try {
+            setNotifLoading(true); // Activar overlay de carga
             await responderInvitacion(id, respuesta);
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
             if (respuesta === 'aceptar') {
@@ -70,11 +72,22 @@ const NotificationButton = () => {
             }
         } catch (e) {
             toast.error('Error al responder la invitación');
+        } finally {
+            setNotifLoading(false); // Desactivar overlay de carga
         }
     };
 
     return (
         <div className="relative">
+            {/* Overlay de carga */}
+            {notifLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                        <span className="text-lg text-gray-700">Procesando invitación...</span>
+                    </div>
+                </div>
+            )}
             <button
                 ref={notifBtnRef}
                 className="relative p-2 rounded-full bg-white shadow hover:bg-gray-100 transition"

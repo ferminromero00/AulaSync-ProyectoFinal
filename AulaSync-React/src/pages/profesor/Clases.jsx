@@ -14,6 +14,8 @@ const Clases = () => {
     });
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     const cargarClases = async () => {
         try {
@@ -39,6 +41,7 @@ const Clases = () => {
 
     const confirmarEliminacion = async () => {
         try {
+            setIsDeleting(true);
             await eliminarClase(claseSeleccionada.id);
             setClases(prevClases => prevClases.filter(clase => clase.id !== claseSeleccionada.id));
             setShowConfirmModal(false);
@@ -46,12 +49,15 @@ const Clases = () => {
         } catch (error) {
             console.error('Error al eliminar la clase:', error);
             toast.error('Error al eliminar la clase');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setIsCreating(true);
             const response = await crearClase(nuevaClase);
             setMostrarFormulario(false);
             setNuevaClase({ nombre: '' });
@@ -60,6 +66,8 @@ const Clases = () => {
         } catch (error) {
             console.error('Error al crear la clase:', error);
             alert(error.message);
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -76,6 +84,26 @@ const Clases = () => {
 
     return (
         <div className="space-y-6 p-6">
+            {/* Overlay de carga al eliminar */}
+            {isDeleting && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                        <span className="text-lg text-gray-700">Eliminando clase...</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Overlay de carga al crear */}
+            {isCreating && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <span className="text-lg text-gray-700">Creando clase...</span>
+                    </div>
+                </div>
+            )}
+
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Mis Clases</h1>
@@ -108,7 +136,7 @@ const Clases = () => {
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-semibold text-gray-900">{clase.nombre}</h2>
                                     <div className="relative">
-                                        <button 
+                                        <button
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
@@ -174,7 +202,10 @@ const Clases = () => {
 
             {/* Modal para crear clase */}
             {mostrarFormulario && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div
+                    className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    style={{ margin: 0, padding: 0 }}
+                >
                     <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold mb-4">Crear Nueva Clase</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -185,7 +216,7 @@ const Clases = () => {
                                 <input
                                     type="text"
                                     value={nuevaClase.nombre}
-                                    onChange={(e) => setNuevaClase({...nuevaClase, nombre: e.target.value})}
+                                    onChange={(e) => setNuevaClase({ ...nuevaClase, nombre: e.target.value })}
                                     className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
                                     required
                                 />
@@ -212,7 +243,10 @@ const Clases = () => {
 
             {/* Modal de confirmación */}
             {showConfirmModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div
+                    className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    style={{ margin: 0, padding: 0 }}
+                >
                     <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
                         <div className="flex items-center justify-center mb-4 text-amber-500">
                             <AlertTriangle className="h-12 w-12" />
