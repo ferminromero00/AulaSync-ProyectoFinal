@@ -7,6 +7,7 @@ import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
 import { crearAnuncio, obtenerAnuncios, eliminarAnuncio } from '../../services/anuncios';
+import { API_BASE_URL } from '../../config/config';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -544,6 +545,12 @@ const ClaseDashboard = () => {
 
     const renderTareaModal = () => {
         if (!showTareaModal || !tareaSeleccionada) return null;
+        
+        // Construir la URL completa usando API_BASE_URL
+        const downloadUrl = tareaSeleccionada.archivoUrl ? 
+            `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : 
+            null;
+
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
@@ -588,7 +595,7 @@ const ClaseDashboard = () => {
                             <div className="border-t pt-6">
                                 <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
                                 <a
-                                    href={tareaSeleccionada.archivoUrl}
+                                    href={downloadUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"

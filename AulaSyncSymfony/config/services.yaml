@@ -6,6 +6,7 @@
 parameters:
     fotos_perfil_directory: '%kernel.project_dir%/public/uploads/fotos_perfil'
     archivos_tareas_directory: '%kernel.project_dir%/public/uploads/tareas'
+    uploads_directory: '%kernel.project_dir%/public/uploads'
 
 services:
     # default configuration for services in *this* file
