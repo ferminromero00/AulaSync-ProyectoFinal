@@ -2,6 +2,7 @@ import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProfesorStats, getTareasStats } from "../../services/stats";
 import ClasesProfesor from "../../components/profesor/ClasesProfesor";
+import TareasResumenProfesor from '../../components/profesor/TareasResumenProfesor';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -10,6 +11,7 @@ const Dashboard = () => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [tareasCount, setTareasCount] = useState(0);
+    const [tareas, setTareas] = useState([]);
 
     const loadStats = async () => {
         try {
@@ -29,6 +31,19 @@ const Dashboard = () => {
         loadStats();
     }, []);
 
+    useEffect(() => {
+        const cargarTareas = async () => {
+            try {
+                // Temporalmente usar un array vacío hasta que el backend esté listo
+                setTareas([]);
+            } catch (error) {
+                console.error('Error al cargar tareas:', error);
+            }
+        };
+
+        cargarTareas();
+    }, []);
+
     const statsConfig = [
         { 
             icon: BookOpen, 
@@ -37,27 +52,15 @@ const Dashboard = () => {
             color: "bg-gradient-to-br from-blue-500 to-blue-600" 
         },
         { 
-            icon: Users, 
-            label: "Total Estudiantes", 
-            value: stats.totalEstudiantes.toString(), 
-            color: "bg-gradient-to-br from-emerald-500 to-emerald-600" 
-        },
-        { 
             icon: FileText, 
             label: "Tareas", 
             value: tareasCount.toString(), 
             color: "bg-gradient-to-br from-amber-500 to-amber-600" 
-        },
-        { 
-            icon: CheckCircle, 
-            label: "Por Calificar", 
-            value: "7", 
-            color: "bg-gradient-to-br from-purple-500 to-purple-600" 
-        },
+        }
     ];
 
     return (
-        <div className="space-y-8 p-6">
+        <div className="space-y-6">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -80,37 +83,40 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Stats - Dos tarjetas horizontales, sin grid */}
+            <div className="flex w-full gap-4">
                 {statsConfig.map((stat, index) => (
-                    <div key={index} 
-                         className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md">
-                        <div className={`absolute top-0 left-0 h-1 w-full ${stat.color}`} />
-                        <div className="flex items-center gap-4">
-                            <div className={`rounded-lg ${stat.color} p-3`}>
-                                <stat.icon className="h-6 w-6 text-white" />
+                    <div
+                        key={index}
+                        className="relative flex-1 overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:shadow-md p-4"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className={`rounded-lg ${stat.color} p-2.5`}>
+                                <stat.icon className="h-5 w-5 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-gray-900">
-                                    {isLoading ? (
-                                        <div className="h-8 w-16 animate-pulse bg-gray-200 rounded"></div>
-                                    ) : (
-                                        stat.value
-                                    )}
-                                </h3>
+                                <h3 className="text-xl font-bold text-gray-900">{stat.value}</h3>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Classes Section */}
-            <div className="bg-white rounded-xl shadow-sm">
-                <div className="border-b border-gray-100">
-                    <div className="px-6 py-4">
-                        <ClasesProfesor onClaseCreated={loadStats} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Listado de clases */}
+                <div className="bg-white rounded-xl shadow-sm">
+                    <div className="border-b border-gray-100">
+                        <div className="px-6 py-4">
+                            <ClasesProfesor onClaseCreated={loadStats} />
+                        </div>
                     </div>
+                </div>
+
+                {/* Tareas pendientes */}
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <h2 className="text-lg font-semibold mb-4">Tareas Pendientes</h2>
+                    <TareasResumenProfesor />
                 </div>
             </div>
         </div>

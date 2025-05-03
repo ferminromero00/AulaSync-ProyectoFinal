@@ -43,3 +43,47 @@ export const getTareasStats = async () => {
         throw error;
     }
 };
+
+export const getTareasByProfesor = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/tareas/profesor`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener tareas');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};
+
+export const getTareasByAlumno = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/tareas/alumno`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener tareas');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};

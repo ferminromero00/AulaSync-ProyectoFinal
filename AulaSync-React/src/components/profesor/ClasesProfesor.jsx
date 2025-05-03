@@ -75,24 +75,24 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                                 to={`/profesor/clase/${clase.id}`}
                                 className="group block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="bg-blue-100 p-3 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-start space-x-4">
+                                        <div className="bg-blue-100 p-3 rounded-lg group-hover:bg-blue-200 transition-colors shrink-0">
                                             <BookOpen className="h-6 w-6 text-blue-600" />
                                         </div>
-                                        <div>
-                                            <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
-                                            <div className="flex items-center mt-1 space-x-4">
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <Users className="h-4 w-4 mr-1" />
+                                        <div className="min-w-0"> {/* Añadido min-w-0 para permitir truncamiento */}
+                                            <h3 className="font-medium text-gray-900 truncate">{clase.nombre}</h3>
+                                            <div className="flex flex-wrap gap-3 mt-1">
+                                                <div className="flex items-center text-sm text-gray-500 shrink-0">
+                                                    <Users className="h-4 w-4 mr-1 shrink-0" />
                                                     <span>{clase.numEstudiantes} estudiantes</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <BookOpen className="h-4 w-4 mr-1" />
+                                                <div className="flex items-center text-sm text-gray-500 shrink-0">
+                                                    <BookOpen className="h-4 w-4 mr-1 shrink-0" />
                                                     <span>Código: {clase.codigoClase}</span>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <Calendar className="h-4 w-4 mr-1" />
+                                                <div className="flex items-center text-sm text-gray-500 shrink-0">
+                                                    <Calendar className="h-4 w-4 mr-1 shrink-0" />
                                                     <span>{new Date(clase.createdAt).toLocaleDateString('es-ES', {
                                                         day: 'numeric',
                                                         month: 'short'
@@ -101,8 +101,8 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span className="text-blue-600 text-sm font-medium">
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-4">
+                                        <span className="text-blue-600 text-sm font-medium whitespace-nowrap">
                                             Ver detalles →
                                         </span>
                                     </div>

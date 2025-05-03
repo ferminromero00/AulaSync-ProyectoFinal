@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react"
-import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check, Users } from "lucide-react"
+import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check, Users, ChevronRight } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../../services/invitaciones';
-import { getTareasStats } from "../../services/stats";
+import { getTareasStats, getTareasByAlumno } from "../../services/stats"; // Añadir getTareasByAlumno
 import { Link, useNavigate } from "react-router-dom"
 import toast from 'react-hot-toast';
 import NotificationButton from '../../components/NotificationButton';
+import TareasResumen from '../../components/TareasResumen';
+import TareasResumenAlumno from '../../components/alumno/TareasResumenAlumno';
 
 const DashboardAlumno = () => {
     const [mostrarModal, setMostrarModal] = useState(false)
@@ -26,6 +28,7 @@ const DashboardAlumno = () => {
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
     const [notifLoading, setNotifLoading] = useState(false);
+    const [tareas, setTareas] = useState([]);
     const navigate = useNavigate();
 
     const stats = [
@@ -33,20 +36,14 @@ const DashboardAlumno = () => {
             icon: BookOpen,
             label: "Clases Inscritas",
             value: clases.length,
-            color: "bg-green-100 text-green-600"
+            color: "bg-gradient-to-br from-blue-500 to-blue-600"
         },
         {
             icon: FileText,
             label: "Tareas Pendientes",
             value: tareasCount,
-            color: "bg-amber-100 text-amber-600"
-        },
-        {
-            icon: CheckCircle,
-            label: "Tareas Completadas",
-            value: "12",
-            color: "bg-blue-100 text-blue-600"
-        },
+            color: "bg-gradient-to-br from-amber-500 to-amber-600"
+        }
     ]
 
     const handleBuscarClase = async (e) => {
@@ -178,6 +175,20 @@ const DashboardAlumno = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
 
+    useEffect(() => {
+        const cargarTareas = async () => {
+            try {
+                // Aquí deberías llamar a tu servicio para obtener las tareas
+                const tareasData = await getTareasByAlumno();
+                setTareas(tareasData);
+            } catch (error) {
+                console.error('Error al cargar tareas:', error);
+            }
+        };
+
+        cargarTareas();
+    }, []);
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -187,7 +198,7 @@ const DashboardAlumno = () => {
     }
 
     return (
-        <div className="space-y-8 p-6"> {/* Cambiado para coincidir con el layout del profesor */}
+        <div className="space-y-8 p-6">
             {/* Overlay de carga para notificaciones */}
             {notifLoading && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
@@ -218,65 +229,81 @@ const DashboardAlumno = () => {
                 </button>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Ajustado el grid */}
+            {/* Stats - Dos tarjetas horizontales, sin grid */}
+            <div className="flex w-full gap-4">
                 {stats.map((stat, index) => (
-                    <div key={index}
-                        className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md"> {/* Mejorado el diseño de la card */}
-                        <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${stat.color}`} />
-                        <div className="flex items-center gap-4">
-                            <div className={`rounded-lg p-3 ${stat.color}`}>
-                                <stat.icon className="h-6 w-6" />
+                    <div
+                        key={index}
+                        className="relative flex-1 overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:shadow-md p-4"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className={`rounded-lg ${stat.color} p-2.5`}>
+                                <stat.icon className="h-5 w-5 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{stat.value}</h3>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Listado de clases */}
-            <div className="bg-white rounded-xl shadow-sm"> {/* Ajustado para coincidir con el estilo del profesor */}
-                <div className="border-b border-gray-100">
-                    <div className="px-6 py-4">
-                        <h2 className="text-lg font-semibold">Mis Clases</h2>
-                        <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Listado de clases - Añadido h-[600px] y overflow-y-auto */}
+                <div className="bg-white rounded-xl shadow-sm h-[600px] flex flex-col">
+                    <div className="border-b border-gray-100">
+                        <div className="px-6 py-4">
+                            <h2 className="text-lg font-semibold">Mis Clases</h2>
+                            <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-6">
+                        <div className="divide-y divide-gray-100">
+                            {clases.length > 0 ? clases.map(clase => (
+                                <Link
+                                    key={clase.id}
+                                    to={`/alumno/clase/${clase.id}`}
+                                    className="block py-4 hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="bg-blue-100 p-3 rounded-lg">
+                                            <BookOpen className="h-6 w-6 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
+                                            <div className="flex items-center gap-4 mt-1">
+                                                <div className="flex items-center text-sm text-gray-600">
+                                                    <Users className="h-4 w-4 mr-2" />
+                                                    <span>{clase.numEstudiantes} estudiantes</span>
+                                                </div>
+                                                <div className="flex items-center text-sm text-gray-600">
+                                                    <BookOpen className="h-4 w-4 mr-2" />
+                                                    <span>Código: {clase.codigoClase}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                </Link>
+                            )) : (
+                                <div className="text-center py-8">
+                                    <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                                    <p className="text-gray-500 mb-1">No estás inscrito en ninguna clase</p>
+                                    <p className="text-sm text-gray-400">Usa el botón "Unirse a clase" para empezar</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-                <div className="p-6">
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {clases.length > 0 ? clases.map(clase => (
-                            <Link
-                                key={clase.id}
-                                to={`/alumno/clase/${clase.id}`}
-                                className="group block bg-gray-50 rounded-lg p-5 transition-all hover:bg-gray-100"
-                            >
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="bg-blue-100 p-3 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                        <BookOpen className="h-6 w-6 text-blue-600" />
-                                    </div>
-                                    <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <Users className="h-4 w-4 mr-2" />
-                                        <span>{clase.numEstudiantes} estudiantes</span>
-                                    </div>
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <BookOpen className="h-4 w-4 mr-2" />
-                                        <span>Código: {clase.codigoClase}</span>
-                                    </div>
-                                </div>
-                            </Link>
-                        )) : (
-                            <div className="col-span-full text-center py-8">
-                                <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                                <p className="text-gray-500 mb-1">No estás inscrito en ninguna clase</p>
-                                <p className="text-sm text-gray-400">Usa el botón "Unirse a clase" para empezar</p>
-                            </div>
-                        )}
+
+                {/* Tareas pendientes */}
+                <div className="bg-white rounded-xl shadow-sm h-[600px] flex flex-col">
+                    <div className="px-6 py-4 border-b border-gray-100">
+                        <h2 className="text-lg font-semibold">Tareas Pendientes</h2>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-6">
+                        <TareasResumenAlumno tareas={tareas} />
                     </div>
                 </div>
             </div>
