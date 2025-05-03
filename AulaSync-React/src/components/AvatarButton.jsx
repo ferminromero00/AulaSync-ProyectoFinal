@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPerfil } from '../services/perfil';
-import { API_BASE_URL } from '../config/config';
 
 const AvatarButton = ({ size = 40, reload = false }) => {
     const [perfil, setPerfil] = useState(null);
@@ -40,10 +39,11 @@ const AvatarButton = ({ size = 40, reload = false }) => {
                      style={{ width: size, height: size }}></div>
             ) : (
                 <img
-                    src={perfil?.fotoPerfilUrl ? `${API_BASE_URL}${perfil.fotoPerfilUrl}?${Date.now()}` : '/default-avatar.png'}
+                    src={perfil?.fotoPerfilUrl || '/default-avatar.png'}
                     alt="Foto de perfil"
                     style={{ width: size, height: size }}
                     className="rounded-full object-cover"
+                    onError={e => { e.target.src = '/default-avatar.png'; }}
                 />
             )}
         </button>

@@ -242,7 +242,8 @@ class ClaseController extends AbstractController
                 return [
                     'id' => $alumno->getId(),
                     'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
-                    'email' => $alumno->getEmail()
+                    'email' => $alumno->getEmail(),
+                    'fotoPerfilUrl' => $alumno->getProfileImage() ?? '/uploads/perfiles/default.png'
                 ];
             })->toArray();
 
