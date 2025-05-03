@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
+import { login } from '../services/auth' // Añadir esta importación
 
 function RegisterForm() {
   const { register, handleSubmit, formState: { errors }, setError } = useForm()
@@ -44,16 +45,27 @@ function RegisterForm() {
   const handleVerificar = async (e) => {
     e.preventDefault();
     try {
-        const response = await api.verificarRegistro({ email: pendingEmail, codigo });
-        console.log('Respuesta del servidor:', response); // Agrega esto para ver la respuesta
-        navigate('/?role=' + role, {
-            state: {
-                message: 'Registro verificado. Por favor, inicia sesión.',
-            },
-            replace: true,
+        const response = await api.verificarRegistro({ 
+            email: pendingEmail, 
+            codigo 
         });
+
+        // Iniciar sesión automáticamente después de verificar
+        await login(
+            { 
+                email: pendingEmail, 
+                password: pendingData.password 
+            }, 
+            role
+        );
+
+        // Redirigir al dashboard correspondiente
+        navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard', {
+            replace: true
+        });
+
     } catch (error) {
-        console.error('Error al verificar registro:', error); // Agrega esto para ver el error
+        console.error('Error:', error);
         setVerifError(error.message || 'Error al verificar el código.');
     }
   }
