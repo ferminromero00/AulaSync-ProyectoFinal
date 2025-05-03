@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check, Users } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../../services/invitaciones';
+import { getTareasStats } from "../../services/stats";
 import { Link, useNavigate } from "react-router-dom"
 import toast from 'react-hot-toast';
 import NotificationButton from '../../components/NotificationButton';
@@ -21,6 +22,7 @@ const DashboardAlumno = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
     const [loading, setLoading] = useState(false);
     const [showNotifMenu, setShowNotifMenu] = useState(false);
+    const [tareasCount, setTareasCount] = useState(0);
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
     const navigate = useNavigate();
@@ -35,7 +37,7 @@ const DashboardAlumno = () => {
         {
             icon: FileText,
             label: "Tareas Pendientes",
-            value: "3",
+            value: tareasCount,
             color: "bg-amber-100 text-amber-600"
         },
         {
@@ -132,6 +134,9 @@ const DashboardAlumno = () => {
             try {
                 const data = await getClasesAlumno();
                 setClases(data);
+                // Obtener el número de tareas del alumno
+                const tareas = await getTareasStats();
+                setTareasCount(tareas.totalTareas || 0);
             } catch (error) {
                 console.error('Error al cargar clases del alumno:', error);
             } finally {

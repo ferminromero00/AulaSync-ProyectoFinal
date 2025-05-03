@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Clase;
+use App\Entity\Anuncio;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -381,5 +382,47 @@ class ClaseController extends AbstractController
             ];
         }
         return new JsonResponse($data);
+    }
+
+    #[Route('/tareas/stats', name: 'tareas_stats', methods: ['GET'])]
+    public function getTareasStats(EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'No autenticado'], 401);
+        }
+
+        // Si es profesor, contar tareas de sus clases
+        if ($user instanceof \App\Entity\Profesor) {
+            $qb = $em->createQueryBuilder()
+                ->select('COUNT(a.id)')
+                ->from(Anuncio::class, 'a')
+                ->join('a.clase', 'c')
+                ->where('a.tipo = :tipo')
+                ->andWhere('c.profesor = :profesor')
+                ->setParameter('tipo', 'tarea')
+                ->setParameter('profesor', $user);
+
+            $totalTareas = (int) $qb->getQuery()->getSingleScalarResult();
+            return new JsonResponse(['totalTareas' => $totalTareas]);
+        }
+
+        // Si es alumno, contar tareas de sus clases inscritas
+        if ($user instanceof \App\Entity\Alumno) {
+            $qb = $em->createQueryBuilder()
+                ->select('COUNT(a.id)')
+                ->from(Anuncio::class, 'a')
+                ->join('a.clase', 'c')
+                ->join('c.alumnos', 'al')
+                ->where('a.tipo = :tipo')
+                ->andWhere('al = :alumno')
+                ->setParameter('tipo', 'tarea')
+                ->setParameter('alumno', $user);
+
+            $totalTareas = (int) $qb->getQuery()->getSingleScalarResult();
+            return new JsonResponse(['totalTareas' => $totalTareas]);
+        }
+
+        return new JsonResponse(['error' => 'Rol no soportado'], 400);
     }
 }

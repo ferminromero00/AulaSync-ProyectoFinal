@@ -1,6 +1,6 @@
 import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getProfesorStats } from "../../services/stats";
+import { getProfesorStats, getTareasStats } from "../../services/stats";
 import ClasesProfesor from "../../components/profesor/ClasesProfesor";
 
 const Dashboard = () => {
@@ -9,11 +9,15 @@ const Dashboard = () => {
         totalEstudiantes: 0
     });
     const [isLoading, setIsLoading] = useState(true);
+    const [tareasCount, setTareasCount] = useState(0);
 
     const loadStats = async () => {
         try {
             const data = await getProfesorStats();
             setStats(data);
+            // Obtener el número de tareas
+            const tareas = await getTareasStats();
+            setTareasCount(tareas.totalTareas || 0);
         } catch (error) {
             console.error('Error al cargar estadísticas:', error);
         } finally {
@@ -41,7 +45,7 @@ const Dashboard = () => {
         { 
             icon: FileText, 
             label: "Tareas", 
-            value: "18", 
+            value: tareasCount.toString(), 
             color: "bg-gradient-to-br from-amber-500 to-amber-600" 
         },
         { 
