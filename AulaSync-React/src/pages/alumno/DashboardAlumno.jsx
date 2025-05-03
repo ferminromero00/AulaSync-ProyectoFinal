@@ -26,23 +26,23 @@ const DashboardAlumno = () => {
     const navigate = useNavigate();
 
     const stats = [
-        { 
-            icon: BookOpen, 
-            label: "Clases Inscritas", 
+        {
+            icon: BookOpen,
+            label: "Clases Inscritas",
             value: clases.length,
-            color: "bg-green-100 text-green-600" 
+            color: "bg-green-100 text-green-600"
         },
-        { 
-            icon: FileText, 
-            label: "Tareas Pendientes", 
-            value: "3", 
-            color: "bg-amber-100 text-amber-600" 
+        {
+            icon: FileText,
+            label: "Tareas Pendientes",
+            value: "3",
+            color: "bg-amber-100 text-amber-600"
         },
-        { 
-            icon: CheckCircle, 
-            label: "Tareas Completadas", 
-            value: "12", 
-            color: "bg-blue-100 text-blue-600" 
+        {
+            icon: CheckCircle,
+            label: "Tareas Completadas",
+            value: "12",
+            color: "bg-blue-100 text-blue-600"
         },
     ]
 
@@ -88,10 +88,10 @@ const DashboardAlumno = () => {
     const handleSalirClase = async (claseId) => {
         try {
             await salirDeClase(claseId);
-            
+
             // Actualizar el estado local eliminando la clase
             setClases(prevClases => prevClases.filter(clase => clase.id !== claseId));
-            
+
             setMenuAbierto(null);
             setShowConfirmModal(false);
             setNotification({
@@ -99,7 +99,7 @@ const DashboardAlumno = () => {
                 message: 'Has salido de la clase exitosamente',
                 type: 'success'
             });
-            
+
             // Ocultar la notificación después de 3 segundos
             setTimeout(() => {
                 setNotification({ show: false, message: '', type: '' });
@@ -118,11 +118,11 @@ const DashboardAlumno = () => {
     const fetchNotificaciones = async () => {
         setLoading(true);
         try {
-          const data = await obtenerInvitacionesPendientes();
-          console.log("Invitaciones pendientes:", data); // <-- Añade esto para depurar
-          setNotificaciones(data);
+            const data = await obtenerInvitacionesPendientes();
+            console.log("Invitaciones pendientes:", data); // <-- Añade esto para depurar
+            setNotificaciones(data);
         } catch (e) {
-          setNotificaciones([]);
+            setNotificaciones([]);
         }
         setLoading(false);
     };
@@ -144,11 +144,11 @@ const DashboardAlumno = () => {
 
     const handleRespuesta = async (id, respuesta) => {
         try {
-          await responderInvitacion(id, respuesta);
-          toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
-          fetchNotificaciones();
+            await responderInvitacion(id, respuesta);
+            toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
+            fetchNotificaciones();
         } catch (e) {
-          toast.error('Error al responder la invitación');
+            toast.error('Error al responder la invitación');
         }
     };
 
@@ -203,8 +203,8 @@ const DashboardAlumno = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Ajustado el grid */}
                 {stats.map((stat, index) => (
-                    <div key={index} 
-                         className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md"> {/* Mejorado el diseño de la card */}
+                    <div key={index}
+                        className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-md"> {/* Mejorado el diseño de la card */}
                         <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${stat.color}`} />
                         <div className="flex items-center gap-4">
                             <div className={`rounded-lg p-3 ${stat.color}`}>
@@ -272,7 +272,7 @@ const DashboardAlumno = () => {
                     <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-semibold">Unirse a una clase</h3>
-                            <button 
+                            <button
                                 onClick={() => setMostrarModal(false)}
                                 className="text-gray-400 hover:text-gray-600"
                             >
@@ -349,7 +349,10 @@ const DashboardAlumno = () => {
 
             {/* Modal de confirmación para unirse */}
             {showJoinConfirmModal && claseParaUnirse && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div
+                    className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    style={{ margin: 0, padding: 0 }}
+                >
                     <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
                         <div className="flex items-center justify-center mb-4 text-green-500">
                             <BookOpen className="h-12 w-12" />
@@ -386,12 +389,11 @@ const DashboardAlumno = () => {
 
             {/* Notificación tipo toast */}
             {notification.show && (
-                <div className={`fixed bottom-4 right-4 z-50 ${
-                    notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                } text-white px-6 py-3 rounded-lg shadow-lg transition-all transform translate-y-0`}>
+                <div className={`fixed bottom-4 right-4 z-50 ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                    } text-white px-6 py-3 rounded-lg shadow-lg transition-all transform translate-y-0`}>
                     <div className="flex items-center space-x-2">
                         <span>{notification.message}</span>
-                        <button 
+                        <button
                             onClick={() => setNotification({ show: false, message: '', type: '' })}
                             className="ml-2 hover:text-gray-200"
                         >
