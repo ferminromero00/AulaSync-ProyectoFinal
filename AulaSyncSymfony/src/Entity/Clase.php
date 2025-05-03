@@ -74,6 +74,12 @@ class Clase
         return $this;
     }
 
+    public function updateNumEstudiantes(): self
+    {
+        $this->numEstudiantes = $this->alumnos->count();
+        return $this;
+    }
+
     public function getProfesor(): ?Profesor
     {
         return $this->profesor;

@@ -52,7 +52,7 @@ class AlumnoController extends AbstractController
                 'email' => $alumno->getEmail(),
                 'curso' => $alumno->getCurso(),
                 'matricula' => $alumno->getMatricula(),
-                'fotoPerfilUrl' => $alumno->getProfileImage() ?? null // Add null coalescing operator
+                'fotoPerfilUrl' => $alumno->getProfileImage() ?? '/uploads/perfiles/default.png'
             ], 200, ['Content-Type' => 'application/json']);
 
             $this->databaseService->closeConnection();
@@ -155,10 +155,10 @@ class AlumnoController extends AbstractController
         try {
             $em->beginTransaction();
             
-            // Eliminar foto anterior si existe
-            $oldFilename = $alumno->getFotoPerfilFilename();
-            if ($oldFilename && $oldFilename !== 'default.png') {
-                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . $oldFilename;
+            // Eliminar foto anterior si existe y no es la default
+            $oldProfileImage = $alumno->getProfileImage();
+            if ($oldProfileImage && $oldProfileImage !== '/uploads/perfiles/default.png') {
+                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . basename($oldProfileImage);
                 if (file_exists($oldFilePath)) {
                     unlink($oldFilePath);
                 }
@@ -168,7 +168,6 @@ class AlumnoController extends AbstractController
             $fileName = $fileUploader->upload($foto);
             
             // Actualizar rutas en la base de datos
-            $alumno->setFotoPerfilFilename($fileName);
             $alumno->setProfileImage('/uploads/fotos_perfil/' . $fileName);
 
             $em->flush();

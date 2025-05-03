@@ -201,14 +201,14 @@ class ClaseController extends AbstractController
                 return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
             }
 
-            $estudiantes = $clase->getAlumnos()->map(function ($alumno) {
-                $nombreCompleto = $alumno->getFirstName() . ' ' . $alumno->getLastName();
+            $estudiantes = array_map(function($estudiante) {
                 return [
-                    'id' => $alumno->getId(),
-                    'nombre' => $nombreCompleto,
-                    'email' => $alumno->getEmail(),
+                    'id' => $estudiante->getId(),
+                    'nombre' => $estudiante->getFirstName() . ' ' . $estudiante->getLastName(),
+                    'email' => $estudiante->getEmail(),
+                    'fotoPerfilUrl' => $estudiante->getProfileImage() ?? '/uploads/perfiles/default.png'
                 ];
-            })->toArray();
+            }, $clase->getAlumnos()->toArray());
 
             return new JsonResponse([
                 'id' => $clase->getId(),
@@ -424,5 +424,41 @@ class ClaseController extends AbstractController
         }
 
         return new JsonResponse(['error' => 'Rol no soportado'], 400);
+    }
+
+    #[Route('/clases/{id}', name: 'get_clase', methods: ['GET'])]
+    public function getClase(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $clase = $em->getRepository(Clase::class)->find($id);
+        
+        if (!$clase) {
+            return new JsonResponse(['error' => 'Clase no encontrada'], 404);
+        }
+
+        // Actualizar el número de estudiantes
+        $clase->updateNumEstudiantes();
+        $em->flush();
+
+        // Construir el array con la información necesaria
+        $data = [
+            'id' => $clase->getId(),
+            'nombre' => $clase->getNombre(),
+            'codigoClase' => $clase->getCodigoClase(),
+            'numEstudiantes' => $clase->getNumEstudiantes(),
+            'profesor' => [
+                'id' => $clase->getProfesor()->getId(),
+                'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName()
+            ],
+            'estudiantes' => array_map(function($estudiante) {
+                return [
+                    'id' => $estudiante->getId(),
+                    'nombre' => $estudiante->getFirstName() . ' ' . $estudiante->getLastName(),
+                    'email' => $estudiante->getEmail(),
+                    'fotoPerfilUrl' => $estudiante->getProfileImage() ?? '/uploads/perfiles/default.png'
+                ];
+            }, $clase->getAlumnos()->toArray())
+        ];
+
+        return new JsonResponse($data);
     }
 }

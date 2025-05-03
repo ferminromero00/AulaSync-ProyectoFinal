@@ -34,7 +34,7 @@ class ProfesorController extends AbstractController
                 'email' => $profesor->getEmail() ?: '',
                 'especialidad' => $profesor->getEspecialidad() ?: '',
                 'departamento' => $profesor->getDepartamento() ?: '',
-                'fotoPerfilUrl' => $profesor->getProfileImage() ?: null,
+                'fotoPerfilUrl' => $profesor->getProfileImage() ?? '/uploads/perfiles/default.png',
                 'nombre' => ($profesor->getFirstName() . ' ' . $profesor->getLastName()) ?: ''
             ];
 
@@ -130,10 +130,10 @@ class ProfesorController extends AbstractController
         }
 
         try {
-            // Eliminar foto anterior si existe
-            $oldFilename = $profesor->getFotoPerfilFilename();
-            if ($oldFilename && $oldFilename !== 'default.png') {
-                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . $oldFilename;
+            // Eliminar foto anterior si existe y no es la default
+            $oldProfileImage = $profesor->getProfileImage();
+            if ($oldProfileImage && $oldProfileImage !== '/uploads/perfiles/default.png') {
+                $oldFilePath = $this->getParameter('fotos_perfil_directory') . '/' . basename($oldProfileImage);
                 if (file_exists($oldFilePath)) {
                     unlink($oldFilePath);
                 }
@@ -143,8 +143,7 @@ class ProfesorController extends AbstractController
             $fileName = $fileUploader->upload($foto);
             
             // Actualizar rutas en la base de datos
-            $profesor->setFotoPerfilFilename($fileName);
-            $profesor->setProfileImage('/uploads/fotos_perfil/' . $fileName); // Cambiar a la ruta correcta
+            $profesor->setProfileImage('/uploads/fotos_perfil/' . $fileName);
 
             $em->persist($profesor);
             $em->flush();

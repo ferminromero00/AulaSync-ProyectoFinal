@@ -58,9 +58,6 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     public $profilePicture; // Hazlo público o usa getter/setter
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $fotoPerfilFilename = null;
-
     #[ORM\OneToMany(mappedBy: 'profesor', targetEntity: Clase::class)]
     private Collection $clases;
 
@@ -197,22 +194,6 @@ class Profesor implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->profileImage = $profileImage;
         return $this;
-    }
-
-    public function getFotoPerfilFilename(): ?string
-    {
-        return $this->fotoPerfilFilename;
-    }
-
-    public function setFotoPerfilFilename(?string $fotoPerfilFilename): self
-    {
-        $this->fotoPerfilFilename = $fotoPerfilFilename;
-        return $this;
-    }
-
-    public function getFotoPerfilUrl(): ?string
-    {
-        return $this->fotoPerfilFilename ? '/uploads/fotos_perfil/' . $this->fotoPerfilFilename : null;
     }
 
     public function eraseCredentials(): void

@@ -272,11 +272,19 @@ const ClaseDashboard = () => {
                     <h3 className="text-xl font-semibold mb-4">Lista de Alumnos</h3>
                     {clase.estudiantes && clase.estudiantes.length > 0 ? (
                         <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                            {clase.estudiantes.map((alumno) => (
-                                <li key={alumno.id} className="py-3 flex items-center justify-between">
+                            {clase.estudiantes.map((estudiante) => (
+                                <li key={estudiante.id} className="py-3 flex items-center gap-4">
+                                    <img
+                                        src={estudiante.fotoPerfilUrl ? `${API_BASE_URL}${estudiante.fotoPerfilUrl}` : '/default-avatar.png'}
+                                        alt={`Foto de ${estudiante.nombre}`}
+                                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                                        onError={(e) => {
+                                            e.target.src = '/default-avatar.png';
+                                        }}
+                                    />
                                     <div>
-                                        <div className="font-medium">{alumno.nombre}</div>
-                                        <div className="text-sm text-gray-500">{alumno.email}</div>
+                                        <div className="font-medium">{estudiante.nombre}</div>
+                                        <div className="text-sm text-gray-500">{estudiante.email}</div>
                                     </div>
                                 </li>
                             ))}
