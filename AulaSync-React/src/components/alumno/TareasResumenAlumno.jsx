@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass, X, FileText, BookOpen } from 'lucide-react';
+import { API_BASE_URL } from '../../config/config';
 
 const TareasResumenAlumno = ({ tareas = [] }) => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
@@ -8,6 +9,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         proximamente: false,
         sinFecha: false
     });
+    const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
+    const [showTareaModal, setShowTareaModal] = useState(false);
 
     const toggleSeccion = (seccion) => {
         setSeccionesAbiertas(prev => ({
@@ -44,6 +47,132 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
     const tareasSinFecha = tareas.filter(t => !t.fechaEntrega);
 
+    const handleClickTarea = (tarea) => {
+        setTareaSeleccionada(tarea);
+        setShowTareaModal(true);
+    };
+
+    const renderTareaModal = () => {
+        if (!showTareaModal || !tareaSeleccionada) return null;
+        
+        // Construir la URL completa del archivo
+        const downloadUrl = tareaSeleccionada.archivoUrl ? 
+            `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
+                    <button
+                        onClick={() => setShowTareaModal(false)}
+                        className="absolute -top-3 -right-3 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg"
+                    >
+                        <X className="h-6 w-6 text-white" />
+                    </button>
+
+                    <div className="p-8 flex-1">
+                        <div className="mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                                <BookOpen className="h-7 w-7 text-blue-600" />
+                                {tareaSeleccionada.titulo}
+                            </h3>
+                            <div className="text-sm text-gray-500">
+                                Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
+                            </div>
+                        </div>
+
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+                            <Calendar className="h-5 w-5 text-amber-600" />
+                            <span className="text-amber-800">
+                                <span className="font-medium">Fecha de entrega:</span>{" "}
+                                {tareaSeleccionada.fechaEntrega
+                                    ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
+                                    : "Sin fecha límite"}
+                            </span>
+                        </div>
+
+                        <div className="mb-6">
+                            <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
+                            <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
+                                {tareaSeleccionada.contenido || "Sin descripción"}
+                            </div>
+                        </div>
+
+                        {downloadUrl && (
+                            <div className="border-t pt-6">
+                                <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
+                                <a
+                                    href={downloadUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                    <FileText className="h-5 w-5" />
+                                    Descargar material
+                                </a>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Panel derecho - Vista de entrega */}
+                    <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200">
+                        <div className="sticky top-8">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
+                            <div className="space-y-6">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                        <Calendar className="h-5 w-5" />
+                                        <span className="font-medium">Pendiente de entrega</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600">
+                                        Fecha límite: {tareaSeleccionada.fechaEntrega ? 
+                                            new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString() : 
+                                            "Sin fecha límite"}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Comentarios (opcional)
+                                        </label>
+                                        <textarea
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            rows="4"
+                                            placeholder="Añade comentarios sobre tu entrega..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Archivo de entrega
+                                        </label>
+                                        <div className="flex items-center justify-center w-full">
+                                            <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                <FileText className="h-8 w-8 mb-2" />
+                                                <span className="text-sm text-center">
+                                                    Arrastra tu archivo aquí o haz clic para seleccionar
+                                                </span>
+                                                <input type="file" className="hidden" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                                    >
+                                        <FileText className="h-5 w-5" />
+                                        Entregar tarea
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
         <div className="space-y-2">
             <button
@@ -78,7 +207,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                             {tareas.map(tarea => (
                                 <div 
                                     key={tarea.id} 
-                                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200"
+                                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer"
+                                    onClick={() => handleClickTarea(tarea)}
                                 >
                                     <div className="flex flex-col gap-1">
                                         <span className="font-medium text-gray-900">
@@ -136,6 +266,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                 <AlertCircle className="h-5 w-5 text-gray-600" />,
                 "bg-gray-50"
             )}
+            {renderTareaModal()}
         </div>
     );
 };

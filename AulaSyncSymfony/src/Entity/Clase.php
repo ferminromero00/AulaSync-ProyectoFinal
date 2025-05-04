@@ -169,6 +169,26 @@ class Clase
         return $this;
     }
 
+    public function removeAllAnuncios(): self
+    {
+        foreach ($this->anuncios as $anuncio) {
+            $this->removeAnuncio($anuncio);
+        }
+        return $this;
+    }
+
+    public function getAnunciosByType(string $type): array
+    {
+        return $this->anuncios
+            ->filter(fn($anuncio) => $anuncio->getTipo() === $type)
+            ->toArray();
+    }
+
+    public function getTareas(): array
+    {
+        return $this->getAnunciosByType('tarea');
+    }
+
     private function generarCodigoClase(): string
     {
         // Generar un código aleatorio de 6 caracteres alfanuméricos

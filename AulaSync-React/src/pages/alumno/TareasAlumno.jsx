@@ -11,8 +11,13 @@ const TareasAlumno = () => {
         const cargarTareas = async () => {
             try {
                 const tareasData = await getTareasByAlumno();
-                console.log("Tareas cargadas:", tareasData); // Para debug
-                setTareas(tareasData);
+                // Transform data to match the expected format
+                const formattedTareas = tareasData.map(tarea => ({
+                    ...tarea,
+                    contenido: tarea.contenido || '',
+                    createdAt: tarea.createdAt || new Date().toISOString()
+                }));
+                setTareas(formattedTareas);
             } catch (error) {
                 console.error("Error al cargar tareas:", error);
                 setTareas([]);
