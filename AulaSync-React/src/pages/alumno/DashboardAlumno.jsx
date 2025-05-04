@@ -250,46 +250,42 @@ const DashboardAlumno = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Listado de clases - Añadido h-[600px] y overflow-y-auto */}
-                <div className="bg-white rounded-xl shadow-sm h-[600px] flex flex-col">
-                    <div className="border-b border-gray-100">
-                        <div className="px-6 py-4">
-                            <h2 className="text-lg font-semibold">Mis Clases</h2>
-                            <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
-                        </div>
+                {/* Listado de clases */}
+                <div className="bg-white rounded-xl shadow-sm">
+                    <div className="px-6 py-4 border-b border-gray-100">
+                        <h2 className="text-lg font-semibold">Mis Clases</h2>
+                        <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-6">
-                        <div className="divide-y divide-gray-100">
+                    <div className="p-4">
+                        <div className="grid gap-3">
                             {clases.length > 0 ? clases.map(clase => (
                                 <Link
                                     key={clase.id}
                                     to={`/alumno/clase/${clase.id}`}
-                                    className="block py-4 hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-blue-100 p-3 rounded-lg">
-                                            <BookOpen className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-medium text-gray-900">{clase.nombre}</h3>
-                                            <div className="flex items-center gap-4 mt-1">
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Users className="h-4 w-4 mr-2" />
-                                                    <span>{clase.numEstudiantes} estudiantes</span>
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <BookOpen className="h-4 w-4 mr-2" />
-                                                    <span>Código: {clase.codigoClase}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                                    <div className="bg-blue-100 p-2 rounded-lg">
+                                        <BookOpen className="h-5 w-5 text-blue-600" />
                                     </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-medium text-gray-900 truncate">{clase.nombre}</h3>
+                                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                                            <span className="flex items-center gap-1">
+                                                <Users className="h-4 w-4" />
+                                                {clase.numEstudiantes} estudiantes
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <BookOpen className="h-4 w-4" />
+                                                Código: {clase.codigoClase}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
                                 </Link>
                             )) : (
-                                <div className="text-center py-8">
-                                    <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                                    <p className="text-gray-500 mb-1">No estás inscrito en ninguna clase</p>
+                                <div className="text-center py-6">
+                                    <BookOpen className="h-10 w-10 mx-auto mb-2 text-gray-400" />
+                                    <p className="text-gray-500">No estás inscrito en ninguna clase</p>
                                     <p className="text-sm text-gray-400">Usa el botón "Unirse a clase" para empezar</p>
                                 </div>
                             )}

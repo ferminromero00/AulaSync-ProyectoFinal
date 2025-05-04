@@ -19,7 +19,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         <div className="space-y-2">
             <button
                 onClick={() => toggleSeccion(seccionId)}
-                className="w-full flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-all duration-200 border border-gray-200"
             >
                 <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${bgColor}`}>
@@ -38,23 +38,30 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                 }
             </button>
 
-            {seccionesAbiertas[seccionId] && (
-                <div className="pl-12">
+            <div 
+                className={`transform transition-all duration-200 ease-in-out overflow-hidden ${
+                    seccionesAbiertas[seccionId] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+            >
+                <div className="pl-14 pt-2">
                     {tareas.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {tareas.map(tarea => (
-                                <div key={tarea.id} className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 transition-colors">
+                                <div 
+                                    key={tarea.id} 
+                                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200"
+                                >
                                     {/* Contenido de la tarea */}
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-4 text-gray-500">
+                        <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
                             No hay tareas en este período
                         </div>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 
