@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass } from 'lucide-react';
 
 const TareasResumenAlumno = ({ tareas = [] }) => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
         estaSemana: false,
         esteMes: false,
+        proximamente: false,
         sinFecha: false
     });
 
@@ -14,6 +15,34 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             [seccion]: !prev[seccion]
         }));
     };
+
+    // Lógica de fechas
+    const hoy = new Date();
+    const finDeSemana = new Date();
+    finDeSemana.setDate(hoy.getDate() + (7 - hoy.getDay()));
+    const finDeMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+    const dentroDeUnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+
+    // Filtrado de tareas por sección
+    const tareasEstaSemana = tareas.filter(t => {
+        if (!t.fechaEntrega) return false;
+        const fecha = new Date(t.fechaEntrega);
+        return fecha >= hoy && fecha <= finDeSemana;
+    });
+
+    const tareasEsteMes = tareas.filter(t => {
+        if (!t.fechaEntrega) return false;
+        const fecha = new Date(t.fechaEntrega);
+        return fecha > finDeSemana && fecha <= finDeMes;
+    });
+
+    const tareasProximamente = tareas.filter(t => {
+        if (!t.fechaEntrega) return false;
+        const fecha = new Date(t.fechaEntrega);
+        return fecha > finDeMes;
+    });
+
+    const tareasSinFecha = tareas.filter(t => !t.fechaEntrega);
 
     const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
         <div className="space-y-2">
@@ -69,23 +98,28 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         <div className="space-y-4">
             {renderSeccion(
                 "Esta semana",
-                tareas.filter(t => /* lógica para esta semana */[]),
+                tareasEstaSemana,
                 "estaSemana",
                 <Clock className="h-5 w-5 text-orange-600" />,
                 "bg-orange-50"
             )}
-            
             {renderSeccion(
                 "Este mes",
-                tareas.filter(t => /* lógica para este mes */[]),
+                tareasEsteMes,
                 "esteMes",
                 <Calendar className="h-5 w-5 text-blue-600" />,
                 "bg-blue-50"
             )}
-            
+            {renderSeccion(
+                "Próximamente",
+                tareasProximamente,
+                "proximamente",
+                <Hourglass className="h-5 w-5 text-green-600" />,
+                "bg-green-50"
+            )}
             {renderSeccion(
                 "Sin fecha de entrega",
-                tareas.filter(t => /* lógica para sin fecha */[]),
+                tareasSinFecha,
                 "sinFecha",
                 <AlertCircle className="h-5 w-5 text-gray-600" />,
                 "bg-gray-50"
