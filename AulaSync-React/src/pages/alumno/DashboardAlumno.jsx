@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from "react"
-import { BookOpen, Calendar, FileText, CheckCircle, Plus, X, MoreVertical, LogOut, AlertTriangle, Bell, Check, Users, ChevronRight } from "lucide-react"
+import { BookOpen, Plus, X, Users, ChevronRight, AlertTriangle } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../../services/invitaciones';
-import { getTareasStats, getTareasByAlumno } from "../../services/stats"; // Añadir getTareasByAlumno
 import { Link, useNavigate } from "react-router-dom"
 import toast from 'react-hot-toast';
 import NotificationButton from '../../components/NotificationButton';
-import TareasResumen from '../../components/TareasResumen';
-import TareasResumenAlumno from '../../components/alumno/TareasResumenAlumno';
 
 const DashboardAlumno = () => {
     const [mostrarModal, setMostrarModal] = useState(false)
@@ -24,27 +21,10 @@ const DashboardAlumno = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
     const [loading, setLoading] = useState(false);
     const [showNotifMenu, setShowNotifMenu] = useState(false);
-    const [tareasCount, setTareasCount] = useState(0);
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
     const [notifLoading, setNotifLoading] = useState(false);
-    const [tareas, setTareas] = useState([]);
     const navigate = useNavigate();
-
-    const stats = [
-        {
-            icon: BookOpen,
-            label: "Clases Inscritas",
-            value: clases.length,
-            color: "bg-gradient-to-br from-blue-500 to-blue-600"
-        },
-        {
-            icon: FileText,
-            label: "Tareas Pendientes",
-            value: tareasCount,
-            color: "bg-gradient-to-br from-amber-500 to-amber-600"
-        }
-    ]
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
@@ -132,21 +112,16 @@ const DashboardAlumno = () => {
         const cargarTodo = async () => {
             try {
                 setIsLoading(true);
-                const [clasesData, tareasStats, invitaciones, tareasData] = await Promise.all([
+                const [clasesData, invitaciones] = await Promise.all([
                     getClasesAlumno(),
-                    getTareasStats(),
-                    obtenerInvitacionesPendientes(),
-                    getTareasByAlumno()
+                    obtenerInvitacionesPendientes()
                 ]);
                 setClases(clasesData);
-                setTareasCount(tareasStats.totalTareas || 0);
                 setNotificaciones(invitaciones);
-                setTareas(tareasData);
             } catch (error) {
                 console.error('Error al cargar datos del dashboard:', error);
                 setClases([]);
                 setNotificaciones([]);
-                setTareas([]);
             } finally {
                 setIsLoading(false);
             }
@@ -239,58 +214,43 @@ const DashboardAlumno = () => {
                 </button>
             </div>
 
-            {/* Stats - Dos tarjetas horizontales, sin grid */}
-            <div className="flex w-full gap-4">
-                {stats.map((stat, index) => (
-                    <div
-                        key={index}
-                        className="relative flex-1 overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:shadow-md p-4"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`rounded-lg ${stat.color} p-2.5`}>
-                                <stat.icon className="h-5 w-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-xl font-bold text-gray-900">{stat.value}</h3>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="w-full">
-                {/* Listado de clases - Ahora ocupa todo el ancho */}
-                <div className="bg-white rounded-xl shadow-sm">
+            {/* Contenedor principal de clases - ahora ocupa todo el espacio disponible */}
+            <div className="w-full h-[calc(100vh-8rem)]">
+                <div className="bg-white h-full rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-gray-100">
                         <h2 className="text-lg font-semibold">Mis Clases</h2>
                         <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
                     </div>
-                    <div className="p-4">
+                    <div className="flex-1 p-4 overflow-y-auto">
                         <div className="grid gap-3">
                             {clases.length > 0 ? clases.map(clase => (
                                 <Link
                                     key={clase.id}
                                     to={`/alumno/clase/${clase.id}`}
-                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                                    className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200"
                                 >
-                                    <div className="bg-blue-100 p-2 rounded-lg">
-                                        <BookOpen className="h-5 w-5 text-blue-600" />
+                                    <div className="bg-blue-100 p-3 rounded-xl">
+                                        <BookOpen className="h-6 w-6 text-blue-600" />
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-gray-900 truncate">{clase.nombre}</h3>
+                                    <div className="flex-1 min-w-0 flex items-center gap-6">
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-medium text-gray-900">{clase.nombre}</h3>
+                                            <div className="flex items-center gap-6 mt-1">
+                                                <span className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <Users className="h-4 w-4 text-gray-500" />
+                                                    {clase.numEstudiantes} estudiantes
+                                                </span>
+                                                <span className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
+                                                        Código: {clase.codigoClase}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                        </div>
                                         <div className="flex items-center gap-3 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Users className="h-4 w-4" />
-                                                {clase.numEstudiantes} estudiantes
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <BookOpen className="h-4 w-4" />
-                                                Código: {clase.codigoClase}
-                                            </span>
+                                            <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
                                         </div>
                                     </div>
-                                    <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
                                 </Link>
                             )) : (
                                 <div className="text-center py-6">

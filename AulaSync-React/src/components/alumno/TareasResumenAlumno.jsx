@@ -54,14 +54,16 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
     const renderTareaModal = () => {
         if (!showTareaModal || !tareaSeleccionada) return null;
-        
+
         // Construir la URL completa del archivo
-        const downloadUrl = tareaSeleccionada.archivoUrl ? 
+        const downloadUrl = tareaSeleccionada.archivoUrl ?
             `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : null;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
+            <div
+                className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
+                style={{ margin: 0, padding: 0 }}
+            >                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
                     <button
                         onClick={() => setShowTareaModal(false)}
                         className="absolute -top-3 -right-3 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg"
@@ -124,8 +126,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                         <span className="font-medium">Pendiente de entrega</span>
                                     </div>
                                     <p className="text-sm text-gray-600">
-                                        Fecha límite: {tareaSeleccionada.fechaEntrega ? 
-                                            new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString() : 
+                                        Fecha límite: {tareaSeleccionada.fechaEntrega ?
+                                            new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString() :
                                             "Sin fecha límite"}
                                     </p>
                                 </div>
@@ -190,23 +192,22 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                         </span>
                     </div>
                 </div>
-                {seccionesAbiertas[seccionId] ? 
-                    <ChevronUp className="h-5 w-5 text-gray-400" /> : 
+                {seccionesAbiertas[seccionId] ?
+                    <ChevronUp className="h-5 w-5 text-gray-400" /> :
                     <ChevronDown className="h-5 w-5 text-gray-400" />
                 }
             </button>
 
-            <div 
-                className={`transform transition-all duration-200 ease-in-out overflow-hidden ${
-                    seccionesAbiertas[seccionId] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}
+            <div
+                className={`transform transition-all duration-200 ease-in-out overflow-hidden ${seccionesAbiertas[seccionId] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
             >
                 <div className="pl-14 pt-2">
                     {tareas.length > 0 ? (
                         <div className="space-y-3">
                             {tareas.map(tarea => (
-                                <div 
-                                    key={tarea.id} 
+                                <div
+                                    key={tarea.id}
                                     className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer"
                                     onClick={() => handleClickTarea(tarea)}
                                 >
