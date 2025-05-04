@@ -11,8 +11,10 @@ const TareasAlumno = () => {
         const cargarTareas = async () => {
             try {
                 const tareasData = await getTareasByAlumno();
+                console.log("Tareas cargadas:", tareasData); // Para debug
                 setTareas(tareasData);
             } catch (error) {
+                console.error("Error al cargar tareas:", error);
                 setTareas([]);
             } finally {
                 setIsLoading(false);

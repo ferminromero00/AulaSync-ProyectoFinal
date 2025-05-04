@@ -10,6 +10,7 @@ import Clases from './pages/profesor/Clases'
 import Configuracion from './pages/profesor/Configuracion'
 import ClaseDashboard from './pages/profesor/ClaseDashboard'
 import ConfiguracionAlumno from './pages/alumno/Configuracion'
+import TareasAlumno from './pages/alumno/TareasAlumno';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
             <Route path="dashboard" element={<DashboardAlumno />} />
             <Route path="clase/:id" element={<ClaseDashboard />} />
             <Route path="configuracion" element={<ConfiguracionAlumno />} />
+            <Route path="tareas" element={<TareasAlumno />} />
             {/* ...otras rutas de alumno... */}
           </Route>
         </Routes>
