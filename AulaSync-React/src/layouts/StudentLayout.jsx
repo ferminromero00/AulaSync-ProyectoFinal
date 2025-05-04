@@ -88,10 +88,10 @@ const StudentLayout = () => {
                                         </div>
                                     ) : (
                                         clases.map(clase => (
-                                            <Link
+                                            <div
                                                 key={clase.id}
-                                                to={`/alumno/clase/${clase.id}`}
-                                                className="flex items-center justify-between px-2 py-1.5 text-xs text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden"
+                                                onClick={() => window.location.href = `/alumno/clase/${clase.id}`}
+                                                className="flex items-center justify-between px-2 py-1.5 text-xs text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden cursor-pointer"
                                             >
                                                 <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
                                                     <div className="h-1.5 w-1.5 rounded-full bg-green-500/50 group-hover/item:bg-green-400 shrink-0"></div>
@@ -102,7 +102,7 @@ const StudentLayout = () => {
                                                 <span className="text-[10px] text-green-400/70 bg-green-800/30 px-1.5 py-0.5 rounded-full shrink-0 ml-1">
                                                     {clase.numEstudiantes} 👥
                                                 </span>
-                                            </Link>
+                                            </div>
                                         ))
                                     )}
                                 </div>
