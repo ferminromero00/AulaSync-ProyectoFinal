@@ -91,13 +91,16 @@ const StudentLayout = () => {
                                             <Link
                                                 key={clase.id}
                                                 to={`/alumno/clase/${clase.id}`}
-                                                className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800 text-sm group relative overflow-hidden transition-all duration-300"
+                                                className="flex items-center space-x-2 rounded-lg px-4 py-2.5 text-gray-300 hover:bg-green-800 text-sm group relative overflow-hidden transition-all duration-300 border border-green-800/20"
                                             >
                                                 <div className="absolute inset-y-0 left-0 w-1 bg-green-500 transform origin-left scale-y-0 transition-transform group-hover:scale-y-100"></div>
                                                 <div className="flex items-center space-x-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 group-hover:bg-green-400 transition-colors"></div>
-                                                    <span className="truncate">{clase.nombre}</span>
+                                                    <div className="w-2 h-2 rounded-full bg-gray-400 group-hover:bg-green-400 transition-colors"></div>
+                                                    <span className="truncate group-hover:text-white transition-colors">{clase.nombre}</span>
                                                 </div>
+                                                <span className="ml-auto text-xs bg-green-900/30 px-2 py-0.5 rounded-full group-hover:bg-green-700/50 transition-colors">
+                                                    {clase.numEstudiantes} 👥
+                                                </span>
                                             </Link>
                                         ))
                                     )}

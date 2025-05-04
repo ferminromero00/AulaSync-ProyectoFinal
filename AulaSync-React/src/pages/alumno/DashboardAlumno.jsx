@@ -128,21 +128,45 @@ const DashboardAlumno = () => {
     };
 
     useEffect(() => {
-        const cargarClases = async () => {
+        let intervalId;
+        const cargarTodo = async () => {
             try {
-                const data = await getClasesAlumno();
-                setClases(data);
-                // Obtener el número de tareas del alumno
-                const tareas = await getTareasStats();
-                setTareasCount(tareas.totalTareas || 0);
+                setIsLoading(true);
+                const [clasesData, tareasStats, invitaciones, tareasData] = await Promise.all([
+                    getClasesAlumno(),
+                    getTareasStats(),
+                    obtenerInvitacionesPendientes(),
+                    getTareasByAlumno()
+                ]);
+                setClases(clasesData);
+                setTareasCount(tareasStats.totalTareas || 0);
+                setNotificaciones(invitaciones);
+                setTareas(tareasData);
             } catch (error) {
-                console.error('Error al cargar clases del alumno:', error);
+                console.error('Error al cargar datos del dashboard:', error);
+                setClases([]);
+                setNotificaciones([]);
+                setTareas([]);
             } finally {
                 setIsLoading(false);
             }
         };
-        cargarClases();
-        fetchNotificaciones();
+        cargarTodo();
+
+        // Refrescar invitaciones cada 30s SOLO si hay sesión de alumno
+        if (localStorage.getItem('role') === 'alumno') {
+            intervalId = setInterval(async () => {
+                try {
+                    const invitaciones = await obtenerInvitacionesPendientes();
+                    setNotificaciones(invitaciones);
+                } catch {
+                    setNotificaciones([]);
+                }
+            }, 30000);
+        }
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
     }, []);
 
     const handleRespuesta = async (id, respuesta) => {
@@ -174,20 +198,6 @@ const DashboardAlumno = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
-
-    useEffect(() => {
-        const cargarTareas = async () => {
-            try {
-                // Aquí deberías llamar a tu servicio para obtener las tareas
-                const tareasData = await getTareasByAlumno();
-                setTareas(tareasData);
-            } catch (error) {
-                console.error('Error al cargar tareas:', error);
-            }
-        };
-
-        cargarTareas();
-    }, []);
 
     if (isLoading) {
         return (
