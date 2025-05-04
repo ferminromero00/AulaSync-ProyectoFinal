@@ -81,9 +81,9 @@ const StudentLayout = () => {
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
                                 isClassesOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                             }`}>
-                                <div className="pl-11 pr-3 space-y-1 border-l-2 border-green-700/20 ml-6">
+                                <div className="pl-6 pr-2 space-y-1 border-l-2 border-green-700/20 ml-4">
                                     {clases.length === 0 ? (
-                                        <div className="px-3 py-2 text-sm text-green-400/60 italic">
+                                        <div className="px-2 py-2 text-xs text-green-400/60 italic">
                                             No hay clases disponibles
                                         </div>
                                     ) : (
@@ -91,15 +91,15 @@ const StudentLayout = () => {
                                             <Link
                                                 key={clase.id}
                                                 to={`/alumno/clase/${clase.id}`}
-                                                className="flex items-center justify-between px-3 py-2 text-sm text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden"
+                                                className="flex items-center justify-between px-2 py-1.5 text-xs text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden"
                                             >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <div className="h-2 w-2 rounded-full bg-green-500/50 group-hover/item:bg-green-400"></div>
-                                                    <span className="truncate group-hover/item:text-white transition-colors">
+                                                <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-1">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-green-500/50 group-hover/item:bg-green-400 shrink-0"></div>
+                                                    <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
                                                         {clase.nombre}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-green-400/70 bg-green-800/30 px-2 py-0.5 rounded-full">
+                                                <span className="text-[10px] text-green-400/70 bg-green-800/30 px-1.5 py-0.5 rounded-full shrink-0 ml-1">
                                                     {clase.numEstudiantes} 👥
                                                 </span>
                                             </Link>
