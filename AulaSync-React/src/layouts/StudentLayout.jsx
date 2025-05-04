@@ -1,13 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
-import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut } from 'lucide-react'
+import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut, ChevronRight, ChevronDown, GraduationCap } from 'lucide-react'
 import { logout } from '../services/auth'
+import { getClasesAlumno } from '../services/clases'
 import NotificationButton from '../components/NotificationButton'
 import AvatarButton from '../components/AvatarButton'
 
 const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    const [isClassesOpen, setIsClassesOpen] = useState(false)
+    const [clases, setClases] = useState([])
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const cargarClases = async () => {
+            try {
+                const data = await getClasesAlumno();
+                setClases(data);
+            } catch (error) {
+                console.error('Error al cargar clases:', error);
+            }
+        };
+        cargarClases();
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -40,6 +55,56 @@ const StudentLayout = () => {
                             <BarChart2 className="h-5 w-5" />
                             <span>Dashboard</span>
                         </Link>
+
+                        {/* Menú desplegable de clases */}
+                        <div className="space-y-1">
+                            <button
+                                onClick={() => setIsClassesOpen(!isClassesOpen)}
+                                className="flex items-center justify-between w-full rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800 transition-all duration-300"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <GraduationCap className="h-5 w-5" />
+                                    <span>Mis Clases</span>
+                                </div>
+                                <div className="transform transition-transform duration-300">
+                                    {isClassesOpen ? (
+                                        <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronRight className="h-4 w-4" />
+                                    )}
+                                </div>
+                            </button>
+
+                            {/* Lista de clases con animación */}
+                            <div
+                                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                                    isClassesOpen ? 'max-h-96' : 'max-h-0'
+                                }`}
+                            >
+                                <div className="pl-4 space-y-1 py-2">
+                                    {clases.length === 0 ? (
+                                        <div className="px-4 py-2 text-gray-400 text-sm italic">
+                                            No hay clases disponibles
+                                        </div>
+                                    ) : (
+                                        clases.map(clase => (
+                                            <Link
+                                                key={clase.id}
+                                                to={`/alumno/clase/${clase.id}`}
+                                                className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800 text-sm group relative overflow-hidden transition-all duration-300"
+                                            >
+                                                <div className="absolute inset-y-0 left-0 w-1 bg-green-500 transform origin-left scale-y-0 transition-transform group-hover:scale-y-100"></div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 group-hover:bg-green-400 transition-colors"></div>
+                                                    <span className="truncate">{clase.nombre}</span>
+                                                </div>
+                                            </Link>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         <Link to="/alumno/tareas"
                               className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800">
                             <FileText className="h-5 w-5" />
