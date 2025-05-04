@@ -249,8 +249,8 @@ const DashboardAlumno = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Listado de clases */}
+            <div className="w-full">
+                {/* Listado de clases - Ahora ocupa todo el ancho */}
                 <div className="bg-white rounded-xl shadow-sm">
                     <div className="px-6 py-4 border-b border-gray-100">
                         <h2 className="text-lg font-semibold">Mis Clases</h2>
@@ -290,16 +290,6 @@ const DashboardAlumno = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
-
-                {/* Tareas pendientes */}
-                <div className="bg-white rounded-xl shadow-sm h-[600px] flex flex-col">
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <h2 className="text-lg font-semibold">Tareas Pendientes</h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-6">
-                        <TareasResumenAlumno tareas={tareas} />
                     </div>
                 </div>
             </div>
