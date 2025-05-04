@@ -80,7 +80,19 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                     key={tarea.id} 
                                     className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200"
                                 >
-                                    {/* Contenido de la tarea */}
+                                    <div className="flex flex-col gap-1">
+                                        <span className="font-medium text-gray-900">
+                                            <span className="font-semibold">Título:</span> {tarea.titulo || tarea.contenido}
+                                        </span>
+                                        <span className="text-sm text-gray-500">
+                                            <span className="font-semibold">Clase:</span> {tarea.clase?.nombre || 'Sin clase'}
+                                        </span>
+                                        {tarea.fechaEntrega && (
+                                            <span className="text-xs text-gray-400">
+                                                Entrega: {new Date(tarea.fechaEntrega).toLocaleString()}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

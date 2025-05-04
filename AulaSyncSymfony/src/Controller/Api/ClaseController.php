@@ -427,6 +427,44 @@ class ClaseController extends AbstractController
         return new JsonResponse(['error' => 'Rol no soportado'], 400);
     }
 
+    #[Route('/tareas/alumno', name: 'tareas_alumno', methods: ['GET'])]
+    public function getTareasAlumno(EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\Alumno) {
+            return new JsonResponse(['error' => 'No autenticado'], 401);
+        }
+
+        // Obtener todas las tareas (anuncios tipo "tarea") de las clases en las que está inscrito el alumno
+        $qb = $em->createQueryBuilder()
+            ->select('a', 'c')
+            ->from(\App\Entity\Anuncio::class, 'a')
+            ->join('a.clase', 'c')
+            ->join('c.alumnos', 'al')
+            ->where('a.tipo = :tipo')
+            ->andWhere('al = :alumno')
+            ->setParameter('tipo', 'tarea')
+            ->setParameter('alumno', $user);
+
+        $tareas = $qb->getQuery()->getResult();
+
+        // Formatear la respuesta
+        $result = [];
+        foreach ($tareas as $tarea) {
+            $result[] = [
+                'id' => $tarea->getId(),
+                'titulo' => $tarea->getTitulo() ?? $tarea->getContenido(),
+                'fechaEntrega' => $tarea->getFechaEntrega() ? $tarea->getFechaEntrega()->format('Y-m-d H:i:s') : null,
+                'clase' => [
+                    'id' => $tarea->getClase()->getId(),
+                    'nombre' => $tarea->getClase()->getNombre(),
+                ],
+            ];
+        }
+
+        return new JsonResponse($result);
+    }
+
     #[Route('/clases/{id}', name: 'get_clase', methods: ['GET'])]
     public function getClase(int $id, EntityManagerInterface $em): JsonResponse
     {

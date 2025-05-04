@@ -78,7 +78,13 @@ export const getTareasByAlumno = async () => {
         });
 
         if (!response.ok) {
-            throw new Error('Error al obtener tareas');
+            // Mostrar el error real si lo hay
+            let errorMsg = 'Error al obtener tareas';
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorMsg;
+            } catch {}
+            throw new Error(errorMsg);
         }
 
         return await response.json();
