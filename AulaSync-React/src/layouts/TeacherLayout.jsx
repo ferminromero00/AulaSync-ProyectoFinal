@@ -25,47 +25,49 @@ const TeacherLayout = () => {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out bg-gray-900
+            <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-                <div className="flex h-full flex-col bg-gray-900 text-white">
-                    <div className="flex h-16 items-center justify-between px-4">
-                        <Link to="/profesor/dashboard" className="flex items-center space-x-2">
-                            <BookOpen className="h-6 w-6" />
-                            <span className="text-xl font-bold">AulaSync</span>
-                        </Link>
-                        <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden">
-                            <X className="h-6 w-6" />
-                        </button>
+                <div className="flex h-full flex-col bg-gradient-to-b from-blue-900 to-blue-800 text-white">
+                    {/* Logo y título */}
+                    <div className="flex h-16 items-center gap-2 px-6 border-b border-blue-700/50">
+                        <BookOpen className="h-7 w-7 text-blue-300" />
+                        <span className="text-xl font-bold tracking-wider text-white/90">AulaSync</span>
                     </div>
-                    <nav className="flex-1 space-y-1 px-2 py-4">
+
+                    {/* Navegación principal */}
+                    <nav className="flex-1 space-y-2 px-3 py-4">
                         <Link to="/profesor/dashboard" 
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800">
-                            <BarChart2 className="h-5 w-5" />
-                            <span>Dashboard</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
+                            <BarChart2 className="h-5 w-5 text-blue-300" />
+                            <span className="font-medium">Dashboard</span>
                         </Link>
+
                         <Link to="/profesor/clases"
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800">
-                            <Users className="h-5 w-5" />
-                            <span>Clases</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
+                            <Users className="h-5 w-5 text-blue-300" />
+                            <span className="font-medium">Clases</span>
                         </Link>
+
                         <Link to="/profesor/tareas"
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800">
-                            <FileText className="h-5 w-5" />
-                            <span>Tareas</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
+                            <FileText className="h-5 w-5 text-blue-300" />
+                            <span className="font-medium">Tareas</span>
                         </Link>
                     </nav>
-                    <div className="border-t border-gray-800 p-4 space-y-2">
+
+                    {/* Footer navigation */}
+                    <div className="border-t border-blue-700/50 p-4 space-y-2">
                         <Link to="/profesor/configuracion"
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800">
-                            <Settings className="h-5 w-5" />
-                            <span>Configuración</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
+                            <Settings className="h-5 w-5 text-blue-300" />
+                            <span className="font-medium">Configuración</span>
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="flex w-full items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-gray-800"
+                            className="flex w-full items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 hover:text-red-100 hover:shadow-md hover:shadow-red-500/20 transition-all duration-200"
                         >
-                            <LogOut className="h-5 w-5" />
-                            <span>Cerrar Sesión</span>
+                            <LogOut className="h-5 w-5 text-red-400" />
+                            <span className="font-medium">Cerrar Sesión</span>
                         </button>
                     </div>
                 </div>

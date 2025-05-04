@@ -42,48 +42,48 @@ const StudentLayout = () => {
             {/* Sidebar */}
             <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-                <div className="flex h-full flex-col bg-green-900 text-white">
-                    <div className="flex h-16 items-center justify-between px-4">
-                        <Link to="/alumno/dashboard" className="flex items-center space-x-2">
-                            <BookOpen className="h-6 w-6" />
-                            <span className="text-xl font-bold">AulaSync</span>
-                        </Link>
+                <div className="flex h-full flex-col bg-gradient-to-b from-green-900 to-green-800 text-white">
+                    {/* Logo y título */}
+                    <div className="flex h-16 items-center gap-2 px-6 border-b border-green-700/50">
+                        <BookOpen className="h-7 w-7 text-green-400" />
+                        <span className="text-xl font-bold tracking-wider text-white/90">AulaSync</span>
                     </div>
-                    <nav className="flex-1 space-y-1 px-2 py-4">
+
+                    {/* Navegación principal */}
+                    <nav className="flex-1 space-y-2 px-3 py-4">
+                        {/* Dashboard link */}
                         <Link to="/alumno/dashboard" 
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800">
-                            <BarChart2 className="h-5 w-5" />
-                            <span>Dashboard</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-green-700/20 bg-green-800/20 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-md hover:shadow-green-500/20 transition-all duration-200">
+                            <BarChart2 className="h-5 w-5 text-green-300" />
+                            <span className="font-medium">Dashboard</span>
                         </Link>
 
-                        {/* Menú desplegable de clases */}
-                        <div className="space-y-1">
+                        {/* Sección de Mis Clases */}
+                        <div className="space-y-2 pt-1">
                             <button
                                 onClick={() => setIsClassesOpen(!isClassesOpen)}
-                                className="flex items-center justify-between w-full rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800 transition-all duration-300"
+                                className="flex w-full items-center justify-between px-4 py-3 text-gray-300 rounded-lg border border-green-700/20 bg-green-800/20 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-md hover:shadow-green-500/20 transition-all duration-200"
                             >
-                                <div className="flex items-center space-x-2">
-                                    <GraduationCap className="h-5 w-5" />
-                                    <span>Mis Clases</span>
+                                <div className="flex items-center gap-3">
+                                    <GraduationCap className="h-5 w-5 text-green-400" />
+                                    <span className="font-medium">Mis Clases</span>
                                 </div>
-                                <div className="transform transition-transform duration-300">
+                                <div className="transform transition-transform duration-200">
                                     {isClassesOpen ? (
-                                        <ChevronDown className="h-4 w-4" />
+                                        <ChevronDown className="h-4 w-4 opacity-70" />
                                     ) : (
-                                        <ChevronRight className="h-4 w-4" />
+                                        <ChevronRight className="h-4 w-4 opacity-70" />
                                     )}
                                 </div>
                             </button>
 
-                            {/* Lista de clases con animación */}
-                            <div
-                                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                                    isClassesOpen ? 'max-h-96' : 'max-h-0'
-                                }`}
-                            >
-                                <div className="pl-4 space-y-1 py-2">
+                            {/* Lista de clases con animación mejorada */}
+                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                                isClassesOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                            }`}>
+                                <div className="pl-11 pr-3 space-y-1 border-l-2 border-green-700/20 ml-6">
                                     {clases.length === 0 ? (
-                                        <div className="px-4 py-2 text-gray-400 text-sm italic">
+                                        <div className="px-3 py-2 text-sm text-green-400/60 italic">
                                             No hay clases disponibles
                                         </div>
                                     ) : (
@@ -91,14 +91,15 @@ const StudentLayout = () => {
                                             <Link
                                                 key={clase.id}
                                                 to={`/alumno/clase/${clase.id}`}
-                                                className="flex items-center space-x-2 rounded-lg px-4 py-2.5 text-gray-300 hover:bg-green-800 text-sm group relative overflow-hidden transition-all duration-300 border border-green-800/20"
+                                                className="flex items-center justify-between px-3 py-2 text-sm text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden"
                                             >
-                                                <div className="absolute inset-y-0 left-0 w-1 bg-green-500 transform origin-left scale-y-0 transition-transform group-hover:scale-y-100"></div>
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="w-2 h-2 rounded-full bg-gray-400 group-hover:bg-green-400 transition-colors"></div>
-                                                    <span className="truncate group-hover:text-white transition-colors">{clase.nombre}</span>
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className="h-2 w-2 rounded-full bg-green-500/50 group-hover/item:bg-green-400"></div>
+                                                    <span className="truncate group-hover/item:text-white transition-colors">
+                                                        {clase.nombre}
+                                                    </span>
                                                 </div>
-                                                <span className="ml-auto text-xs bg-green-900/30 px-2 py-0.5 rounded-full group-hover:bg-green-700/50 transition-colors">
+                                                <span className="text-xs text-green-400/70 bg-green-800/30 px-2 py-0.5 rounded-full">
                                                     {clase.numEstudiantes} 👥
                                                 </span>
                                             </Link>
@@ -108,24 +109,27 @@ const StudentLayout = () => {
                             </div>
                         </div>
 
+                        {/* Tareas link */}
                         <Link to="/alumno/tareas"
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800">
-                            <FileText className="h-5 w-5" />
-                            <span>Tareas</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-green-700/20 bg-green-800/20 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-md hover:shadow-green-500/20 transition-all duration-200">
+                            <FileText className="h-5 w-5 text-green-300" />
+                            <span className="font-medium">Tareas</span>
                         </Link>
                     </nav>
-                    <div className="border-t border-green-800 p-4 space-y-2">
+
+                    {/* Footer navigation */}
+                    <div className="border-t border-green-700/50 p-4 space-y-2">
                         <Link to="/alumno/configuracion"
-                              className="flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800">
-                            <Settings className="h-5 w-5" />
-                            <span>Configuración</span>
+                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-green-700/20 bg-green-800/20 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-md hover:shadow-green-500/20 transition-all duration-200">
+                            <Settings className="h-5 w-5 text-green-300" />
+                            <span className="font-medium">Configuración</span>
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="flex w-full items-center space-x-2 rounded-lg px-4 py-2 text-gray-300 hover:bg-green-800"
+                            className="flex w-full items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 hover:text-red-100 hover:shadow-md hover:shadow-red-500/20 transition-all duration-200"
                         >
-                            <LogOut className="h-5 w-5" />
-                            <span>Cerrar Sesión</span>
+                            <LogOut className="h-5 w-5 text-red-400" />
+                            <span className="font-medium">Cerrar Sesión</span>
                         </button>
                     </div>
                 </div>
