@@ -191,7 +191,15 @@ class ClaseController extends AbstractController
     public function getClaseDetalle(int $id, EntityManagerInterface $em): JsonResponse
     {
         try {
-            $clase = $em->getRepository(Clase::class)->find($id);
+            // OPTIMIZACIÓN: fetch join para alumnos y profesor
+            $qb = $em->createQueryBuilder()
+                ->select('c', 'a', 'p')
+                ->from(\App\Entity\Clase::class, 'c')
+                ->leftJoin('c.alumnos', 'a')
+                ->leftJoin('c.profesor', 'p')
+                ->where('c.id = :id')
+                ->setParameter('id', $id);
+            $clase = $qb->getQuery()->getOneOrNullResult();
 
             if (!$clase) {
                 return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
@@ -201,6 +209,7 @@ class ClaseController extends AbstractController
                 return new JsonResponse(['error' => 'No tienes permiso para ver esta clase'], JsonResponse::HTTP_FORBIDDEN);
             }
 
+            // Limitar los campos de los estudiantes para respuesta rápida
             $estudiantes = array_map(function($estudiante) {
                 return [
                     'id' => $estudiante->getId(),
@@ -226,7 +235,15 @@ class ClaseController extends AbstractController
     public function getClaseDetalleAlumno(int $id, EntityManagerInterface $em): JsonResponse
     {
         try {
-            $clase = $em->getRepository(Clase::class)->find($id);
+            // OPTIMIZACIÓN: fetch join para alumnos y profesor
+            $qb = $em->createQueryBuilder()
+                ->select('c', 'a', 'p')
+                ->from(\App\Entity\Clase::class, 'c')
+                ->leftJoin('c.alumnos', 'a')
+                ->leftJoin('c.profesor', 'p')
+                ->where('c.id = :id')
+                ->setParameter('id', $id);
+            $clase = $qb->getQuery()->getOneOrNullResult();
 
             if (!$clase) {
                 return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);

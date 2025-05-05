@@ -8,11 +8,12 @@ import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
 import { crearAnuncio, obtenerAnuncios, eliminarAnuncio } from '../../services/anuncios';
 import { API_BASE_URL } from '../../config/config';
+import { useClase } from '../../contexts/ClaseContext';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [clase, setClase] = useState(null);
+    const { claseData, setClaseData, anuncios, setAnuncios } = useClase();
     const [isLoading, setIsLoading] = useState(true);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +31,6 @@ const ClaseDashboard = () => {
         descripcion: ''
     });
     const [showTipoSelector, setShowTipoSelector] = useState(true);
-    const [anuncios, setAnuncios] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [anuncioToDelete, setAnuncioToDelete] = useState(null);
     const [isDeletingAnuncio, setIsDeletingAnuncio] = useState(false);
@@ -42,36 +42,43 @@ const ClaseDashboard = () => {
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
 
     useEffect(() => {
-        const fetchClase = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getClaseById(id);
-                setClase(data);
+                setIsLoading(true);
+                // Realizar ambas llamadas en paralelo
+                const [claseResponse, anunciosData] = await Promise.all([
+                    getClaseById(id),
+                    obtenerAnuncios(id)
+                ]);
+                
+                setClaseData(claseResponse);
+                setAnuncios(anunciosData || []);
             } catch (error) {
-                console.error('Error al cargar la clase:', error);
-                if (error.message.includes('No autorizado')) {
-                    navigate('/'); // Redirigir al login si el token no es válido
-                }
+                console.error('Error:', error);
+                toast.error('Error al cargar los datos de la clase');
+                setAnuncios([]); // Asegurarnos de que siempre sea un array
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchClase();
-    }, [id, navigate]);
+
+        fetchData();
+        
+        return () => {
+            setClaseData(null);
+            setAnuncios([]);
+        };
+    }, [id, setClaseData, setAnuncios]);
 
     const fetchAnuncios = async () => {
         try {
             const anunciosData = await obtenerAnuncios(id);
-            setAnuncios(anunciosData);
+            setAnuncios(anunciosData || []);
         } catch (error) {
-            console.error('Error al cargar los anuncios:', error);
+            console.error('Error al obtener anuncios:', error);
             toast.error('Error al cargar los anuncios');
-            setAnuncios([]);
         }
     };
-
-    useEffect(() => {
-        fetchAnuncios();
-    }, [id]);
 
     const handleSearchAlumnos = async (query) => {
         if (!query.trim()) {
@@ -140,7 +147,6 @@ const ClaseDashboard = () => {
                 dataToSend = {
                     ...dataToSend,
                     contenido: anuncioData.descripcion,
-                    // Solo incluir fechaEntrega si tiene un valor
                     ...(anuncioData.fechaEntrega ? { fechaEntrega: anuncioData.fechaEntrega } : {})
                 };
             }
@@ -157,7 +163,7 @@ const ClaseDashboard = () => {
                 descripcion: ''
             });
             setShowTipoSelector(true);
-            fetchAnuncios();
+            await fetchAnuncios(); // Usar await aquí para asegurar que los anuncios se actualicen
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         } finally {
@@ -270,9 +276,9 @@ const ClaseDashboard = () => {
                         <X className="h-6 w-6" />
                     </button>
                     <h3 className="text-xl font-semibold mb-4">Lista de Alumnos</h3>
-                    {clase.estudiantes && clase.estudiantes.length > 0 ? (
+                    {claseData.estudiantes && claseData.estudiantes.length > 0 ? (
                         <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                            {clase.estudiantes.map((estudiante) => (
+                            {claseData.estudiantes.map((estudiante) => (
                                 <li key={estudiante.id} className="py-3 flex items-center gap-4">
                                     <img
                                         src={estudiante.fotoPerfilUrl ? `${API_BASE_URL}${estudiante.fotoPerfilUrl}` : '/default-avatar.png'}
@@ -638,7 +644,7 @@ const ClaseDashboard = () => {
                                             <div className="text-center">
                                                 <p className="text-sm text-gray-500">Pendientes</p>
                                                 <p className="text-2xl font-semibold text-gray-900">
-                                                    {clase?.estudiantes?.length || 0}
+                                                    {claseData?.estudiantes?.length || 0}
                                                 </p>
                                             </div>
                                         </div>
@@ -650,7 +656,7 @@ const ClaseDashboard = () => {
                                             <h5 className="font-medium text-gray-900">Estado por estudiante</h5>
                                         </div>
                                         <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                                            {clase?.estudiantes?.map((estudiante) => (
+                                            {claseData?.estudiantes?.map((estudiante) => (
                                                 <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
                                                     <div>
                                                         <p className="font-medium text-gray-900">{estudiante.nombre}</p>
@@ -735,7 +741,7 @@ const ClaseDashboard = () => {
         );
     }
 
-    if (!clase) {
+    if (!claseData) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
                 <BookOpen className="h-16 w-16 text-gray-400 mb-4" />
@@ -755,12 +761,12 @@ const ClaseDashboard = () => {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div className="flex-1 min-w-0">
                             <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                                {clase.nombre}
+                                {claseData.nombre}
                             </h1>
                             <div className="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
                                 <div className="mt-2 flex items-center text-sm text-gray-500">
                                     <BookOpen className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                                    Código: {clase.codigoClase}
+                                    Código: {claseData.codigoClase}
                                 </div>
                             </div>
                         </div>
@@ -805,20 +811,20 @@ const ClaseDashboard = () => {
                             </div>
                         </div>
                         <div className="min-h-[200px] max-h-[280px] overflow-y-auto">
-                            {clase.estudiantes && clase.estudiantes.length > 0 ? (
+                            {claseData.estudiantes && claseData.estudiantes.length > 0 ? (
                                 <ul className="space-y-3">
-                                    {clase.estudiantes.slice(0, 4).map((estudiante) => (
+                                    {claseData.estudiantes.slice(0, 4).map((estudiante) => (
                                         <li key={estudiante.id} className="text-gray-700 py-1.5 px-2 rounded-md hover:bg-gray-50">
                                             {estudiante.nombre}
                                         </li>
                                     ))}
-                                    {clase.estudiantes.length > 4 && (
+                                    {claseData.estudiantes.length > 4 && (
                                         <li className="text-center text-gray-500 py-2 border-t">
                                             <span className="block text-lg mb-1">•••</span>
                                             <div 
                                                 className="text-blue-600 text-sm"
                                             >
-                                                Alumnos totales ({clase.estudiantes.length})
+                                                Alumnos totales ({claseData.estudiantes.length})
                                             </div>
                                         </li>
                                     )}

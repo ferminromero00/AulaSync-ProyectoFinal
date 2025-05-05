@@ -23,6 +23,7 @@ const ClaseDashboard = () => {
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
 
     useEffect(() => {
+        // Solo cargar datos de la clase, no perfil ni clases globales aquí
         const fetchClase = async () => {
             try {
                 const data = await getClaseById(id);

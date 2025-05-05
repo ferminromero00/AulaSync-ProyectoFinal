@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class AnuncioController extends AbstractController
 {
-    #[Route('/api/anuncios/crear', name: 'crear_anuncio', methods: ['POST'])]
+    #[Route('/api/anuncios', name: 'crear_anuncio', methods: ['POST'])]
     public function crearAnuncio(Request $request, EntityManagerInterface $entityManager, ClaseRepository $claseRepository): JsonResponse
     {
         try {
@@ -79,7 +79,7 @@ class AnuncioController extends AbstractController
         }
     }
 
-    #[Route('/api/anuncios/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]
+    #[Route('/api/anuncios/clase/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]
     public function obtenerAnuncios(int $claseId, ClaseRepository $claseRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         try {
@@ -100,25 +100,22 @@ class AnuncioController extends AbstractController
                 ->getQuery()
                 ->getResult();
 
-            $formattedAnuncios = array_map(function($anuncio) {
+            return $this->json(['anuncios' => array_map(function($anuncio) {
                 return [
                     'id' => $anuncio['id'],
                     'contenido' => $anuncio['contenido'],
                     'tipo' => $anuncio['tipo'],
                     'fechaCreacion' => $anuncio['fechaCreacion']->format('Y-m-d H:i:s'),
                     'fechaEntrega' => $anuncio['fechaEntrega'] ? $anuncio['fechaEntrega']->format('Y-m-d H:i:s') : null,
-                    'titulo' => $anuncio['titulo'] ?? null,
-                    'archivoUrl' => $anuncio['archivoUrl'] ?? null,
+                    'titulo' => $anuncio['titulo'],
+                    'archivoUrl' => $anuncio['archivoUrl'],
                     'autor' => [
                         'id' => $anuncio['autorId'],
                         'nombre' => trim($anuncio['first_name'] . ' ' . $anuncio['last_name'])
                     ]
                 ];
-            }, $anuncios);
+            }, $anuncios)]);
 
-            return $this->json(['anuncios' => $formattedAnuncios], 200, [], [
-                'groups' => ['anuncio']
-            ]);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => 'Error al obtener los anuncios',

@@ -1,3 +1,6 @@
+import { api } from './api';
+import { API_BASE_URL } from '../config/config';
+
 const API_URL = 'http://localhost:8000/api';
 
 const handleRequest = async (url, options = {}) => {
@@ -109,23 +112,21 @@ export const getClaseById = async (id) => {
             throw new Error('NO_ROLE');
         }
 
-        const endpoint = role === 'alumno' ? `/clases/${id}/alumno` : `/clases/${id}`;
-
-        return handleRequest(endpoint, {
-            method: 'GET'
+        const response = await fetch(`${API_BASE_URL}/api/clases/${id}${role === 'alumno' ? '/alumno' : ''}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
         });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al obtener la clase');
+        }
+
+        return response.json();
     } catch (error) {
         console.error('Error en getClaseById:', error);
-        if (
-            error.message === 'TOKEN_EXPIRED' || 
-            error.message === 'NO_TOKEN' || 
-            error.message === 'UNAUTHORIZED'
-        ) {
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
-            throw new Error('Sesión expirada. Redirigiendo al login...');
-        }
         throw error;
     }
 };
