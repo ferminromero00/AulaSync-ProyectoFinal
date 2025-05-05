@@ -1,13 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Bell, Check, X } from "lucide-react";
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../services/invitaciones';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { GlobalContext } from "../App";
 
 const NotificationButton = () => {
     const navigate = useNavigate();
+    const { userData } = useContext(GlobalContext);
+    const notificaciones = userData.invitaciones || [];
     const [showNotifMenu, setShowNotifMenu] = useState(false);
-    const [notificaciones, setNotificaciones] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notifLoading, setNotifLoading] = useState(false);
     const notifBtnRef = useRef(null);
@@ -30,16 +32,6 @@ const NotificationButton = () => {
         }
         setLoading(false);
     };
-
-    useEffect(() => {
-        if (role === 'alumno') {
-            fetchNotificaciones();
-            const interval = setInterval(fetchNotificaciones, 30000);
-            return () => clearInterval(interval);
-        }
-        // Si no es alumno, no hace nada
-    // eslint-disable-next-line
-    }, []);
 
     useEffect(() => {
         if (!showNotifMenu) return;

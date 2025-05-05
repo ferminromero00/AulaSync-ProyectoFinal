@@ -1,28 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useContext, useState } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut, ChevronRight, ChevronDown, GraduationCap } from 'lucide-react'
 import { logout } from '../services/auth'
-import { getClasesAlumno } from '../services/clases'
 import NotificationButton from '../components/NotificationButton'
 import AvatarButton from '../components/AvatarButton'
+import { GlobalContext } from '../App'
 
 const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const [isClassesOpen, setIsClassesOpen] = useState(false)
-    const [clases, setClases] = useState([])
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const cargarClases = async () => {
-            try {
-                const data = await getClasesAlumno();
-                setClases(data);
-            } catch (error) {
-                console.error('Error al cargar clases:', error);
-            }
-        };
-        cargarClases();
-    }, []);
+    const { userData } = useContext(GlobalContext);
+    const clases = userData.clases || [];
 
     const handleLogout = () => {
         logout();

@@ -1,29 +1,30 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useContext } from "react"
 import { BookOpen, Plus, X, Users, ChevronRight, AlertTriangle } from "lucide-react"
-import { buscarClasePorCodigo, unirseAClase, getClasesAlumno, salirDeClase } from "../../services/clases"
-import { obtenerInvitacionesPendientes, responderInvitacion } from '../../services/invitaciones';
+import { buscarClasePorCodigo, unirseAClase, salirDeClase } from "../../services/clases"
+import { responderInvitacion } from '../../services/invitaciones';
 import { Link, useNavigate } from "react-router-dom"
 import toast from 'react-hot-toast';
 import NotificationButton from '../../components/NotificationButton';
+import { GlobalContext } from "../../App"
 
 const DashboardAlumno = () => {
+    const { userData } = useContext(GlobalContext);
+    const { clases, invitaciones, loading } = userData;
+
     const [mostrarModal, setMostrarModal] = useState(false)
     const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false)
     const [claseParaUnirse, setClaseParaUnirse] = useState(null)
     const [codigo, setCodigo] = useState("")
     const [error, setError] = useState("")
-    const [clases, setClases] = useState([]);
     const [notificaciones, setNotificaciones] = useState([]); // Añadir este estado
-    const [isLoading, setIsLoading] = useState(true);
     const [menuAbierto, setMenuAbierto] = useState(null);
     const [claseSeleccionada, setClaseSeleccionada] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-    const [loading, setLoading] = useState(false);
+    const [notifLoading, setNotifLoading] = useState(false);
     const [showNotifMenu, setShowNotifMenu] = useState(false);
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
-    const [notifLoading, setNotifLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleBuscarClase = async (e) => {
@@ -95,55 +96,6 @@ const DashboardAlumno = () => {
         }
     }
 
-    const fetchNotificaciones = async () => {
-        setLoading(true);
-        try {
-            const data = await obtenerInvitacionesPendientes();
-            console.log("Invitaciones pendientes:", data); // <-- Añade esto para depurar
-            setNotificaciones(data);
-        } catch (e) {
-            setNotificaciones([]);
-        }
-        setLoading(false);
-    };
-
-    useEffect(() => {
-        let intervalId;
-        const cargarTodo = async () => {
-            try {
-                setIsLoading(true);
-                const [clasesData, invitaciones] = await Promise.all([
-                    getClasesAlumno(),
-                    obtenerInvitacionesPendientes()
-                ]);
-                setClases(clasesData);
-                setNotificaciones(invitaciones);
-            } catch (error) {
-                console.error('Error al cargar datos del dashboard:', error);
-                setClases([]);
-                setNotificaciones([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        cargarTodo();
-
-        // Refrescar invitaciones cada 30s SOLO si hay sesión de alumno
-        if (localStorage.getItem('role') === 'alumno') {
-            intervalId = setInterval(async () => {
-                try {
-                    const invitaciones = await obtenerInvitacionesPendientes();
-                    setNotificaciones(invitaciones);
-                } catch {
-                    setNotificaciones([]);
-                }
-            }, 30000);
-        }
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, []);
-
     const handleRespuesta = async (id, respuesta) => {
         try {
             setNotifLoading(true);
@@ -174,7 +126,7 @@ const DashboardAlumno = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
 
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -222,44 +174,50 @@ const DashboardAlumno = () => {
                         <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
                     </div>
                     <div className="flex-1 p-4 overflow-y-auto">
-                        <div className="grid gap-3">
-                            {clases.length > 0 ? clases.map(clase => (
-                                <Link
-                                    key={clase.id}
-                                    to={`/alumno/clase/${clase.id}`}
-                                    className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200"
-                                >
-                                    <div className="bg-blue-100 p-3 rounded-xl">
-                                        <BookOpen className="h-6 w-6 text-blue-600" />
-                                    </div>
-                                    <div className="flex-1 min-w-0 flex items-center gap-6">
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-medium text-gray-900">{clase.nombre}</h3>
-                                            <div className="flex items-center gap-6 mt-1">
-                                                <span className="flex items-center gap-2 text-sm text-gray-600">
-                                                    <Users className="h-4 w-4 text-gray-500" />
-                                                    {clase.numEstudiantes} estudiantes
-                                                </span>
-                                                <span className="flex items-center gap-2 text-sm text-gray-600">
-                                                    <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
-                                                        Código: {clase.codigoClase}
+                        {loading ? (
+                            <div className="flex justify-center items-center h-64">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : (
+                            <div className="grid gap-3">
+                                {clases && clases.length > 0 ? clases.map(clase => (
+                                    <Link
+                                        key={clase.id}
+                                        to={`/alumno/clase/${clase.id}`}
+                                        className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200"
+                                    >
+                                        <div className="bg-blue-100 p-3 rounded-xl">
+                                            <BookOpen className="h-6 w-6 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1 min-w-0 flex items-center gap-6">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-medium text-gray-900">{clase.nombre}</h3>
+                                                <div className="flex items-center gap-6 mt-1">
+                                                    <span className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <Users className="h-4 w-4 text-gray-500" />
+                                                        {clase.numEstudiantes} estudiantes
                                                     </span>
-                                                </span>
+                                                    <span className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
+                                                            Código: {clase.codigoClase}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                                                <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 text-sm text-gray-500">
-                                            <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
-                                        </div>
+                                    </Link>
+                                )) : (
+                                    <div className="text-center py-12">
+                                        <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                                        <p className="text-lg text-gray-600 mb-2">No estás inscrito en ninguna clase</p>
+                                        <p className="text-sm text-gray-500">Usa el botón "Unirse a clase" para empezar</p>
                                     </div>
-                                </Link>
-                            )) : (
-                                <div className="text-center py-6">
-                                    <BookOpen className="h-10 w-10 mx-auto mb-2 text-gray-400" />
-                                    <p className="text-gray-500">No estás inscrito en ninguna clase</p>
-                                    <p className="text-sm text-gray-400">Usa el botón "Unirse a clase" para empezar</p>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

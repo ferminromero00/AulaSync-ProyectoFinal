@@ -12,10 +12,51 @@ import ClaseDashboard from './pages/profesor/ClaseDashboard'
 import ConfiguracionAlumno from './pages/alumno/Configuracion'
 import TareasAlumno from './pages/alumno/TareasAlumno';
 import { Toaster } from 'react-hot-toast';
+import { createContext, useState, useEffect } from 'react';
+import { getPerfil } from './services/perfil';
+import { getClasesAlumno } from './services/clases';
+import { obtenerInvitacionesPendientes } from './services/invitaciones';
+
+export const GlobalContext = createContext();
+
+export function GlobalProvider({ children }) {
+    const [userData, setUserData] = useState({
+        user: null,
+        clases: [],
+        invitaciones: [],
+        loading: true
+    });
+
+    useEffect(() => {
+        const cargarDatos = async () => {
+            if (!localStorage.getItem('token')) {
+                setUserData({ user: null, clases: [], invitaciones: [], loading: false });
+                return;
+            }
+            try {
+                const [user, clases, invitaciones] = await Promise.all([
+                    getPerfil(),
+                    getClasesAlumno(),
+                    obtenerInvitacionesPendientes()
+                ]);
+                setUserData({ user, clases, invitaciones, loading: false });
+            } catch {
+                setUserData({ user: null, clases: [], invitaciones: [], loading: false });
+            }
+        };
+        cargarDatos();
+    }, []);
+
+    return (
+        <GlobalContext.Provider value={{ userData, setUserData }}>
+            {children}
+        </GlobalContext.Provider>
+    );
+}
 
 function App() {
   return (
-    <>
+    <GlobalProvider>
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
@@ -49,7 +90,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </GlobalProvider>
   )
 }
 

@@ -10,6 +10,9 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use App\Entity\Alumno;
 use App\Entity\Profesor;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/api', name: 'api_')]
 class LoginController extends AbstractController
@@ -26,11 +29,12 @@ class LoginController extends AbstractController
     }
 
     #[Route('/alumno/login', name: 'login_alumno', methods: ['POST'])]
-    public function loginAlumno(#[CurrentUser] ?Alumno $alumno, Request $request): JsonResponse
+    public function loginAlumno(Request $request, UserPasswordHasherInterface $passwordHasher, JWTTokenManagerInterface $jwtManager, EntityManagerInterface $em): JsonResponse
     {
         $this->apiLogger->debug('Intento de login de alumno');
 
         try {
+            $alumno = $this->getUser();
             if (null === $alumno) {
                 $this->apiLogger->info('Login API llamada', [
                     'user' => null
@@ -48,9 +52,25 @@ class LoginController extends AbstractController
                 'user' => $alumno->getUserIdentifier()
             ]);
 
+            $token = $jwtManager->create($alumno);
+
+            // Obtener datos del alumno
+            $clases = $em->getRepository(Clase::class)->findClasesByAlumno($alumno);
+            $invitaciones = $em->getRepository(Invitacion::class)->findInvitacionesPendientes($alumno);
+
             return $this->json([
-                'user' => $alumno->getUserIdentifier(),
-                'roles' => $alumno->getRoles(),
+                'token' => $token,
+                'user' => [
+                    'id' => $alumno->getId(),
+                    'email' => $alumno->getEmail(),
+                    'firstName' => $alumno->getFirstName(),
+                    'lastName' => $alumno->getLastName(),
+                    'curso' => $alumno->getCurso(),
+                    'matricula' => $alumno->getMatricula(),
+                    'profileImage' => $alumno->getProfileImage()
+                ],
+                'clases' => $clases,
+                'invitaciones' => $invitaciones
             ]);
         } catch (\Exception $e) {
             $this->apiLogger->error('Error en login', [
@@ -59,6 +79,39 @@ class LoginController extends AbstractController
             ]);
             throw $e;
         }
+    }
+
+    private function getClasesData(Alumno $alumno, EntityManagerInterface $em): array 
+    {
+        return array_map(function($clase) {
+            return [
+                'id' => $clase->getId(),
+                'nombre' => $clase->getNombre(),
+                'numEstudiantes' => $clase->getNumEstudiantes(),
+                'codigoClase' => $clase->getCodigoClase(),
+                'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+            ];
+        }, $alumno->getClases()->toArray());
+    }
+
+    private function getInvitacionesPendientes(Alumno $alumno, EntityManagerInterface $em): array
+    {
+        $invitaciones = $em->getRepository(Invitacion::class)->findBy([
+            'alumno' => $alumno,
+            'estado' => 'pendiente'
+        ]);
+        
+        return array_map(function($inv) {
+            return [
+                'id' => $inv->getId(),
+                'clase' => [
+                    'id' => $inv->getClase()->getId(),
+                    'nombre' => $inv->getClase()->getNombre(),
+                    'profesor' => $inv->getClase()->getProfesor()->getFullName()
+                ],
+                'fecha' => $inv->getFecha()->format('Y-m-d H:i:s')
+            ];
+        }, $invitaciones);
     }
 
     #[Route('/profesor/login', name: 'login_profesor', methods: ['POST'])]
