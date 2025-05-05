@@ -125,11 +125,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                         <Calendar className="h-5 w-5" />
                                         <span className="font-medium">Pendiente de entrega</span>
                                     </div>
-                                    <p className="text-sm text-gray-600">
-                                        Fecha límite: {tareaSeleccionada.fechaEntrega ?
-                                            new Date(tareaSeleccionada.fechaEntrega).toLocaleDateString() :
-                                            "Sin fecha límite"}
-                                    </p>
+                                    
                                 </div>
 
                                 <div className="space-y-4">
