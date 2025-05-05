@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
 import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { GlobalContext } from '../../App';
 
 const Clases = () => {
+    const { userData, setUserData } = useContext(GlobalContext);
     const [clases, setClases] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [menuAbierto, setMenuAbierto] = useState(null);
@@ -17,21 +19,23 @@ const Clases = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
-    const cargarClases = async () => {
-        try {
-            setIsLoading(true);
-            const data = await getClasesProfesor();
-            setClases(data);
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        // Siempre recarga desde la API al entrar en la página
+        const cargarClases = async () => {
+            try {
+                setIsLoading(true);
+                const data = await getClasesProfesor();
+                setClases(data);
+                // Opcional: actualiza el contexto global para mantenerlo sincronizado
+                setUserData(prev => ({ ...prev, clases: data }));
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
         cargarClases();
-    }, []);
+    }, [setUserData]);
 
     const handleEliminarClase = async (claseId) => {
         setClaseSeleccionada(clases.find(clase => clase.id === claseId));

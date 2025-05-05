@@ -14,7 +14,7 @@ import TareasAlumno from './pages/alumno/TareasAlumno';
 import { Toaster } from 'react-hot-toast';
 import { createContext, useState, useEffect } from 'react';
 import { getPerfil } from './services/perfil';
-import { getClasesAlumno } from './services/clases';
+import { getClasesAlumno, getClasesProfesor } from './services/clases';
 import { obtenerInvitacionesPendientes } from './services/invitaciones';
 
 export const GlobalContext = createContext();
@@ -33,13 +33,24 @@ export function GlobalProvider({ children }) {
                 setUserData({ user: null, clases: [], invitaciones: [], loading: false });
                 return;
             }
+            const role = localStorage.getItem('role');
             try {
-                const [user, clases, invitaciones] = await Promise.all([
-                    getPerfil(),
-                    getClasesAlumno(),
-                    obtenerInvitacionesPendientes()
-                ]);
-                setUserData({ user, clases, invitaciones, loading: false });
+                if (role === 'profesor') {
+                    const [user, clases] = await Promise.all([
+                        getPerfil(),
+                        getClasesProfesor()
+                    ]);
+                    setUserData({ user, clases, invitaciones: [], loading: false });
+                } else if (role === 'alumno') {
+                    const [user, clases, invitaciones] = await Promise.all([
+                        getPerfil(),
+                        getClasesAlumno(),
+                        obtenerInvitacionesPendientes()
+                    ]);
+                    setUserData({ user, clases, invitaciones, loading: false });
+                } else {
+                    setUserData({ user: null, clases: [], invitaciones: [], loading: false });
+                }
             } catch {
                 setUserData({ user: null, clases: [], invitaciones: [], loading: false });
             }

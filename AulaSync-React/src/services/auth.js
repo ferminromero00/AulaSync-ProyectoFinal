@@ -17,14 +17,18 @@ export const login = async (credentials, role) => {
             throw new Error(data.message || 'Error en el inicio de sesión');
         }
 
-        // Almacenar en localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', role);
-        localStorage.setItem('user', JSON.stringify({
-            ...data.user,
-            clases: data.clases || [],
-            invitaciones: data.invitaciones || []
-        }));
+
+        if (role === 'alumno') {
+            localStorage.setItem('user', JSON.stringify({
+                ...data.user,
+                clases: data.clases || [],
+                invitaciones: data.invitaciones || []
+            }));
+        } else {
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
 
         return {
             token: data.token,

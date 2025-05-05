@@ -15,11 +15,13 @@ const Dashboard = () => {
 
     const loadStats = async () => {
         try {
-            const data = await getProfesorStats();
-            setStats(data);
-            // Obtener el número de tareas
-            const tareas = await getTareasStats();
-            setTareasCount(tareas.totalTareas || 0);
+            // Llama a ambas funciones en paralelo
+            const [statsData, tareasData] = await Promise.all([
+                getProfesorStats(),
+                getTareasStats()
+            ]);
+            setStats(statsData);
+            setTareasCount(tareasData.totalTareas || 0);
         } catch (error) {
             console.error('Error al cargar estadísticas:', error);
         } finally {
