@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from "react"
 import { BookOpen, Plus, X, Users, ChevronRight, AlertTriangle } from "lucide-react"
-import { buscarClasePorCodigo, unirseAClase, salirDeClase } from "../../services/clases"
+import { buscarClasePorCodigo, unirseAClase, salirDeClase, getClasesAlumno } from "../../services/clases"
 import { responderInvitacion } from '../../services/invitaciones';
 import { Link, useNavigate } from "react-router-dom"
 import toast from 'react-hot-toast';
@@ -112,6 +112,32 @@ const DashboardAlumno = () => {
         }
     };
 
+    // Añadir useEffect para cargar los datos
+    useEffect(() => {
+        const loadClases = async () => {
+            try {
+                const response = await getClasesAlumno();
+                setUserData(prev => ({
+                    ...prev,
+                    clases: response,
+                    loading: false
+                }));
+            } catch (error) {
+                console.error('Error al cargar clases:', error);
+                setUserData(prev => ({
+                    ...prev,
+                    clases: [],
+                    loading: false
+                }));
+            }
+        };
+
+        // Si no hay clases o loading es true, cargar los datos
+        if (!userData.clases || userData.loading) {
+            loadClases();
+        }
+    }, [setUserData]);
+
     // Cerrar menú de notificaciones al hacer click fuera
     useEffect(() => {
         if (!showNotifMenu) return;
@@ -139,7 +165,7 @@ const DashboardAlumno = () => {
 
     return (
         <div className="space-y-8 p-6">
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeSlideIn {
                     0% { opacity: 0; transform: translateY(20px); }
                     100% { opacity: 1; transform: translateY(0); }

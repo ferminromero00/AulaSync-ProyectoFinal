@@ -174,8 +174,19 @@ const ClaseDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header de la clase */}
-            <div className="bg-white mb-6">
+            <style jsx>{`
+                @keyframes fadeSlideIn {
+                    0% { opacity: 0; transform: translateY(20px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                    animation: fadeSlideIn 0.6s ease-out forwards;
+                }
+            `}</style>
+
+            {/* Header de la clase con animación */}
+            <div className="bg-white mb-6 opacity-0 animate-fadeIn"
+                 style={{ animationDelay: '200ms' }}>
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     <h1 className="text-2xl font-bold text-gray-900">{clase.nombre}</h1>
                     <div className="mt-2 flex items-center text-sm text-gray-500">
@@ -187,8 +198,9 @@ const ClaseDashboard = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Lista de estudiantes */}
-                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6">
+                    {/* Lista de estudiantes con animación */}
+                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
+                         style={{ animationDelay: '400ms' }}>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <button
@@ -220,8 +232,9 @@ const ClaseDashboard = () => {
                         )}
                     </div>
 
-                    {/* Contenido principal - Ajustado para ocupar más espacio */}
-                    <div className="lg:w-4/5 bg-white rounded-lg shadow p-6">
+                    {/* Contenido principal con animación */}
+                    <div className="lg:w-4/5 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
+                         style={{ animationDelay: '600ms' }}>
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
                         <div className="text-gray-500 text-center py-8">
                             <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />

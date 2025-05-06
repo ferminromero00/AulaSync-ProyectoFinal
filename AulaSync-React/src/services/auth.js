@@ -1,40 +1,36 @@
 import { API_BASE_URL } from '../config/config';
 
-export const login = async (credentials, role) => {
+export const login = async (credentials) => {
     try {
-        const endpoint = role === 'profesor' ? '/profesor/login' : '/alumno/login';
-        const response = await fetch(`${API_BASE_URL}/api/${role}/login`, {
+        if (!credentials.role) {
+            throw new Error('Role no especificado');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/${credentials.role}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(credentials)
+            body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password
+            }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || 'Error en el inicio de sesión');
+            throw new Error('Credenciales inválidas');
         }
 
+        const data = await response.json();
+        
+        // Guardar el token y otros datos
         localStorage.setItem('token', data.token);
-        localStorage.setItem('role', role);
-
-        if (role === 'alumno') {
-            localStorage.setItem('user', JSON.stringify({
-                ...data.user,
-                clases: data.clases || [],
-                invitaciones: data.invitaciones || []
-            }));
-        } else {
-            localStorage.setItem('user', JSON.stringify(data.user));
-        }
-
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
+        localStorage.setItem('role', credentials.role);
+        
         return {
-            token: data.token,
-            user: data.user,
-            clases: data.clases || [],
-            invitaciones: data.invitaciones || []
+            ...data,
+            role: credentials.role
         };
     } catch (error) {
         console.error('Error en login:', error);

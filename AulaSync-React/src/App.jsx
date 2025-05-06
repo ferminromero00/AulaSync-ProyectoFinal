@@ -67,45 +67,52 @@ export function GlobalProvider({ children }) {
 }
 
 function App() {
-  return (
-    <GlobalProvider>
-      <Toaster position="top-right" />
-      <BrowserRouter>
-        <ClaseProvider>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Rutas protegidas de profesor */}
-            <Route path="/profesor/*" element={
-              <ProtectedRoute allowedRole="profesor">
-                <TeacherLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<TeacherDashboard />} />
-              <Route path="clases" element={<Clases />} />
-              <Route path="configuracion" element={<Configuracion />} />
-              <Route path="clase/:id" element={<ClaseDashboard />} />
-              {/* ...otras rutas de profesor... */}
-            </Route>
+    const [userData, setUserData] = useState({
+        loading: true,
+        clases: null,  // Cambiado de [] a null para mejor control del estado inicial
+        invitaciones: [],
+        perfil: null
+    });
 
-            {/* Rutas protegidas de alumno */}
-            <Route path="/alumno/*" element={
-              <ProtectedRoute allowedRole="alumno">
-                <StudentLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<DashboardAlumno />} />
-              <Route path="clase/:id" element={<ClaseDashboard />} />
-              <Route path="configuracion" element={<ConfiguracionAlumno />} />
-              <Route path="tareas" element={<TareasAlumno />} />
-              {/* ...otras rutas de alumno... */}
-            </Route>
-          </Routes>
-        </ClaseProvider>
-      </BrowserRouter>
-    </GlobalProvider>
-  )
+    return (
+        <GlobalProvider>
+            <Toaster position="top-right" />
+            <BrowserRouter>
+                <ClaseProvider>
+                    <Routes>
+                        <Route path="/" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        
+                        {/* Rutas protegidas de profesor */}
+                        <Route path="/profesor/*" element={
+                            <ProtectedRoute allowedRole="profesor">
+                                <TeacherLayout />
+                            </ProtectedRoute>
+                        }>
+                            <Route path="dashboard" element={<TeacherDashboard />} />
+                            <Route path="clases" element={<Clases />} />
+                            <Route path="configuracion" element={<Configuracion />} />
+                            <Route path="clase/:id" element={<ClaseDashboard />} />
+                            {/* ...otras rutas de profesor... */}
+                        </Route>
+
+                        {/* Rutas protegidas de alumno */}
+                        <Route path="/alumno/*" element={
+                            <ProtectedRoute allowedRole="alumno">
+                                <StudentLayout />
+                            </ProtectedRoute>
+                        }>
+                            <Route path="dashboard" element={<DashboardAlumno />} />
+                            <Route path="clase/:id" element={<ClaseDashboard />} />
+                            <Route path="configuracion" element={<ConfiguracionAlumno />} />
+                            <Route path="tareas" element={<TareasAlumno />} />
+                            {/* ...otras rutas de alumno... */}
+                        </Route>
+                    </Routes>
+                </ClaseProvider>
+            </BrowserRouter>
+        </GlobalProvider>
+    )
 }
 
 export default App
