@@ -118,7 +118,9 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl
             ? `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}`
             : null;
-        const comentarioEntrega = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
+        
+        // Usar el comentario de la tarea guardada o el estado local
+        const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
             <div
@@ -218,7 +220,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                         <div className="bg-white border border-gray-200 rounded-lg p-4">
                                             <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
                                             <div className="text-gray-700 whitespace-pre-line">
-                                                {comentarioEntrega ? comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                                {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
                                             </div>
                                         </div>
                                         <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
@@ -289,70 +291,131 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         );
     };
 
-    const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
-        <div className="space-y-2">
-            <button
-                onClick={() => toggleSeccion(seccionId)}
-                className="w-full flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-all duration-200 border border-gray-200"
-            >
-                <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${bgColor}`}>
-                        {icon}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">{titulo}</span>
-                        <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            {tareas.length}
+    const renderTarea = (tarea) => (
+        <div
+            key={tarea.id}
+            onClick={() => handleClickTarea(tarea)}
+            className="p-6 bg-white rounded-xl border border-gray-100 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer group"
+        >
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                        {tarea.titulo}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-gray-400" />
+                        {tarea.clase?.nombre || 'Sin clase'}
+                    </p>
+                </div>
+                <div className="flex items-start gap-2">
+                    {tarea.entregada ? (
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Entregada
+                        </span>
+                    ) : (
+                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5" />
+                            Pendiente
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {/* Línea divisoria y detalles adicionales - Ahora siempre visible */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-gray-600">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span>Fecha límite:</span>
+                        <span className="font-medium">
+                            {tarea.fechaEntrega 
+                                ? new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                                : "Sin fecha límite"}
                         </span>
                     </div>
-                </div>
-                {seccionesAbiertas[seccionId] ?
-                    <ChevronUp className="h-5 w-5 text-gray-400" /> :
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
-                }
-            </button>
-
-            <div
-                className={`transform transition-all duration-200 ease-in-out overflow-hidden ${seccionesAbiertas[seccionId] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-            >
-                <div className="pl-14 pt-2">
-                    {tareas.length > 0 ? (
-                        <div className="space-y-3">
-                            {tareas.map(tarea => (
-                                <div
-                                    key={tarea.id}
-                                    className="p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer"
-                                    onClick={() => handleClickTarea(tarea)}
-                                >
-                                    <div className="flex flex-col gap-1">
-                                        <span className="font-medium text-gray-900">
-                                            <span className="font-semibold">Título:</span> {tarea.titulo || tarea.contenido}
-                                        </span>
-                                        <span className="text-sm text-gray-500">
-                                            <span className="font-semibold">Clase:</span> {tarea.clase?.nombre || 'Sin clase'}
-                                        </span>
-                                        {tarea.fechaEntrega && (
-                                            <span className="text-xs text-gray-400">
-                                                Entrega: {new Date(tarea.fechaEntrega).toLocaleString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
-                            No hay tareas en este período
-                        </div>
+                    {tarea.archivoUrl && (
+                        <span className="flex items-center gap-1 text-blue-600 hover:text-blue-800">
+                            <Paperclip className="h-4 w-4" />
+                            <span className="text-xs">Adjunto</span>
+                        </span>
                     )}
                 </div>
             </div>
         </div>
     );
 
+    const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
+        <div className="space-y-3">
+            <button
+                onClick={() => toggleSeccion(seccionId)}
+                className={`w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm 
+                hover:shadow-md hover:border-gray-200 transition-all duration-300 ease-in-out
+                ${seccionesAbiertas[seccionId] ? 'ring-2 ring-blue-100 border-blue-200' : ''}`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-lg ${bgColor} transform transition-transform duration-200 
+                        ${seccionesAbiertas[seccionId] ? 'scale-110' : 'scale-100'}`}>
+                        {icon}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="font-medium text-gray-900 text-lg">{titulo}</span>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300
+                            ${seccionesAbiertas[seccionId] 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : 'bg-gray-100 text-gray-700'}`}
+                        >
+                            {tareas.length}
+                        </span>
+                    </div>
+                </div>
+                <div className={`transform transition-transform duration-300 ${
+                    seccionesAbiertas[seccionId] ? 'rotate-180' : 'rotate-0'
+                }`}>
+                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                </div>
+            </button>
+
+            <div className={`grid transition-all duration-300 ease-in-out
+                ${seccionesAbiertas[seccionId] 
+                    ? 'grid-rows-[1fr] opacity-100 translate-y-0' 
+                    : 'grid-rows-[0fr] opacity-0 -translate-y-4'}
+            `}>
+                <div className="overflow-hidden">
+                    <div className="space-y-3 pt-2">
+                        {tareas.length > 0 ? (
+                            tareas.map((tarea, index) => (
+                                <div
+                                    key={tarea.id}
+                                    style={{
+                                        animationDelay: `${index * 50}ms`
+                                    }}
+                                    className="animate-slideIn"
+                                >
+                                    {renderTarea(tarea)}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100
+                                animate-fadeIn">
+                                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3 animate-bounce" />
+                                <p className="text-gray-500">No hay tareas en este período</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             {renderSeccion(
                 "Entregadas",
                 tareasEntregadas,
