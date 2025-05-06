@@ -139,19 +139,21 @@ const DashboardAlumno = () => {
 
     return (
         <div className="space-y-8 p-6">
-            {/* Overlay de carga para notificaciones */}
-            {notifLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                        <span className="text-lg text-gray-700">Procesando invitación...</span>
-                    </div>
-                </div>
-            )}
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"> {/* Mejorado el espaciado */}
+            <style jsx>{`
+                @keyframes fadeSlideIn {
+                    0% { opacity: 0; transform: translateY(20px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                    animation: fadeSlideIn 0.6s ease-out forwards;
+                }
+            `}</style>
+
+            {/* Header Section con animación */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 opacity-0 animate-fadeIn" 
+                 style={{ animationDelay: '200ms' }}>
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800"> {/* Ajustado el tamaño y color */}
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
                         Dashboard del Alumno
                     </h1>
                     <p className="mt-1 text-gray-500">
@@ -160,17 +162,16 @@ const DashboardAlumno = () => {
                 </div>
                 <button
                     onClick={() => setMostrarModal(true)}
-                    className={
-                        "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    }
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                     <Plus className="h-5 w-5 mr-2" />
                     Unirse a clase
                 </button>
             </div>
 
-            {/* Contenedor principal de clases - ahora ocupa todo el espacio disponible */}
-            <div className="w-full h-[calc(100vh-8rem)]">
+            {/* Contenedor principal con animación */}
+            <div className="w-full h-[calc(100vh-8rem)] opacity-0 animate-fadeIn"
+                 style={{ animationDelay: '400ms' }}>
                 <div className="bg-white h-full rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-gray-100">
                         <h2 className="text-lg font-semibold">Mis Clases</h2>
@@ -183,11 +184,12 @@ const DashboardAlumno = () => {
                             </div>
                         ) : (
                             <div className="grid gap-3">
-                                {clases && clases.length > 0 ? clases.map(clase => (
+                                {clases && clases.length > 0 ? clases.map((clase, index) => (
                                     <Link
                                         key={clase.id}
                                         to={`/alumno/clase/${clase.id}`}
-                                        className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200"
+                                        className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200 opacity-0 animate-fadeIn"
+                                        style={{ animationDelay: `${600 + (index * 100)}ms` }}
                                     >
                                         <div className="bg-blue-100 p-3 rounded-xl">
                                             <BookOpen className="h-6 w-6 text-blue-600" />
@@ -213,7 +215,8 @@ const DashboardAlumno = () => {
                                         </div>
                                     </Link>
                                 )) : (
-                                    <div className="text-center py-12">
+                                    <div className="text-center py-12 opacity-0 animate-fadeIn"
+                                         style={{ animationDelay: '600ms' }}>
                                         <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                                         <p className="text-lg text-gray-600 mb-2">No estás inscrito en ninguna clase</p>
                                         <p className="text-sm text-gray-500">Usa el botón "Unirse a clase" para empezar</p>

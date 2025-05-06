@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass, X, FileText, BookOpen, CheckCircle, Paperclip } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 
@@ -18,11 +18,29 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const [entregada, setEntregada] = useState(false);
     const [tareasState, setTareasState] = useState(tareas);
 
+    const seccionRefs = {
+        entregadas: useRef(null),
+        estaSemana: useRef(null),
+        esteMes: useRef(null),
+        proximamente: useRef(null),
+        sinFecha: useRef(null)
+    };
+
     const toggleSeccion = (seccion) => {
         setSeccionesAbiertas(prev => ({
             ...prev,
             [seccion]: !prev[seccion]
         }));
+
+        // Si estamos abriendo la sección, hacemos scroll
+        if (!seccionesAbiertas[seccion]) {
+            setTimeout(() => {
+                seccionRefs[seccion].current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                });
+            }, 100);
+        }
     };
 
     // Lógica de fechas
@@ -352,7 +370,10 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     );
 
     const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
-        <div className="space-y-3">
+        <div 
+            ref={seccionRefs[seccionId]}
+            className="space-y-3"
+        >
             <button
                 onClick={() => toggleSeccion(seccionId)}
                 className={`w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm 
@@ -415,7 +436,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {renderSeccion(
                 "Entregadas",
                 tareasEntregadas,
