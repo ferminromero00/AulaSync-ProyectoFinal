@@ -1,0 +1,68 @@
+@keyframes modalFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalOverlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalContentSlideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes modalContentSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.modal-overlay {
+    animation: modalOverlayFadeIn 0.3s ease-out forwards;
+}
+
+.modal-content {
+    animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-content-left {
+    animation: modalContentSlideInLeft 0.5s ease-out forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.modal-content-right {
+    animation: modalContentSlideInRight 0.5s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+.modal-item-stagger > * {
+    opacity: 0;
+    animation: slideInRight 0.5s ease-out forwards;
+}
+
+.modal-item-stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.modal-item-stagger > *:nth-child(2) { animation-delay: 0.2s; }
+.modal-item-stagger > *:nth-child(3) { animation-delay: 0.3s; }
+.modal-item-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+.modal-item-stagger > *:nth-child(5) { animation-delay: 0.5s; }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import '../styles/modalAnimations.css';
 
 const TareasResumen = ({ tareas }) => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
@@ -123,35 +124,74 @@ const TareasResumen = ({ tareas }) => {
     };
 
     return (
-        <div className="h-[calc(100vh-theme(space.20))] overflow-y-auto px-4">
-            <style jsx>{`
-                @keyframes slideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                @keyframes fadeSlideIn {
-                    0% {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    100% {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                .animate-fadeSlideIn {
-                    animation: fadeSlideIn 0.8s ease-out forwards;
-                }
-            `}</style>
-            {renderSeccion('Esta semana', tareasOrganizadas.estaSemana, 'estaSemana')}
-            {renderSeccion('Este mes', tareasOrganizadas.esteMes, 'esteMes')}
-            {renderSeccion('Sin fecha de entrega', tareasOrganizadas.sinFecha, 'sinFecha')}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+            <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative modal-content">
+                {/* Panel izquierdo */}
+                <div className="p-8 flex-1 opacity-0 animate-scaleIn" style={{ animationDelay: '200ms' }}>
+                    <div className="h-[calc(100vh-theme(space.20))] overflow-y-auto px-4">
+                        {/* Estilos CSS mejorados */}
+                        <style jsx>{`
+                            @keyframes scaleIn {
+                                0% { transform: scale(0.95); opacity: 0; }
+                                100% { transform: scale(1); opacity: 1; }
+                            }
+                            @keyframes slideIn {
+                                0% { transform: translateX(20px); opacity: 0; }
+                                100% { transform: translateX(0); opacity: 1; }
+                            }
+                            @keyframes fadeUp {
+                                0% { transform: translateY(20px); opacity: 0; }
+                                100% { transform: translateY(0); opacity: 1; }
+                            }
+                            .animate-scaleIn {
+                                animation: scaleIn 0.5s ease-out forwards;
+                            }
+                            .animate-slideIn {
+                                animation: slideIn 0.5s ease-out forwards;
+                            }
+                            .animate-fadeUp {
+                                animation: fadeUp 0.5s ease-out forwards;
+                            }
+                            .stagger > * {
+                                opacity: 0;
+                            }
+                            .stagger > *:nth-child(1) { animation-delay: 300ms; }
+                            .stagger > *:nth-child(2) { animation-delay: 400ms; }
+                            .stagger > *:nth-child(3) { animation-delay: 500ms; }
+                        `}</style>
+
+                        <div className="stagger">
+                            {renderSeccion('Esta semana', tareasOrganizadas.estaSemana, 'estaSemana')}
+                            {renderSeccion('Este mes', tareasOrganizadas.esteMes, 'esteMes')}
+                            {renderSeccion('Sin fecha de entrega', tareasOrganizadas.sinFecha, 'sinFecha')}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Panel derecho */}
+                <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 opacity-0 animate-slideIn"
+                     style={{ animationDelay: '400ms' }}>
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">Resumen</h3>
+                        <div className="bg-white rounded-lg p-4 shadow-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="text-center">
+                                    <p className="text-sm text-gray-500">Esta semana</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {tareasOrganizadas.estaSemana.length}
+                                    </p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm text-gray-500">Este mes</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {tareasOrganizadas.esteMes.length}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

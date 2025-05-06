@@ -1,0 +1,75 @@
+@keyframes fadeSlideIn {
+    0% { 
+        opacity: 0; 
+        transform: translateY(20px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    0% { 
+        transform: scale(0.9); 
+        opacity: 0;
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    0% { 
+        transform: translateX(30px); 
+        opacity: 0;
+    }
+    100% { 
+        transform: translateX(0); 
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% { 
+        transform: scale(0.9); 
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeSlideIn 0.8s ease-out forwards;
+}
+
+.animate-scaleIn {
+    animation: scaleIn 0.6s ease-out forwards;
+}
+
+.animate-slideRight {
+    animation: slideInRight 0.6s ease-out forwards;
+}
+
+.animate-bounceIn {
+    animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.stagger-animation > * {
+    opacity: 0;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 200ms; }
+.stagger-animation > *:nth-child(2) { animation-delay: 400ms; }
+.stagger-animation > *:nth-child(3) { animation-delay: 600ms; }
+.stagger-animation > *:nth-child(4) { animation-delay: 800ms; }
+.stagger-animation > *:nth-child(5) { animation-delay: 1000ms; }

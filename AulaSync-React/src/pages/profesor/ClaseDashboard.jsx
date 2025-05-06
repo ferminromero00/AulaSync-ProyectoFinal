@@ -9,6 +9,8 @@ import { toast } from 'react-hot-toast';
 import { crearAnuncio, obtenerAnuncios, eliminarAnuncio } from '../../services/anuncios';
 import { API_BASE_URL } from '../../config/config';
 import { useClase } from '../../contexts/ClaseContext';
+import '../../styles/animations.css';
+import '../../styles/modalAnimations.css';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -625,8 +627,8 @@ const ClaseDashboard = () => {
         const estaEntregada = !!tareaSeleccionada.entregada;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative modal-content">
                     {/* Botón de cerrar reposicionado más arriba */}
                     <button
                         onClick={() => setShowTareaModal(false)}
@@ -636,7 +638,7 @@ const ClaseDashboard = () => {
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="p-8 flex-1">
+                    <div className="p-8 flex-1 modal-content-left">
                         <div className="mb-6">
                             <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
                                 <BookOpen className="h-7 w-7 text-blue-600" />
@@ -682,7 +684,7 @@ const ClaseDashboard = () => {
 
                     {/* Panel derecho - Vista de profesor (entregas) o alumno (subir tarea) */}
                     {role === 'profesor' ? (
-                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200">
+                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right">
                             <div className="sticky top-8">
                                 {/* Añadido mb-8 para dar más espacio */}
                                 <div className="flex items-center justify-between mb-8">
@@ -733,7 +735,7 @@ const ClaseDashboard = () => {
                         </div>
                     ) : (
                         // ALUMNO: formulario y resumen de entrega
-                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative">
+                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative modal-content-right">
                             <div className="sticky top-8">
                                 <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                                 <div className="space-y-6">
@@ -869,7 +871,7 @@ const ClaseDashboard = () => {
             {renderDeletingOverlay()}
             {renderCreatingOverlay()}
             {/* Header de la clase */}
-            <div className="bg-white border-b">
+            <div className="bg-white border-b opacity-0 animate-scaleIn">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div className="flex-1 min-w-0">
@@ -899,9 +901,10 @@ const ClaseDashboard = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex flex-col lg:flex-row gap-6 stagger-animation">
                     {/* Lista de estudiantes */}
-                    <div className="lg:w-[280px] shrink-0 bg-white rounded-lg shadow p-6 h-fit sticky top-8">
+                    <div className="lg:w-[280px] shrink-0 bg-white rounded-lg shadow p-6 h-fit sticky top-8 opacity-0 animate-slideRight"
+                         style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <div className="flex items-center gap-2">
@@ -949,16 +952,18 @@ const ClaseDashboard = () => {
                     </div>
 
                     {/* Contenido principal - Anuncios */}
-                    <div className="flex-1 bg-white rounded-lg shadow p-6">
+                    <div className="flex-1 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
+                         style={{ animationDelay: '400ms' }}>
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
                         <div className="min-h-[calc(100vh-300px)]">
                             {anuncios.length > 0 ? (
                                 <div className="space-y-4">
-                                    {anuncios.map((anuncio) =>
+                                    {anuncios.map((anuncio, index) =>
                                         anuncio.tipo === "tarea" ? (
                                             <div
                                                 key={anuncio.id}
-                                                className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition"
+                                                className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition opacity-0 animate-slideRight"
+                                                style={{ animationDelay: `${600 + (index * 100)}ms` }}
                                                 onClick={() => handleOpenTarea(anuncio)}
                                             >
                                                 {role === 'profesor' && (
@@ -990,7 +995,8 @@ const ClaseDashboard = () => {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative">
+                                            <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative opacity-0 animate-slideRight"
+                                                 style={{ animationDelay: `${600 + (index * 100)}ms` }}>
                                                 {role === 'profesor' && (
                                                     <button
                                                         onClick={() => handleDeleteAnuncio(anuncio.id)}

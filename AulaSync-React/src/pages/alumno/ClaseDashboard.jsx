@@ -6,6 +6,7 @@ import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
+import '../../styles/animations.css';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -174,33 +175,36 @@ const ClaseDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <style jsx>{`
-                @keyframes fadeSlideIn {
-                    0% { opacity: 0; transform: translateY(20px); }
-                    100% { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fadeIn {
-                    animation: fadeSlideIn 0.6s ease-out forwards;
-                }
-            `}</style>
-
-            {/* Header de la clase con animación */}
-            <div className="bg-white mb-6 opacity-0 animate-fadeIn"
-                 style={{ animationDelay: '200ms' }}>
+            {/* Header con animación mejorada */}
+            <header className="bg-white shadow-sm mb-6 opacity-0 animate-scaleIn">
                 <div className="max-w-7xl mx-auto px-4 py-6">
-                    <h1 className="text-2xl font-bold text-gray-900">{clase.nombre}</h1>
-                    <div className="mt-2 flex items-center text-sm text-gray-500">
-                        <BookOpen className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                        Código: {clase.codigoClase}
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-blue-100 rounded-xl">
+                            <BookOpen className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">{clase?.nombre}</h1>
+                            <div className="mt-1 flex items-center gap-4 text-sm text-gray-500">
+                                <span className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    {clase?.numEstudiantes} estudiantes
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                    Activa
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Lista de estudiantes con animación */}
-                    <div className="lg:w-1/5 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
-                         style={{ animationDelay: '400ms' }}>
+            {/* Contenido principal con animaciones escalonadas */}
+            <main className="max-w-7xl mx-auto px-4 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 stagger-animation">
+                    {/* Panel lateral */}
+                    <div className="lg:col-span-1 space-y-6 opacity-0 animate-slideRight"
+                         style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <button
@@ -232,17 +236,22 @@ const ClaseDashboard = () => {
                         )}
                     </div>
 
-                    {/* Contenido principal con animación */}
-                    <div className="lg:w-4/5 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
-                         style={{ animationDelay: '600ms' }}>
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
-                        <div className="text-gray-500 text-center py-8">
-                            <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                            <p>No hay anuncios publicados</p>
+                    {/* Contenido central */}
+                    <div className="lg:col-span-3 space-y-6 opacity-0 animate-slideRight"
+                         style={{ animationDelay: '400ms' }}>
+                        <div className="space-y-4">
+                            {anuncios?.map((anuncio, index) => (
+                                <div key={anuncio.id}
+                                     className="opacity-0 animate-bounceIn"
+                                     style={{ animationDelay: `${600 + (index * 100)}ms` }}>
+                                    {/* ...existing announcement item code... */}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
+
             {/* Modal de lista completa de alumnos */}
             {showAlumnosModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
