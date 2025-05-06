@@ -33,28 +33,31 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const dentroDeUnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
 
     // Filtrado de tareas por sección (usar tareasState en vez de tareas)
-    const tareasEstaSemana = tareasState.filter(t => {
+    // Solo tareas NO entregadas para las secciones de fechas
+    const tareasNoEntregadas = tareasState.filter(t => !t.entregada);
+
+    const tareasEstaSemana = tareasNoEntregadas.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha >= hoy && fecha <= finDeSemana;
     });
 
-    const tareasEsteMes = tareasState.filter(t => {
+    const tareasEsteMes = tareasNoEntregadas.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha > finDeSemana && fecha <= finDeMes;
     });
 
-    const tareasProximamente = tareasState.filter(t => {
+    const tareasProximamente = tareasNoEntregadas.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha > finDeMes;
     });
 
-    const tareasSinFecha = tareasState.filter(t => !t.fechaEntrega);
+    const tareasSinFecha = tareasNoEntregadas.filter(t => !t.fechaEntrega);
 
-    // Añadir nuevo filtro para tareas entregadas (por ahora simulado)
-    const tareasEntregadas = tareasState.filter(t => t.entregada); // Asumimos que tendremos una propiedad 'entregada'
+    // Añadir nuevo filtro para tareas entregadas
+    const tareasEntregadas = tareasState.filter(t => t.entregada);
 
     const handleClickTarea = (tarea) => {
         setTareaSeleccionada(tarea);
