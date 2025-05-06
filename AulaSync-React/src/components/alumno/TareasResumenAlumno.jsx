@@ -7,7 +7,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         estaSemana: false,
         esteMes: false,
         proximamente: false,
-        sinFecha: false
+        sinFecha: false,
+        entregadas: false // Añadir nueva sección
     });
     const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
     const [showTareaModal, setShowTareaModal] = useState(false);
@@ -46,6 +47,9 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     });
 
     const tareasSinFecha = tareas.filter(t => !t.fechaEntrega);
+
+    // Añadir nuevo filtro para tareas entregadas (por ahora simulado)
+    const tareasEntregadas = tareas.filter(t => t.entregada); // Asumimos que tendremos una propiedad 'entregada'
 
     const handleClickTarea = (tarea) => {
         setTareaSeleccionada(tarea);
@@ -235,6 +239,13 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
     return (
         <div className="space-y-4">
+            {renderSeccion(
+                "Entregadas",
+                tareasEntregadas,
+                "entregadas",
+                <FileText className="h-5 w-5 text-emerald-600" />,
+                "bg-emerald-50"
+            )}
             {renderSeccion(
                 "Esta semana",
                 tareasEstaSemana,
