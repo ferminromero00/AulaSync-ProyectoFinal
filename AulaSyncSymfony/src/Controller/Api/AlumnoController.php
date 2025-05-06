@@ -35,29 +35,31 @@ class AlumnoController extends AbstractController
         try {
             $connection = $this->databaseService->getConnection();
             $alumno = $this->getUser();
-            // Log para depuración
-            error_log("[AlumnoController] getPerfil usuario: " . ($alumno ? $alumno->getEmail() : 'null'));
-            error_log("[AlumnoController] getPerfil datos: " . json_encode([
-                'firstName' => $alumno->getFirstName(),
-                'lastName' => $alumno->getLastName(),
-                'email' => $alumno->getEmail(),
-                'curso' => $alumno->getCurso(),
-                'matricula' => $alumno->getMatricula(),
-                'fotoPerfilUrl' => $alumno->getProfileImage() ?? null
-            ]));
+
+            // Obtener las clases del alumno
+            $clases = [];
+            foreach ($alumno->getClases() as $clase) {
+                $clases[] = [
+                    'id' => $clase->getId(),
+                    'nombre' => $clase->getNombre(),
+                    'codigoClase' => $clase->getCodigoClase(),
+                    'numEstudiantes' => $clase->getNumEstudiantes()
+                ];
+            }
+
             $response = new JsonResponse([
-                'id' => $alumno->getId(), // <-- Añadido el campo id
+                'id' => $alumno->getId(),
                 'firstName' => $alumno->getFirstName(),
                 'lastName' => $alumno->getLastName(),
                 'email' => $alumno->getEmail(),
                 'curso' => $alumno->getCurso(),
                 'matricula' => $alumno->getMatricula(),
-                'fotoPerfilUrl' => $alumno->getProfileImage() ?? '/uploads/perfiles/default.png'
-            ], 200, ['Content-Type' => 'application/json']);
+                'fotoPerfilUrl' => $alumno->getProfileImage() ?? '/uploads/perfiles/default.png',
+                'clases' => $clases
+            ]);
 
             $this->databaseService->closeConnection();
             return $response;
-
         } catch (\Exception $e) {
             $this->databaseService->closeConnection();
             return new JsonResponse(['error' => 'Error de conexión'], 500);

@@ -224,10 +224,10 @@ class Alumno implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getClases(): Collection
     {
-        return $this->clases;
+        return $this->clases ?? new ArrayCollection();
     }
 
-    public function addClase(Clase $clase): self
+    public function addClase(Clase $clase): self 
     {
         if (!$this->clases->contains($clase)) {
             $this->clases->add($clase);

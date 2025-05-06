@@ -364,42 +364,29 @@ class ClaseController extends AbstractController
     #[Route('/clases/alumno', name: 'clases_alumno', methods: ['GET'])]
     public function getClasesAlumno(EntityManagerInterface $em): JsonResponse
     {
-        $alumno = $this->getUser();
-        if (!$alumno instanceof \App\Entity\Alumno) {
-            return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
-        }
-
-        $clases = $alumno->getClases();
-
-        $repoInvitacion = $em->getRepository(\App\Entity\Invitacion::class);
-        $invitacionesPendientes = $repoInvitacion->findBy([
-            'alumno' => $alumno,
-            'estado' => 'pendiente'
-        ]);
-        $cambios = false;
-        foreach ($invitacionesPendientes as $inv) {
-            $clase = $inv->getClase();
-            if ($clase && $clase->getAlumnos()->contains($alumno)) {
-                $inv->setEstado('aceptada');
-                $cambios = true;
+        try {
+            $alumno = $this->getUser();
+            if (!$alumno instanceof \App\Entity\Alumno) {
+                return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
             }
-        }
-        if ($cambios) {
-            $em->flush();
-        }
 
-        $data = [];
-        foreach ($clases as $clase) {
-            $profesor = $clase->getProfesor();
-            $data[] = [
-                'id' => $clase->getId(),
-                'nombre' => $clase->getNombre(),
-                'codigoClase' => $clase->getCodigoClase(),
-                'profesor' => $profesor ? ($profesor->getFirstName() . ' ' . $profesor->getLastName()) : null,
-                'numEstudiantes' => $clase->getAlumnos()->count(),
-            ];
+            $clases = $alumno->getClases();
+            $data = [];
+
+            foreach ($clases as $clase) {
+                $data[] = [
+                    'id' => $clase->getId(),
+                    'nombre' => $clase->getNombre(),
+                    'numEstudiantes' => $clase->getNumEstudiantes(),
+                    'codigoClase' => $clase->getCodigoClase(),
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                ];
+            }
+
+            return new JsonResponse($data);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al obtener las clases'], 500);
         }
-        return new JsonResponse($data);
     }
 
     #[Route('/tareas/stats', name: 'tareas_stats', methods: ['GET'])]
