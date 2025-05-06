@@ -4,11 +4,14 @@ namespace App\Controller\Api;
 
 use App\Entity\Clase;
 use App\Entity\Anuncio;
+use App\Entity\EntregaTarea;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
@@ -440,20 +443,25 @@ class ClaseController extends AbstractController
                 return new JsonResponse(['error' => 'Usuario no autenticado'], 401);
             }
 
-            $qb = $em->createQueryBuilder()
-                ->select('a', 'c')
+            $qb = $em->createQueryBuilder();
+            $qb->select('a', 'c', 'e')
                 ->from(\App\Entity\Anuncio::class, 'a')
                 ->join('a.clase', 'c')
                 ->join('c.alumnos', 'al')
+                ->leftJoin('a.entregas', 'e', 'WITH', 'e.alumno = :alumno')
                 ->where('a.tipo = :tipo')
                 ->andWhere('al = :alumno')
-                ->orderBy('a.fechaCreacion', 'DESC')
                 ->setParameter('tipo', 'tarea')
-                ->setParameter('alumno', $alumno);
+                ->setParameter('alumno', $alumno)
+                ->orderBy('a.fechaCreacion', 'DESC');
 
             $tareas = $qb->getQuery()->getResult();
 
             $result = array_map(function($tarea) {
+                $entrega = $tarea->getEntregas()->filter(
+                    fn($e) => $e->getAlumno() === $this->getUser()
+                )->first();
+                
                 return [
                     'id' => $tarea->getId(),
                     'titulo' => $tarea->getTitulo(),
@@ -463,14 +471,63 @@ class ClaseController extends AbstractController
                         'id' => $tarea->getClase()->getId(),
                         'nombre' => $tarea->getClase()->getNombre()
                     ],
-                    'archivoUrl' => $tarea->getArchivoUrl()
+                    'archivoUrl' => $tarea->getArchivoUrl(),
+                    'entregada' => $entrega ? true : false,
+                    'comentarioEntrega' => $entrega ? $entrega->getComentario() : null,
+                    'archivoEntregaUrl' => $entrega ? $entrega->getArchivoUrl() : null,
+                    'fechaEntregada' => $entrega ? $entrega->getFechaEntrega()?->format('Y-m-d H:i:s') : null
                 ];
             }, $tareas);
 
             return new JsonResponse($result);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+            return new JsonResponse(['error' => 'Error al obtener las tareas: ' . $e->getMessage()], 500);
         }
+    }
+
+    #[Route('/tareas/{id}/entregar', name: 'tarea_entregar', methods: ['POST'])]
+    public function entregarTarea(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $alumno = $this->getUser();
+        if (!$alumno instanceof \App\Entity\Alumno) {
+            return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
+        }
+
+        $tarea = $em->getRepository(\App\Entity\Anuncio::class)->find($id);
+        if (!$tarea || $tarea->getTipo() !== 'tarea') {
+            return new JsonResponse(['error' => 'Tarea no encontrada'], 404);
+        }
+
+        // Comprobar si ya existe una entrega para este alumno y tarea
+        $entregaRepo = $em->getRepository(EntregaTarea::class);
+        $entrega = $entregaRepo->findOneBy(['alumno' => $alumno, 'tarea' => $tarea]);
+        if ($entrega) {
+            return new JsonResponse(['error' => 'Ya has entregado esta tarea'], 409);
+        }
+
+        $entrega = new EntregaTarea();
+        $entrega->setAlumno($alumno);
+        $entrega->setTarea($tarea);
+        $entrega->setComentario($request->request->get('comentario', ''));
+        $entrega->setFechaEntrega(new \DateTime());
+
+        /** @var UploadedFile $archivo */
+        $archivo = $request->files->get('archivo');
+        if ($archivo) {
+            $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/entregas';
+            $nombreArchivo = uniqid() . '-' . $archivo->getClientOriginalName();
+            try {
+                $archivo->move($uploadsDir, $nombreArchivo);
+                $entrega->setArchivoUrl('/uploads/entregas/' . $nombreArchivo);
+            } catch (FileException $e) {
+                return new JsonResponse(['error' => 'Error al subir el archivo'], 500);
+            }
+        }
+
+        $em->persist($entrega);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Tarea entregada correctamente']);
     }
 
     #[Route('/clases/{id}', name: 'get_clase', methods: ['GET'])]

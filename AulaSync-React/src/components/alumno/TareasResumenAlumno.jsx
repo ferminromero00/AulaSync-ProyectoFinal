@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass, X, FileText, BookOpen } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass, X, FileText, BookOpen, CheckCircle, Paperclip } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 
 const TareasResumenAlumno = ({ tareas = [] }) => {
@@ -12,6 +12,11 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     });
     const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
     const [showTareaModal, setShowTareaModal] = useState(false);
+    const [archivoEntrega, setArchivoEntrega] = useState(null);
+    const [comentarioEntrega, setComentarioEntrega] = useState('');
+    const [isEntregando, setIsEntregando] = useState(false);
+    const [entregada, setEntregada] = useState(false);
+    const [tareasState, setTareasState] = useState(tareas);
 
     const toggleSeccion = (seccion) => {
         setSeccionesAbiertas(prev => ({
@@ -27,33 +32,76 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const finDeMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
     const dentroDeUnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
 
-    // Filtrado de tareas por sección
-    const tareasEstaSemana = tareas.filter(t => {
+    // Filtrado de tareas por sección (usar tareasState en vez de tareas)
+    const tareasEstaSemana = tareasState.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha >= hoy && fecha <= finDeSemana;
     });
 
-    const tareasEsteMes = tareas.filter(t => {
+    const tareasEsteMes = tareasState.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha > finDeSemana && fecha <= finDeMes;
     });
 
-    const tareasProximamente = tareas.filter(t => {
+    const tareasProximamente = tareasState.filter(t => {
         if (!t.fechaEntrega) return false;
         const fecha = new Date(t.fechaEntrega);
         return fecha > finDeMes;
     });
 
-    const tareasSinFecha = tareas.filter(t => !t.fechaEntrega);
+    const tareasSinFecha = tareasState.filter(t => !t.fechaEntrega);
 
     // Añadir nuevo filtro para tareas entregadas (por ahora simulado)
-    const tareasEntregadas = tareas.filter(t => t.entregada); // Asumimos que tendremos una propiedad 'entregada'
+    const tareasEntregadas = tareasState.filter(t => t.entregada); // Asumimos que tendremos una propiedad 'entregada'
 
     const handleClickTarea = (tarea) => {
         setTareaSeleccionada(tarea);
         setShowTareaModal(true);
+        setArchivoEntrega(null);
+        setComentarioEntrega('');
+        setEntregada(!!tarea.entregada); // Si ya está entregada, marcarlo
+    };
+
+    const handleEntregaTarea = async () => {
+        if (!tareaSeleccionada) return;
+        setIsEntregando(true);
+        try {
+            const formData = new FormData();
+            formData.append('comentario', comentarioEntrega);
+            if (archivoEntrega) formData.append('archivo', archivoEntrega);
+
+            // Suponiendo endpoint: /api/tareas/{id}/entregar
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/tareas/${tareaSeleccionada.id}/entregar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            if (!response.ok) throw new Error('Error al entregar la tarea');
+            // Opcional: actualizar tareaSeleccionada con datos de entrega
+            setEntregada(true);
+            // Actualizar el estado de la tarea en el array de tareas
+            setTareasState(prev =>
+                prev.map(t =>
+                    t.id === tareaSeleccionada.id
+                        ? { ...t, entregada: true }
+                        : t
+                )
+            );
+            // Actualizar la tarea seleccionada también
+            setTareaSeleccionada(prev =>
+                prev ? { ...prev, entregada: true } : prev
+            );
+            // Opcional: notificar al usuario
+        } catch (e) {
+            alert('Error al entregar la tarea');
+        } finally {
+            setIsEntregando(false);
+        }
     };
 
     const renderTareaModal = () => {
@@ -62,6 +110,12 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         // Construir la URL completa del archivo
         const downloadUrl = tareaSeleccionada.archivoUrl ?
             `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : null;
+
+        // NUEVO: datos de la entrega del alumno
+        const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl
+            ? `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}`
+            : null;
+        const comentarioEntrega = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
             <div
@@ -125,48 +179,105 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                             <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                             <div className="space-y-6">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    <div className="flex items-center gap-2 text-amber-600 mb-2">
-                                        <Calendar className="h-5 w-5" />
-                                        <span className="font-medium">Pendiente de entrega</span>
-                                    </div>
-                                    
+                                    {entregada ? (
+                                        <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                                            <CheckCircle className="h-5 w-5" />
+                                            <span className="font-medium">¡Tarea entregada!</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                            <Calendar className="h-5 w-5" />
+                                            <span className="font-medium">Pendiente de entrega</span>
+                                        </div>
+                                    )}
                                 </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Comentarios (opcional)
-                                        </label>
-                                        <textarea
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            rows="4"
-                                            placeholder="Añade comentarios sobre tu entrega..."
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Archivo de entrega
-                                        </label>
-                                        <div className="flex items-center justify-center w-full">
-                                            <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
-                                                <FileText className="h-8 w-8 mb-2" />
-                                                <span className="text-sm text-center">
-                                                    Arrastra tu archivo aquí o haz clic para seleccionar
+                                {entregada ? (
+                                    <div className="space-y-4">
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Paperclip className="h-5 w-5 text-green-600" />
+                                                <span className="font-medium text-green-800">Archivo entregado:</span>
+                                            </div>
+                                            {archivoEntregaUrl ? (
+                                                <a
+                                                    href={archivoEntregaUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                >
+                                                    <FileText className="h-5 w-5" />
+                                                    Descargar entrega
+                                                </a>
+                                            ) : (
+                                                <span className="text-gray-500">No se adjuntó archivo</span>
+                                            )}
+                                        </div>
+                                        <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                            <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
+                                            <div className="text-gray-700 whitespace-pre-line">
+                                                {comentarioEntrega ? comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                            </div>
+                                        </div>
+                                        <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="h-5 w-5 text-blue-600" />
+                                                <span className="font-medium text-gray-700">Fecha de entrega:</span>
+                                                <span className="text-gray-700">
+                                                    {tareaSeleccionada.fechaEntregada
+                                                        ? new Date(tareaSeleccionada.fechaEntregada).toLocaleString()
+                                                        : 'Desconocida'}
                                                 </span>
-                                                <input type="file" className="hidden" />
-                                            </label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <BookOpen className="h-5 w-5 text-blue-600" />
+                                                <span className="font-medium text-gray-700">Título:</span>
+                                                <span className="text-gray-700">{tareaSeleccionada.titulo || tareaSeleccionada.contenido}</span>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <button
-                                        type="button"
-                                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                    >
-                                        <FileText className="h-5 w-5" />
-                                        Entregar tarea
-                                    </button>
-                                </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Comentarios (opcional)
+                                            </label>
+                                            <textarea
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                rows="4"
+                                                placeholder="Añade comentarios sobre tu entrega..."
+                                                value={comentarioEntrega}
+                                                onChange={e => setComentarioEntrega(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Archivo de entrega
+                                            </label>
+                                            <div className="flex items-center justify-center w-full">
+                                                <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                    <FileText className="h-8 w-8 mb-2" />
+                                                    <span className="text-sm text-center">
+                                                        {archivoEntrega ? archivoEntrega.name : 'Arrastra tu archivo aquí o haz clic para seleccionar'}
+                                                    </span>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        onChange={e => setArchivoEntrega(e.target.files[0])}
+                                                    />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                                            onClick={handleEntregaTarea}
+                                            disabled={isEntregando}
+                                        >
+                                            <FileText className="h-5 w-5" />
+                                            {isEntregando ? "Entregando..." : "Entregar tarea"}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

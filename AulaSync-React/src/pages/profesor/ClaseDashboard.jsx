@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText, CheckCircle, Paperclip } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -37,6 +37,9 @@ const ClaseDashboard = () => {
     const [isCreatingAnuncio, setIsCreatingAnuncio] = useState(false);
     const [showTareaModal, setShowTareaModal] = useState(false);
     const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
+    const [archivoEntrega, setArchivoEntrega] = useState(null);
+    const [comentarioEntrega, setComentarioEntrega] = useState('');
+    const [isEntregando, setIsEntregando] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -193,8 +196,54 @@ const ClaseDashboard = () => {
     };
 
     const handleOpenTarea = (tarea) => {
+        // Si la tarea ya tiene datos de entrega, los mostramos
         setTareaSeleccionada(tarea);
         setShowTareaModal(true);
+        setArchivoEntrega(null);
+        setComentarioEntrega('');
+        setIsEntregando(false);
+    };
+
+    // NUEVO: función para entregar tarea (solo alumno)
+    const handleEntregaTarea = async () => {
+        if (!tareaSeleccionada) return;
+        if (tareaSeleccionada.entregada) {
+            toast.error('Ya has entregado esta tarea');
+            return;
+        }
+        setIsEntregando(true);
+        try {
+            const formData = new FormData();
+            formData.append('comentario', comentarioEntrega);
+            if (archivoEntrega) formData.append('archivo', archivoEntrega);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/tareas/${tareaSeleccionada.id}/entregar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Error al entregar la tarea');
+            }
+            // Obtener datos de la entrega para actualizar el estado local
+            const now = new Date();
+            setTareaSeleccionada(prev => prev ? {
+                ...prev,
+                entregada: true,
+                comentarioEntrega,
+                archivoEntregaUrl: archivoEntrega ? null : prev.archivoEntregaUrl, // Si hay archivo, se actualizará al recargar
+                fechaEntregada: now.toISOString()
+            } : prev);
+            toast.success('Tarea entregada correctamente');
+        } catch (e) {
+            toast.error(e.message || 'Error al entregar la tarea');
+        } finally {
+            setIsEntregando(false);
+        }
     };
 
     // NUEVO: función para recortar texto con puntos suspensivos
@@ -565,6 +614,16 @@ const ClaseDashboard = () => {
             `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : 
             null;
 
+        // NUEVO: datos de la entrega del alumno (si existe)
+        const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl
+            ? `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}`
+            : null;
+        const comentarioEntregaAlumno = tareaSeleccionada.comentarioEntrega;
+        const fechaEntregada = tareaSeleccionada.fechaEntregada;
+
+        // NUEVO: detectar si la tarea está entregada
+        const estaEntregada = !!tareaSeleccionada.entregada;
+
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
@@ -673,57 +732,111 @@ const ClaseDashboard = () => {
                             </div>
                         </div>
                     ) : (
-                        // Vista de alumno (el código existente para la entrega de tareas)
+                        // ALUMNO: formulario y resumen de entrega
                         <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative">
                             <div className="sticky top-8">
                                 <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
-                                
                                 <div className="space-y-6">
-                                    {/* Estado de la entrega */}
                                     <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                        <div className="flex items-center gap-2 text-amber-600 mb-2">
-                                            <Calendar className="h-5 w-5" />
-                                            <span className="font-medium">Pendiente de entrega</span>
-                                        </div>
-                                        
+                                        {estaEntregada ? (
+                                            <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                                                <CheckCircle className="h-5 w-5" />
+                                                <span className="font-medium">¡Tarea entregada!</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                                <Calendar className="h-5 w-5" />
+                                                <span className="font-medium">Pendiente de entrega</span>
+                                            </div>
+                                        )}
                                     </div>
-
-                                    {/* Formulario de entrega */}
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Comentarios (opcional)
-                                            </label>
-                                            <textarea
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                rows="4"
-                                                placeholder="Añade comentarios sobre tu entrega..."
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Archivo de entrega
-                                            </label>
-                                            <div className="flex items-center justify-center w-full">
-                                                <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
-                                                    <FileText className="h-8 w-8 mb-2" />
-                                                    <span className="text-sm text-center">
-                                                        Arrastra tu archivo aquí o haz clic para seleccionar
+                                    {estaEntregada ? (
+                                        <div className="space-y-4">
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Paperclip className="h-5 w-5 text-green-600" />
+                                                    <span className="font-medium text-green-800">Archivo entregado:</span>
+                                                </div>
+                                                {archivoEntregaUrl ? (
+                                                    <a
+                                                        href={archivoEntregaUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <FileText className="h-5 w-5" />
+                                                        Descargar entrega
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-500">No se adjuntó archivo</span>
+                                                )}
+                                            </div>
+                                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                                <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
+                                                <div className="text-gray-700 whitespace-pre-line">
+                                                    {comentarioEntregaAlumno ? comentarioEntregaAlumno : <span className="italic text-gray-400">Sin comentario</span>}
+                                                </div>
+                                            </div>
+                                            <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-5 w-5 text-blue-600" />
+                                                    <span className="font-medium text-gray-700">Fecha de entrega:</span>
+                                                    <span className="text-gray-700">
+                                                        {fechaEntregada
+                                                            ? new Date(fechaEntregada).toLocaleString()
+                                                            : 'Desconocida'}
                                                     </span>
-                                                    <input type="file" className="hidden" />
-                                                </label>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <BookOpen className="h-5 w-5 text-blue-600" />
+                                                    <span className="font-medium text-gray-700">Título:</span>
+                                                    <span className="text-gray-700">{tareaSeleccionada.titulo || tareaSeleccionada.contenido}</span>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <button
-                                            type="button"
-                                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                        >
-                                            <FileText className="h-5 w-5" />
-                                            Entregar tarea
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Comentarios (opcional)
+                                                </label>
+                                                <textarea
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    rows="4"
+                                                    placeholder="Añade comentarios sobre tu entrega..."
+                                                    value={comentarioEntrega}
+                                                    onChange={e => setComentarioEntrega(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Archivo de entrega
+                                                </label>
+                                                <div className="flex items-center justify-center w-full">
+                                                    <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+                                                        <FileText className="h-8 w-8 mb-2" />
+                                                        <span className="text-sm text-center">
+                                                            {archivoEntrega ? archivoEntrega.name : 'Arrastra tu archivo aquí o haz clic para seleccionar'}
+                                                        </span>
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            onChange={e => setArchivoEntrega(e.target.files[0])}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                                                onClick={handleEntregaTarea}
+                                                disabled={isEntregando || estaEntregada}
+                                            >
+                                                <FileText className="h-5 w-5" />
+                                                {isEntregando ? "Entregando..." : (estaEntregada ? "Ya entregada" : "Entregar tarea")}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

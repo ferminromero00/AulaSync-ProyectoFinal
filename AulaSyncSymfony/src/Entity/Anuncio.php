@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AnuncioRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -39,6 +41,14 @@ class Anuncio
     #[ORM\ManyToOne(targetEntity: Profesor::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Profesor $autor = null;
+
+    #[ORM\OneToMany(mappedBy: 'tarea', targetEntity: EntregaTarea::class, orphanRemoval: true)]
+    private Collection $entregas;
+
+    public function __construct()
+    {
+        $this->entregas = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -130,6 +140,30 @@ class Anuncio
     public function setAutor(?Profesor $autor): self
     {
         $this->autor = $autor;
+        return $this;
+    }
+
+    public function getEntregas(): Collection
+    {
+        return $this->entregas;
+    }
+
+    public function addEntrega(EntregaTarea $entrega): self
+    {
+        if (!$this->entregas->contains($entrega)) {
+            $this->entregas->add($entrega);
+            $entrega->setTarea($this);
+        }
+        return $this;
+    }
+
+    public function removeEntrega(EntregaTarea $entrega): self
+    {
+        if ($this->entregas->removeElement($entrega)) {
+            if ($entrega->getTarea() === $this) {
+                $entrega->setTarea(null);
+            }
+        }
         return $this;
     }
 }

@@ -163,7 +163,7 @@ export const unirseAClase = async (codigo) => {
             method: 'POST',
             body: JSON.stringify({ codigo })
         });
-        console.log("unirseAClase - Respuesta de la API:", response); // Log 2
+        // Después de unirse, podrías recargar las clases aquí si lo necesitas
         return response;
     } catch (error) {
         console.error('Error en unirseAClase:', error);

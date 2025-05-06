@@ -88,34 +88,46 @@ class AnuncioController extends AbstractController
                 return $this->json(['error' => 'Clase no encontrada'], 404);
             }
 
-            $qb = $entityManager->getRepository(Anuncio::class)->createQueryBuilder('a');
-            $anuncios = $qb
-                ->select('a.id', 'a.contenido', 'a.tipo', 'a.fechaCreacion', 
-                         'a.fechaEntrega', 'a.titulo', 'a.archivoUrl',
-                         'p.id as autorId', 'p.first_name', 'p.last_name')
+            $user = $this->getUser();
+            
+            $qb = $entityManager->createQueryBuilder();
+            $qb->select('a', 'e', 'p')
+                ->from(Anuncio::class, 'a')
                 ->leftJoin('a.autor', 'p')
+                ->leftJoin('a.entregas', 'e', 'WITH', 'e.alumno = :alumno')
                 ->where('a.clase = :clase')
                 ->setParameter('clase', $clase)
-                ->orderBy('a.fechaCreacion', 'DESC')
-                ->getQuery()
-                ->getResult();
+                ->setParameter('alumno', $user)
+                ->orderBy('a.fechaCreacion', 'DESC');
 
-            return $this->json(['anuncios' => array_map(function($anuncio) {
-                return [
-                    'id' => $anuncio['id'],
-                    'contenido' => $anuncio['contenido'],
-                    'tipo' => $anuncio['tipo'],
-                    'fechaCreacion' => $anuncio['fechaCreacion']->format('Y-m-d H:i:s'),
-                    'fechaEntrega' => $anuncio['fechaEntrega'] ? $anuncio['fechaEntrega']->format('Y-m-d H:i:s') : null,
-                    'titulo' => $anuncio['titulo'],
-                    'archivoUrl' => $anuncio['archivoUrl'],
-                    'autor' => [
-                        'id' => $anuncio['autorId'],
-                        'nombre' => trim($anuncio['first_name'] . ' ' . $anuncio['last_name'])
-                    ]
-                ];
-            }, $anuncios)]);
+            $anuncios = $qb->getQuery()->getResult();
 
+            return $this->json([
+                'anuncios' => array_map(function($anuncio) {
+                    $entrega = $anuncio->getEntregas()->filter(
+                        fn($e) => $e->getAlumno() === $this->getUser()
+                    )->first();
+
+                    return [
+                        'id' => $anuncio->getId(),
+                        'contenido' => $anuncio->getContenido(),
+                        'tipo' => $anuncio->getTipo(),
+                        'fechaCreacion' => $anuncio->getFechaCreacion()->format('Y-m-d H:i:s'),
+                        'fechaEntrega' => $anuncio->getFechaEntrega() ? 
+                            $anuncio->getFechaEntrega()->format('Y-m-d H:i:s') : null,
+                        'titulo' => $anuncio->getTitulo(),
+                        'archivoUrl' => $anuncio->getArchivoUrl(),
+                        'autor' => [
+                            'id' => $anuncio->getAutor()->getId(),
+                            'nombre' => $anuncio->getAutor()->getFirstName() . ' ' . $anuncio->getAutor()->getLastName()
+                        ],
+                        'entregada' => $entrega !== false,
+                        'comentarioEntrega' => $entrega ? $entrega->getComentario() : null,
+                        'archivoEntregaUrl' => $entrega ? $entrega->getArchivoUrl() : null,
+                        'fechaEntregada' => $entrega ? $entrega->getFechaEntrega()->format('Y-m-d H:i:s') : null
+                    ];
+                }, $anuncios)
+            ]);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => 'Error al obtener los anuncios',

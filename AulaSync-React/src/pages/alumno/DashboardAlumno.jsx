@@ -8,7 +8,7 @@ import NotificationButton from '../../components/NotificationButton';
 import { GlobalContext } from "../../App"
 
 const DashboardAlumno = () => {
-    const { userData } = useContext(GlobalContext);
+    const { userData, setUserData } = useContext(GlobalContext);
     const { clases, invitaciones, loading } = userData;
 
     const [mostrarModal, setMostrarModal] = useState(false)
@@ -70,8 +70,11 @@ const DashboardAlumno = () => {
         try {
             await salirDeClase(claseId);
 
-            // Actualizar el estado local eliminando la clase
-            setClases(prevClases => prevClases.filter(clase => clase.id !== claseId));
+            // Actualizar el estado global eliminando la clase
+            setUserData(prev => ({
+                ...prev,
+                clases: prev.clases.filter(clase => clase.id !== claseId)
+            }));
 
             setMenuAbierto(null);
             setShowConfirmModal(false);
