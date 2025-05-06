@@ -17,6 +17,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const [isEntregando, setIsEntregando] = useState(false);
     const [entregada, setEntregada] = useState(false);
     const [tareasState, setTareasState] = useState(tareas);
+    const [isClosing, setIsClosing] = useState(false);
 
     const seccionRefs = {
         entregadas: useRef(null),
@@ -125,6 +126,14 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         }
     };
 
+    const handleCloseModal = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowTareaModal(false);
+            setIsClosing(false);
+        }, 200); // Coincidir con la duración de la animación
+    };
+
     const renderTareaModal = () => {
         if (!showTareaModal || !tareaSeleccionada) return null;
 
@@ -141,12 +150,13 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
-            <div
-                className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
-                style={{ margin: 0, padding: 0 }}
-            >                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative modal-content max-h-[90vh] overflow-hidden">
+            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
+                    modal-content max-h-[90vh] overflow-hidden
+                    ${isClosing ? 'modal-content-closing' : ''}`}>
                     <button
-                        onClick={() => setShowTareaModal(false)}
+                        onClick={handleCloseModal}
                         className="absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg hover:scale-110 transform duration-200"
                     >
                         <X className="h-6 w-6 text-white" />
@@ -315,57 +325,51 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         <div
             key={tarea.id}
             onClick={() => handleClickTarea(tarea)}
-            className="p-6 bg-white rounded-xl border border-gray-100 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer group"
+            className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition"
         >
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                        {tarea.titulo}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-gray-400" />
-                        {tarea.clase?.nombre || 'Sin clase'}
-                    </p>
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
                 </div>
-                <div className="flex items-start gap-2">
-                    {tarea.entregada ? (
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                            Entregada
-                        </span>
-                    ) : (
-                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            Pendiente
-                        </span>
-                    )}
-                </div>
+                {tarea.entregada ? (
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        Entregada
+                    </span>
+                ) : (
+                    <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        Pendiente
+                    </span>
+                )}
             </div>
-
-            {/* Línea divisoria y detalles adicionales - Ahora siempre visible */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
-                <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <span>Fecha límite:</span>
-                        <span className="font-medium">
-                            {tarea.fechaEntrega
-                                ? new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })
-                                : "Sin fecha límite"}
-                        </span>
-                    </div>
+            <div className="text-sm text-gray-600">
+                <Calendar className="h-4 w-4 inline mr-1" />
+                {tarea.fechaEntrega 
+                    ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : "Sin fecha límite"}
+            </div>
+            <div className="mt-2 flex justify-between items-center">
+                <span className="text-sm text-gray-500">
+                    {tarea.clase?.nombre || 'Sin clase'}
+                </span>
+                <div className="flex items-center gap-2">
                     {tarea.archivoUrl && (
-                        <span className="flex items-center gap-1 text-blue-600 hover:text-blue-800">
+                        <span className="flex items-center gap-1 text-blue-600">
                             <Paperclip className="h-4 w-4" />
                             <span className="text-xs">Adjunto</span>
                         </span>
                     )}
+                    <span className="text-xs text-gray-500">
+                        Ver detalles →
+                    </span>
                 </div>
             </div>
         </div>

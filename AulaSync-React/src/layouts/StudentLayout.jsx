@@ -79,7 +79,7 @@ const StudentLayout = () => {
                                         clases.map(clase => (
                                             <div
                                                 key={clase.id}
-                                                onClick={() => window.location.href = `/alumno/clase/${clase.id}`}
+                                                onClick={() => navigate(`/alumno/clase/${clase.id}`)}
                                                 className="flex items-center justify-between px-2 py-1.5 text-xs text-gray-300 rounded-lg border border-green-700/10 bg-green-800/10 hover:bg-green-600/30 hover:text-white hover:border-green-400 hover:shadow-sm hover:shadow-green-500/20 group/item relative overflow-hidden cursor-pointer"
                                             >
                                                 <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-1">

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText, CheckCircle, Paperclip } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText, CheckCircle, Paperclip, Clock } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -42,6 +42,7 @@ const ClaseDashboard = () => {
     const [archivoEntrega, setArchivoEntrega] = useState(null);
     const [comentarioEntrega, setComentarioEntrega] = useState('');
     const [isEntregando, setIsEntregando] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -254,16 +255,28 @@ const ClaseDashboard = () => {
         return texto.length > max ? texto.slice(0, max) + '...' : texto;
     };
 
+    const handleCloseModal = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowSearchModal(false);
+            setShowAlumnosModal(false);
+            setShowAnuncioModal(false);
+            setIsClosing(false);
+        }, 200);
+    };
+
     const renderStudentSearchModal = () => {
         if (!showSearchModal) return null;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-lg p-6 w-full max-w-md modal-content
+                    ${isClosing ? 'modal-content-closing' : ''}`}>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">Buscar Alumnos</h3>
                         <button 
-                            onClick={() => setShowSearchModal(false)}
+                            onClick={handleCloseModal}
                             className="text-gray-500 hover:text-gray-700"
                         >
                             <X className="h-5 w-5" />
@@ -318,11 +331,13 @@ const ClaseDashboard = () => {
     const renderAlumnosModal = () => {
         if (!showAlumnosModal) return null;
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-lg relative">
+            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-lg p-6 w-full max-w-lg relative modal-content
+                    ${isClosing ? 'modal-content-closing' : ''}`}>
                     <button
                         className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-                        onClick={() => setShowAlumnosModal(false)}
+                        onClick={handleCloseModal}
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -358,18 +373,16 @@ const ClaseDashboard = () => {
         if (!showAnuncioModal) return null;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-xl p-6 w-full max-w-2xl mx-4 modal-content
+                    ${isClosing ? 'modal-content-closing' : ''}`}>
                     {showTipoSelector ? (
                         <>
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-semibold text-gray-900">Crear nueva publicación</h3>
                                 <button 
-                                    onClick={() => {
-                                        setShowAnuncioModal(false);
-                                        setAnuncioData({ contenido: '', tipo: '' });
-                                        setShowTipoSelector(true);
-                                    }}
+                                    onClick={handleCloseModal}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                     <X className="h-6 w-6" />
@@ -417,11 +430,7 @@ const ClaseDashboard = () => {
                                         <h3 className="text-xl font-semibold text-gray-900">Nuevo Anuncio</h3>
                                     </div>
                                     <button 
-                                        onClick={() => {
-                                            setShowAnuncioModal(false);
-                                            setAnuncioData({ contenido: '', tipo: '' });
-                                            setShowTipoSelector(true);
-                                        }}
+                                        onClick={handleCloseModal}
                                         className="text-gray-400 hover:text-gray-600 transition-colors"
                                     >
                                         <X className="h-6 w-6" />
@@ -445,11 +454,7 @@ const ClaseDashboard = () => {
                                     <div className="flex justify-end gap-3 pt-4">
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setShowAnuncioModal(false);
-                                                setAnuncioData({ contenido: '', tipo: '' });
-                                                setShowTipoSelector(true);
-                                            }}
+                                            onClick={handleCloseModal}
                                             className="px-6 py-2.5 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                                         >
                                             Cancelar
@@ -482,11 +487,7 @@ const ClaseDashboard = () => {
                                             Volver
                                         </button>
                                         <button 
-                                            onClick={() => {
-                                                setShowAnuncioModal(false);
-                                                setAnuncioData({ contenido: '', tipo: '', titulo: '', fechaEntrega: '', archivo: null, descripcion: '' });
-                                                setShowTipoSelector(true);
-                                            }}
+                                            onClick={handleCloseModal}
                                             className="text-gray-400 hover:text-gray-600 transition-colors"
                                         >
                                             <X className="h-6 w-6" />
@@ -558,11 +559,7 @@ const ClaseDashboard = () => {
                                     <div className="flex justify-end gap-3 pt-4">
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setShowAnuncioModal(false);
-                                                setAnuncioData({ contenido: '', tipo: '', titulo: '', fechaEntrega: '', archivo: null, descripcion: '' });
-                                                setShowTipoSelector(true);
-                                            }}
+                                            onClick={handleCloseModal}
                                             className="px-6 py-2.5 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                                         >
                                             Cancelar
@@ -983,15 +980,45 @@ const ClaseDashboard = () => {
                                                         <BookOpen className="h-5 w-5 text-blue-600" />
                                                         <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
                                                     </div>
+                                                    {anuncio.entregada ? (
+                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                                                            <CheckCircle className="h-3.5 w-3.5" />
+                                                            Entregada
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                                                            <Clock className="h-3.5 w-3.5" />
+                                                            Pendiente
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="text-sm text-gray-600">
                                                     <Calendar className="h-4 w-4 inline mr-1" />
                                                     {anuncio.fechaEntrega 
-                                                        ? new Date(anuncio.fechaEntrega).toLocaleString()
+                                                        ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })
                                                         : "Sin fecha límite"}
                                                 </div>
-                                                <div className="mt-2 text-xs text-gray-500">
-                                                    Ver detalles →
+                                                <div className="mt-2 flex justify-between items-center">
+                                                    <span className="text-sm text-gray-500">
+                                                        {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        {anuncio.archivoUrl && (
+                                                            <span className="flex items-center gap-1 text-blue-600">
+                                                                <Paperclip className="h-4 w-4" />
+                                                                <span className="text-xs">Adjunto</span>
+                                                            </span>
+                                                        )}
+                                                        <span className="text-xs text-gray-500">
+                                                            Ver detalles →
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ) : (
