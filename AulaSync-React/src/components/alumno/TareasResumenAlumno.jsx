@@ -136,7 +136,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl
             ? `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}`
             : null;
-        
+
         // Usar el comentario de la tarea guardada o el estado local
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
@@ -144,61 +144,63 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             <div
                 className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
                 style={{ margin: 0, padding: 0 }}
-            >                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative">
+            >                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative modal-content max-h-[90vh] overflow-hidden">
                     <button
                         onClick={() => setShowTareaModal(false)}
-                        className="absolute -top-3 -right-3 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg"
+                        className="absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg hover:scale-110 transform duration-200"
                     >
                         <X className="h-6 w-6 text-white" />
                     </button>
 
-                    <div className="p-8 flex-1">
-                        <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-                                <BookOpen className="h-7 w-7 text-blue-600" />
-                                {tareaSeleccionada.titulo}
-                            </h3>
-                            <div className="text-sm text-gray-500">
-                                Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
+                    <div className="p-8 flex-1 modal-content-left overflow-y-auto">
+                        <div className="modal-item-stagger">
+                            <div className="mb-6 modal-item-stagger">
+                                <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                                    <BookOpen className="h-7 w-7 text-blue-600" />
+                                    {tareaSeleccionada.titulo}
+                                </h3>
+                                <div className="text-sm text-gray-500">
+                                    Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
-                            <Calendar className="h-5 w-5 text-amber-600" />
-                            <span className="text-amber-800">
-                                <span className="font-medium">Fecha de entrega:</span>{" "}
-                                {tareaSeleccionada.fechaEntrega
-                                    ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
-                                    : "Sin fecha límite"}
-                            </span>
-                        </div>
-
-                        <div className="mb-6">
-                            <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
-                            <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
-                                {tareaSeleccionada.contenido || "Sin descripción"}
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2 modal-item-stagger">
+                                <Calendar className="h-5 w-5 text-amber-600" />
+                                <span className="text-amber-800">
+                                    <span className="font-medium">Fecha de entrega:</span>{" "}
+                                    {tareaSeleccionada.fechaEntrega
+                                        ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
+                                        : "Sin fecha límite"}
+                                </span>
                             </div>
-                        </div>
 
-                        {downloadUrl && (
-                            <div className="border-t pt-6">
-                                <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
-                                <a
-                                    href={downloadUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    <FileText className="h-5 w-5" />
-                                    Descargar material
-                                </a>
+                            <div className="mb-6 modal-item-stagger">
+                                <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
+                                <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
+                                    {tareaSeleccionada.contenido || "Sin descripción"}
+                                </div>
                             </div>
-                        )}
+
+                            {downloadUrl && (
+                                <div className="border-t pt-6 modal-item-stagger">
+                                    <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
+                                    <a
+                                        href={downloadUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                        <FileText className="h-5 w-5" />
+                                        Descargar material
+                                    </a>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Panel derecho - Vista de entrega */}
-                    <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200">
-                        <div className="sticky top-8">
+                    <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                        <div className="modal-item-stagger">
                             <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                             <div className="space-y-6">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
@@ -347,7 +349,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <span>Fecha límite:</span>
                         <span className="font-medium">
-                            {tarea.fechaEntrega 
+                            {tarea.fechaEntrega
                                 ? new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', {
                                     day: 'numeric',
                                     month: 'long',
@@ -370,7 +372,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     );
 
     const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
-        <div 
+        <div
             ref={seccionRefs[seccionId]}
             className="space-y-3"
         >
@@ -388,24 +390,23 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                     <div className="flex items-center gap-3">
                         <span className="font-medium text-gray-900 text-lg">{titulo}</span>
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300
-                            ${seccionesAbiertas[seccionId] 
-                                ? 'bg-blue-100 text-blue-800' 
+                            ${seccionesAbiertas[seccionId]
+                                ? 'bg-blue-100 text-blue-800'
                                 : 'bg-gray-100 text-gray-700'}`}
                         >
                             {tareas.length}
                         </span>
                     </div>
                 </div>
-                <div className={`transform transition-transform duration-300 ${
-                    seccionesAbiertas[seccionId] ? 'rotate-180' : 'rotate-0'
-                }`}>
+                <div className={`transform transition-transform duration-300 ${seccionesAbiertas[seccionId] ? 'rotate-180' : 'rotate-0'
+                    }`}>
                     <ChevronDown className="h-5 w-5 text-gray-400" />
                 </div>
             </button>
 
             <div className={`grid transition-all duration-300 ease-in-out
-                ${seccionesAbiertas[seccionId] 
-                    ? 'grid-rows-[1fr] opacity-100 translate-y-0' 
+                ${seccionesAbiertas[seccionId]
+                    ? 'grid-rows-[1fr] opacity-100 translate-y-0'
                     : 'grid-rows-[0fr] opacity-0 -translate-y-4'}
             `}>
                 <div className="overflow-hidden">
