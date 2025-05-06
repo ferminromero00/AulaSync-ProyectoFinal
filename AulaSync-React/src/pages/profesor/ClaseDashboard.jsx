@@ -43,6 +43,7 @@ const ClaseDashboard = () => {
     const [comentarioEntrega, setComentarioEntrega] = useState('');
     const [isEntregando, setIsEntregando] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'entregadas'
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -254,6 +255,33 @@ const ClaseDashboard = () => {
         if (!texto) return '';
         return texto.length > max ? texto.slice(0, max) + '...' : texto;
     };
+
+    // Filtrar las tareas según el estado seleccionado
+    const filtrarTareas = (tareas) => {
+        switch (filtroTareas) {
+            case 'pendientes':
+                return tareas.filter(t => t.tipo === 'tarea' && !t.entregada);
+            case 'entregadas':
+                return tareas.filter(t => t.tipo === 'tarea' && t.entregada);
+            default:
+                return tareas;
+        }
+    };
+
+    // Renderizar filtros antes del listado de anuncios
+    const renderFiltros = () => (
+        <div className="flex items-center gap-2 mb-4">
+            <select
+                value={filtroTareas}
+                onChange={(e) => setFiltroTareas(e.target.value)}
+                className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+                <option value="todas">Todas las tareas</option>
+                <option value="pendientes">Pendientes</option>
+                <option value="entregadas">Entregadas</option>
+            </select>
+        </div>
+    );
 
     const handleCloseModal = () => {
         setIsClosing(true);
@@ -951,11 +979,14 @@ const ClaseDashboard = () => {
                     {/* Contenido principal - Anuncios */}
                     <div className="flex-1 bg-white rounded-lg shadow p-6 opacity-0 animate-fadeIn"
                          style={{ animationDelay: '400ms' }}>
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Tablón de anuncios</h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-medium text-gray-900">Tablón de anuncios</h2>
+                            {renderFiltros()}
+                        </div>
                         <div className="min-h-[calc(100vh-300px)]">
                             {anuncios.length > 0 ? (
                                 <div className="space-y-4">
-                                    {anuncios.map((anuncio, index) =>
+                                    {filtrarTareas(anuncios).map((anuncio, index) =>
                                         anuncio.tipo === "tarea" ? (
                                             <div
                                                 key={anuncio.id}
