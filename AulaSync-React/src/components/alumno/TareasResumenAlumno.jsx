@@ -341,8 +341,11 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             key={tarea.id}
             onClick={() => handleClickTarea(tarea)}
             className="group bg-gradient-to-r from-blue-50 to-blue-50/50 border-l-4 border-blue-400 
-                     p-4 rounded-xl relative cursor-pointer hover:from-blue-100/80 hover:to-blue-50 
-                     transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+                     p-4 rounded-xl relative cursor-pointer transition-all duration-300
+                     hover:shadow-xl hover:z-20"
+            style={{
+                outline: "none"
+            }}
         >
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
@@ -393,6 +396,14 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                     </span>
                 </div>
             </div>
+            {/* Mejorar el hover: outline y z-index, sin scale */}
+            <style>{`
+                .group:hover {
+                    outline: 2px solid #3b82f6; /* azul-500 */
+                    outline-offset: 2px;
+                    background: linear-gradient(to right, #e0e7ff, #f0f9ff 50%);
+                }
+            `}</style>
         </div>
     );
 
