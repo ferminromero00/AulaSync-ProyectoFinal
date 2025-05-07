@@ -48,6 +48,18 @@
     }
 }
 
+@keyframes buttonPress {
+    0% { 
+        transform: scale(1); 
+    }
+    50% { 
+        transform: scale(0.95);
+    }
+    100% { 
+        transform: scale(1);
+    }
+}
+
 .animate-fadeIn {
     animation: fadeSlideIn 0.8s ease-out forwards;
 }
@@ -62,6 +74,10 @@
 
 .animate-bounceIn {
     animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-button-press {
+    animation: buttonPress 0.3s ease-in-out;
 }
 
 .stagger-animation > * {

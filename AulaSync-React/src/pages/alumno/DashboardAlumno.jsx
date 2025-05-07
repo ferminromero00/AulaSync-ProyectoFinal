@@ -136,13 +136,13 @@ const DashboardAlumno = () => {
             }
         };
 
-        // Solo cargar si no hay clases
-        if (!userData.clases || userData.clases.length === 0) {
+        // Solo cargar si userData.loading es true o si clases es null
+        if (userData.loading || !userData.clases) {
             loadClases();
         } else {
             setLocalLoading(false);
         }
-    }, [setUserData, userData.clases]);
+    }, [setUserData]); // Eliminar userData.clases de las dependencias
 
     // Cerrar menú de notificaciones al hacer click fuera
     useEffect(() => {

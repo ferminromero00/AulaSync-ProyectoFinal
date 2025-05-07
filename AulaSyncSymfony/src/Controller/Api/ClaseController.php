@@ -565,4 +565,54 @@ class ClaseController extends AbstractController
 
         return new JsonResponse($data);
     }
+
+    #[Route('/tareas/{id}/entregas', name: 'get_tarea_entregas', methods: ['GET'])]
+    public function getTareaEntregas(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $tarea = $em->getRepository(Anuncio::class)->find($id);
+            
+            if (!$tarea || $tarea->getTipo() !== 'tarea') {
+                return $this->json(['error' => 'Tarea no encontrada'], 404);
+            }
+
+            // Verificar permisos (profesor de la clase o alumno inscrito)
+            $user = $this->getUser();
+            $clase = $tarea->getClase();
+            
+            if (!($clase->getProfesor() === $user || $clase->getAlumnos()->contains($user))) {
+                return $this->json(['error' => 'No tienes permiso para ver estas entregas'], 403);
+            }
+
+            $entregas = $em->getRepository(EntregaTarea::class)
+                ->createQueryBuilder('e')
+                ->select('e', 'a')
+                ->leftJoin('e.alumno', 'a')
+                ->where('e.tarea = :tarea')
+                ->setParameter('tarea', $tarea)
+                ->getQuery()
+                ->getResult();
+
+            $entregasData = array_map(function($entrega) {
+                return [
+                    'id' => $entrega->getId(),
+                    'alumno' => [
+                        'id' => $entrega->getAlumno()->getId(),
+                        'nombre' => $entrega->getAlumno()->getFirstName() . ' ' . $entrega->getAlumno()->getLastName()
+                    ],
+                    'fechaEntrega' => $entrega->getFechaEntrega()->format('c'),
+                    'comentario' => $entrega->getComentario(),
+                    'archivoUrl' => $entrega->getArchivoUrl()
+                ];
+            }, $entregas);
+
+            return $this->json($entregasData);
+        } catch (\Exception $e) {
+            $this->apiLogger->error('Error al obtener entregas', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->json(['error' => 'Error al obtener las entregas'], 500);
+        }
+    }
 }

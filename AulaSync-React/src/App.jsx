@@ -23,7 +23,7 @@ export const GlobalContext = createContext();
 export function GlobalProvider({ children }) {
     const [userData, setUserData] = useState({
         user: null,
-        clases: [],
+        clases: null, // Cambiado de [] a null para mejor control del estado inicial
         invitaciones: [],
         loading: true
     });

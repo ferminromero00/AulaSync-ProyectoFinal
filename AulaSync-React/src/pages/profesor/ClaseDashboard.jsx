@@ -11,6 +11,7 @@ import { API_BASE_URL } from '../../config/config';
 import { useClase } from '../../contexts/ClaseContext';
 import '../../styles/animations.css';
 import '../../styles/modalAnimations.css';
+import { getEntregasTarea } from '../../services/entregas';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -44,6 +45,7 @@ const ClaseDashboard = () => {
     const [isEntregando, setIsEntregando] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'entregadas'
+    const [loadingEntregas, setLoadingEntregas] = useState({});
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -199,13 +201,39 @@ const ClaseDashboard = () => {
         }
     };
 
-    const handleOpenTarea = (tarea) => {
-        // Si la tarea ya tiene datos de entrega, los mostramos
+    const handleOpenTarea = async (tarea) => {
         setTareaSeleccionada(tarea);
         setShowTareaModal(true);
         setArchivoEntrega(null);
         setComentarioEntrega('');
         setIsEntregando(false);
+    
+        // Añadir estado de carga para cada estudiante
+        const estudianteIds = claseData?.estudiantes?.map(e => e.id) || [];
+        setLoadingEntregas(
+            estudianteIds.reduce((acc, id) => ({...acc, [id]: true}), {})
+        );
+    
+        try {
+            const entregas = await getEntregasTarea(tarea.id);
+            if (Array.isArray(entregas)) {
+                setTareaSeleccionada(prev => ({
+                    ...prev,
+                    entregas: entregas
+                }));
+            } else {
+                throw new Error('Formato de respuesta inválido');
+            }
+        } catch (error) {
+            console.error('Error al cargar las entregas:', error);
+            toast.error('Error al cargar las entregas');
+            setTareaSeleccionada(prev => ({
+                ...prev,
+                entregas: []
+            }));
+        } finally {
+            setLoadingEntregas({}); // Limpiar estados de carga
+        }
     };
 
     // NUEVO: función para entregar tarea (solo alumno)
@@ -742,17 +770,26 @@ const ClaseDashboard = () => {
                                             <h5 className="font-medium text-gray-900">Estado por estudiante</h5>
                                         </div>
                                         <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                                            {claseData?.estudiantes?.map((estudiante) => (
-                                                <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{estudiante.nombre}</p>
-                                                        <p className="text-sm text-gray-500">Sin entregar</p>
+                                            {claseData?.estudiantes?.map((estudiante) => {
+                                                // Buscar si el estudiante ha entregado la tarea
+                                                // Usar anuncio.entregas si está disponible, si no, tareaSeleccionada.entregas
+                                                // Si no viene en el anuncio, hay que pedirlo al backend
+                                                // Aquí usamos tareaSeleccionada.entregas, que debe ser un array de entregas con .alumno.id
+                                                const entregas = tareaSeleccionada.entregas || [];
+                                                // Puede que la API devuelva entregas como undefined, por eso el array vacío por defecto
+                                                const entrega = entregas.find(e =>
+                                                    (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
+                                                );
+                                                const entregado = !!entrega;
+                                                return (
+                                                    <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                                                        <div>
+                                                            <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                        </div>
+                                                        {renderEstadoEntrega(estudiante)}
                                                     </div>
-                                                    <span className="px-2 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
-                                                        Pendiente
-                                                    </span>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -870,6 +907,31 @@ const ClaseDashboard = () => {
                     )}
                 </div>
             </div>
+        );
+    };
+
+    const renderEstadoEntrega = (estudiante) => {
+        if (loadingEntregas[estudiante.id]) {
+            return (
+                <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 flex items-center gap-1">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                    <span>Comprobando...</span>
+                </span>
+            );
+        }
+        
+        const entrega = tareaSeleccionada.entregas?.find(e => e.alumno.id === estudiante.id);
+        
+        return entrega ? (
+            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                <CheckCircle className="h-3.5 w-3.5" />
+                Entregado
+            </span>
+        ) : (
+            <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                Pendiente
+            </span>
         );
     };
 
@@ -1013,20 +1075,17 @@ const ClaseDashboard = () => {
                                                         <X className="h-5 w-5 text-gray-600" />
                                                     </button>
                                                 )}
-                                                {/* Estado al lado izquierdo de la X */}
-                                                <div className="absolute top-4 right-16 flex items-center z-10">
-                                                    {anuncio.entregada ? (
-                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
-                                                            <CheckCircle className="h-3.5 w-3.5" />
-                                                            Entregada
-                                                        </span>
-                                                    ) : (
+                                                {/* Entregas pendientes al lado izquierdo de la X */}
+                                                {role === 'profesor' && (
+                                                    <div className="absolute top-4 right-16 flex items-center z-10">
                                                         <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                                                            <Clock className="h-3.5 w-3.5" />
-                                                            Pendiente
+                                                            Entregas pendientes:&nbsp;
+                                                            {claseData?.estudiantes
+                                                                ? claseData.estudiantes.length - (anuncio.entregas?.length || 0)
+                                                                : 0}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                                 {/* Título y resto del contenido */}
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <BookOpen className="h-5 w-5 text-blue-600" />

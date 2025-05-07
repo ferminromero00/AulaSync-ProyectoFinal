@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../services/auth'
@@ -11,12 +11,14 @@ export default function LoginForm({ role }) {
     const { register, handleSubmit, formState: { errors }, setError } = useForm()
     const navigate = useNavigate()
     const { setUserData } = useContext(GlobalContext);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const placeholderEmail = role === 'profesor' 
         ? 'profesor@centro.edu' 
         : 'alumno@centro.edu'
 
     const onSubmit = async (data) => {
+        setIsSubmitting(true);
         try {
             const loginData = {
                 ...data,
@@ -53,6 +55,8 @@ export default function LoginForm({ role }) {
                 type: 'manual',
                 message: error.message || 'Error en el inicio de sesión'
             });
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -105,9 +109,19 @@ export default function LoginForm({ role }) {
 
             <button
                 type="submit"
-                className={`w-full rounded-md px-4 py-2 text-sm font-medium text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${buttonColors}`}
+                disabled={isSubmitting}
+                className={`w-full rounded-md px-4 py-2 text-sm font-medium text-white transition-all
+                    ${buttonColors} focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${isSubmitting ? 'animate-button-press opacity-75 cursor-not-allowed' : ''}`}
             >
-                Iniciar sesión como {role}
+                {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Iniciando sesión...
+                    </div>
+                ) : (
+                    `Iniciar sesión como ${role}`
+                )}
             </button>
         </form>
     )
