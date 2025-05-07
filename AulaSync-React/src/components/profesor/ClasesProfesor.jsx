@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getClasesProfesor, crearClase } from '../../services/clases';
 import { Plus, BookOpen, Users, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { GlobalContext } from '../../App';
 
 const ClasesProfesor = ({ onClaseCreated }) => {
-    const [clases, setClases] = useState([]);
+    const { userData, setUserData } = useContext(GlobalContext);
+    const [clases, setClases] = useState(userData.clases || []);
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const [nuevaClase, setNuevaClase] = useState({
-        nombre: ''
-    });
-    const [isLoading, setIsLoading] = useState(true);
+    const [nuevaClase, setNuevaClase] = useState({ nombre: '' });
+    const [isLoading, setIsLoading] = useState(!userData.clases || userData.clases.length === 0);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        cargarClases();
+        if (!userData.clases || userData.clases.length === 0) {
+            cargarClases();
+        } else {
+            setIsLoading(false);
+        }
+    // eslint-disable-next-line
     }, []);
 
     const cargarClases = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const clasesData = await getClasesProfesor(token);
+            setIsLoading(true);
+            const clasesData = await getClasesProfesor();
             setClases(clasesData);
+            setUserData(prev => ({ ...prev, clases: clasesData }));
             setIsLoading(false);
         } catch (error) {
             console.error('Error al cargar las clases:', error);
@@ -32,8 +38,7 @@ const ClasesProfesor = ({ onClaseCreated }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            await crearClase(nuevaClase, token);
+            await crearClase(nuevaClase);
             setMostrarFormulario(false);
             setNuevaClase({ nombre: '' });
             await cargarClases();

@@ -955,8 +955,14 @@ const ClaseDashboard = () => {
                             {claseData.estudiantes && claseData.estudiantes.length > 0 ? (
                                 <ul className="space-y-3">
                                     {claseData.estudiantes.slice(0, 4).map((estudiante) => (
-                                        <li key={estudiante.id} className="text-gray-700 py-1.5 px-2 rounded-md hover:bg-gray-50">
-                                            {estudiante.nombre}
+                                        <li key={estudiante.id} className="text-gray-700 py-1.5 px-2 rounded-md hover:bg-gray-50 flex items-center gap-2">
+                                            <img
+                                                src={estudiante.fotoPerfilUrl ? `${API_BASE_URL}${estudiante.fotoPerfilUrl}` : '/default-avatar.png'}
+                                                alt={`Foto de ${estudiante.nombre}`}
+                                                className="h-7 w-7 rounded-full object-cover border border-gray-200"
+                                                onError={e => { e.target.src = '/default-avatar.png'; }}
+                                            />
+                                            <span>{estudiante.nombre}</span>
                                         </li>
                                     ))}
                                     {claseData.estudiantes.length > 4 && (
@@ -994,34 +1000,37 @@ const ClaseDashboard = () => {
                                                 style={{ animationDelay: `${600 + (index * 100)}ms` }}
                                                 onClick={() => handleOpenTarea(anuncio)}
                                             >
+                                                {/* Botón eliminar SIEMPRE arriba a la derecha */}
                                                 {role === 'profesor' && (
                                                     <button
                                                         onClick={e => {
                                                             e.stopPropagation();
                                                             handleDeleteAnuncio(anuncio.id);
                                                         }}
-                                                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors z-10"
                                                         title="Eliminar tarea"
                                                     >
                                                         <X className="h-5 w-5 text-gray-600" />
                                                     </button>
                                                 )}
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <BookOpen className="h-5 w-5 text-blue-600" />
-                                                        <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
-                                                    </div>
+                                                {/* Estado al lado izquierdo de la X */}
+                                                <div className="absolute top-4 right-16 flex items-center z-10">
                                                     {anuncio.entregada ? (
-                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
                                                             <CheckCircle className="h-3.5 w-3.5" />
                                                             Entregada
                                                         </span>
                                                     ) : (
-                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
                                                             <Clock className="h-3.5 w-3.5" />
                                                             Pendiente
                                                         </span>
                                                     )}
+                                                </div>
+                                                {/* Título y resto del contenido */}
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <BookOpen className="h-5 w-5 text-blue-600" />
+                                                    <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
                                                 </div>
                                                 <div className="text-sm text-gray-600">
                                                     <Calendar className="h-4 w-4 inline mr-1" />

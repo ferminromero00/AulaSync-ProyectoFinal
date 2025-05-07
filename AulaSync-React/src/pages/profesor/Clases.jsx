@@ -4,6 +4,7 @@ import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus, AlertTrian
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { GlobalContext } from '../../App';
+import "../../styles/animations.css";
 
 const Clases = () => {
     const { userData, setUserData } = useContext(GlobalContext);
@@ -87,37 +88,40 @@ const Clases = () => {
     }, [menuAbierto]);
 
     return (
-        <div className="space-y-6 p-6">
-            {/* Overlay de carga al eliminar */}
-            {isDeleting && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
-                        <span className="text-lg text-gray-700">Eliminando clase...</span>
-                    </div>
-                </div>
-            )}
+        <div className="space-y-8 p-6">
+            <style>{`
+                .animate-fadeIn { animation: fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards; opacity: 0; }
+                .animate-fadeIn-1 { animation-delay: 100ms; }
+                .animate-fadeIn-2 { animation-delay: 300ms; }
+                .animate-fadeIn-3 { animation-delay: 500ms; }
+                .animate-fadeIn-4 { animation-delay: 700ms; }
+                .modern-shadow {
+                    box-shadow: 0 4px 24px 0 rgba(30, 64, 175, 0.07), 0 1.5px 6px 0 rgba(30, 64, 175, 0.03);
+                }
+                .modern-card {
+                    border-radius: 1.25rem;
+                    background: white;
+                    transition: box-shadow 0.2s, transform 0.2s;
+                }
+                .modern-card:hover {
+                    box-shadow: 0 8px 32px 0 rgba(30, 64, 175, 0.13), 0 3px 12px 0 rgba(30, 64, 175, 0.06);
+                    transform: translateY(-2px) scale(1.01);
+                }
+            `}</style>
 
-            {/* Overlay de carga al crear */}
-            {isCreating && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-                    <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        <span className="text-lg text-gray-700">Creando clase...</span>
-                    </div>
-                </div>
-            )}
-
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fadeIn animate-fadeIn-1">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Mis Clases</h1>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                        Mis Clases
+                    </h1>
+                    <p className="mt-1 text-gray-500 text-lg">
                         Gestiona todas tus clases y sus detalles
                     </p>
                 </div>
                 <button
                     onClick={() => setMostrarFormulario(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl shadow modern-shadow hover:bg-blue-700 transition-colors text-base font-semibold"
                 >
                     <Plus className="h-5 w-5" />
                     Nueva Clase
@@ -129,19 +133,25 @@ const Clases = () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 </div>
             ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {clases.map((clase) => (
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 animate-fadeIn animate-fadeIn-2">
+                    {clases.map((clase, index) => (
                         <Link
                             key={clase.id}
                             to={`/profesor/clase/${clase.id}`}
-                            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                            className="modern-card modern-shadow group transition-all duration-200 hover:scale-[1.02] relative overflow-hidden opacity-0 animate-fadeIn"
+                            style={{ animationDelay: `${300 + index * 100}ms` }}
                         >
-                            <div className="p-6">
+                            <div className="p-7">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-semibold text-gray-900">{clase.nombre}</h2>
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-blue-100 p-3 rounded-xl">
+                                            <BookOpen className="h-6 w-6 text-blue-600" />
+                                        </div>
+                                        <h2 className="text-xl font-semibold text-gray-900 truncate">{clase.nombre}</h2>
+                                    </div>
                                     <div className="relative">
                                         <button
-                                            onClick={(e) => {
+                                            onClick={e => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
                                                 setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
@@ -154,7 +164,7 @@ const Clases = () => {
                                             <div className="absolute right-0 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                                                 <div className="py-1">
                                                     <button
-                                                        onClick={(e) => {
+                                                        onClick={e => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
                                                             handleEliminarClase(clase.id);
@@ -170,33 +180,37 @@ const Clases = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    <div className="flex items-center text-gray-600">
-                                        <BookOpen className="h-5 w-5 mr-2" />
-                                        <span className="text-sm">Código: {clase.codigoClase}</span>
+                                    <div className="flex items-center text-gray-600 gap-2">
+                                        <BookOpen className="h-5 w-5" />
+                                        <span className="text-sm font-medium">Código: {clase.codigoClase}</span>
                                     </div>
-                                    <div className="flex items-center text-gray-600">
-                                        <Users className="h-5 w-5 mr-2" />
-                                        <span className="text-sm">{clase.numEstudiantes} estudiantes</span>
+                                    <div className="flex items-center text-gray-600 gap-2">
+                                        <Users className="h-5 w-5" />
+                                        <span className="text-sm font-medium">{clase.numEstudiantes} estudiantes</span>
                                     </div>
-                                    <div className="flex items-center text-gray-600">
-                                        <Calendar className="h-5 w-5 mr-2" />
-                                        <span className="text-sm">Creada: {new Date(clase.createdAt).toLocaleDateString()}</span>
+                                    <div className="flex items-center text-gray-600 gap-2">
+                                        <Calendar className="h-5 w-5" />
+                                        <span className="text-sm font-medium">Creada: {new Date(clase.createdAt).toLocaleDateString('es-ES')}</span>
                                     </div>
-                                    <div className="flex items-center text-gray-600">
-                                        <Clock className="h-5 w-5 mr-2" />
-                                        <span className="text-sm">Última actividad: {clase.ultimaActividad}</span>
+                                    <div className="flex items-center text-gray-600 gap-2">
+                                        <Clock className="h-5 w-5" />
+                                        <span className="text-sm font-medium">Última actividad: {clase.ultimaActividad}</span>
                                     </div>
                                 </div>
                                 <div className="mt-6 pt-4 border-t">
                                     <div className="flex items-center justify-between">
                                         <div className="text-sm text-gray-500">
-                                            <p>Profesor: {clase.profesor.nombre}</p>
-                                            <p>Especialidad: {clase.profesor.especialidad || 'No especificada'}</p>
+                                            <p>Profesor: <span className="font-medium">{clase.profesor.nombre}</span></p>
+                                            <p>Especialidad: <span className="font-medium">{clase.profesor.especialidad || 'No especificada'}</span></p>
                                         </div>
-                                        <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        <span className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap transition-colors">
                                             Ver detalles →
-                                        </button>
+                                        </span>
                                     </div>
+                                </div>
+                                {/* Fondo decorativo */}
+                                <div className="absolute right-0 top-0 opacity-10 pointer-events-none select-none">
+                                    <BookOpen className="h-24 w-24" />
                                 </div>
                             </div>
                         </Link>

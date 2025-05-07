@@ -1,89 +1,85 @@
-import { BookOpen, Calendar, CheckCircle, FileText, Users } from "lucide-react";
+import { BookOpen, Calendar, FileText } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProfesorStats, getTareasStats } from "../../services/stats";
 import ClasesProfesor from "../../components/profesor/ClasesProfesor";
-import TareasResumenProfesor from '../../components/profesor/TareasResumenProfesor';
+import "../../styles/animations.css";
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
         totalClases: 0,
         totalEstudiantes: 0
     });
-    const [isLoading, setIsLoading] = useState(true);
     const [tareasCount, setTareasCount] = useState(0);
-    const [tareas, setTareas] = useState([]);
+    const [statsLoading, setStatsLoading] = useState(true);
 
-    const loadStats = async () => {
-        try {
-            // Llama a ambas funciones en paralelo
-            const [statsData, tareasData] = await Promise.all([
-                getProfesorStats(),
-                getTareasStats()
-            ]);
-            setStats(statsData);
-            setTareasCount(tareasData.totalTareas || 0);
-        } catch (error) {
-            console.error('Error al cargar estadísticas:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    // Cargar estadísticas en paralelo, pero no bloquear el resto del dashboard
     useEffect(() => {
-        loadStats();
-    }, []);
-
-    useEffect(() => {
-        const cargarTareas = async () => {
-            try {
-                // Temporalmente usar un array vacío hasta que el backend esté listo
-                setTareas([]);
-            } catch (error) {
-                console.error('Error al cargar tareas:', error);
+        let mounted = true;
+        setStatsLoading(true);
+        Promise.all([
+            getProfesorStats(),
+            getTareasStats()
+        ]).then(([statsData, tareasData]) => {
+            if (mounted) {
+                setStats(statsData);
+                setTareasCount(tareasData.totalTareas || 0);
             }
-        };
-
-        cargarTareas();
+        }).catch((error) => {
+            console.error('Error al cargar estadísticas:', error);
+        }).finally(() => {
+            if (mounted) setStatsLoading(false);
+        });
+        return () => { mounted = false; };
     }, []);
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500"></div>
-            </div>
-        );
-    }
 
     const statsConfig = [
         { 
             icon: BookOpen, 
             label: "Clases Activas", 
             value: stats.totalClases.toString(), 
-            color: "bg-gradient-to-br from-blue-500 to-blue-600" 
+            color: "from-blue-500 to-blue-400",
+            bg: "bg-gradient-to-br from-blue-100 to-blue-50",
+            iconBg: "bg-gradient-to-br from-blue-500 to-blue-400"
         },
         { 
             icon: FileText, 
             label: "Tareas", 
             value: tareasCount.toString(), 
-            color: "bg-gradient-to-br from-amber-500 to-amber-600" 
+            color: "from-amber-500 to-amber-400",
+            bg: "bg-gradient-to-br from-amber-100 to-amber-50",
+            iconBg: "bg-gradient-to-br from-amber-500 to-amber-400"
         }
     ];
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-10">
+            <style>{`
+                .modern-shadow {
+                    box-shadow: 0 4px 24px 0 rgba(30, 64, 175, 0.07), 0 1.5px 6px 0 rgba(30, 64, 175, 0.03);
+                }
+                .modern-card {
+                    border-radius: 1.25rem;
+                    background: white;
+                    transition: box-shadow 0.2s, transform 0.2s;
+                }
+                .modern-card:hover {
+                    box-shadow: 0 8px 32px 0 rgba(30, 64, 175, 0.13), 0 3px 12px 0 rgba(30, 64, 175, 0.06);
+                    transform: translateY(-2px) scale(1.01);
+                }
+            `}</style>
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fadeIn animate-fadeIn-1">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
                         Dashboard del Profesor
                     </h1>
-                    <p className="mt-1 text-gray-500">
+                    <p className="mt-1 text-gray-500 text-lg">
                         Bienvenido de nuevo, aquí está el resumen de tu actividad
                     </p>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-600">
+                <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-xl shadow modern-shadow">
+                    <Calendar className="h-5 w-5 text-blue-400" />
+                    <span className="text-base text-gray-700 font-medium">
                         {new Date().toLocaleDateString('es-ES', { 
                             day: 'numeric', 
                             month: 'long', 
@@ -93,41 +89,35 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Stats - Dos tarjetas horizontales, sin grid */}
-            <div className="flex w-full gap-4">
+            {/* Stats - Tarjetas modernas */}
+            <div className="flex w-full gap-8 animate-fadeIn animate-fadeIn-2">
                 {statsConfig.map((stat, index) => (
                     <div
                         key={index}
-                        className="relative flex-1 overflow-hidden rounded-lg bg-white shadow-sm transition-all hover:shadow-md p-4"
+                        className={`flex-1 modern-card modern-shadow ${stat.bg} p-7 flex items-center gap-5 relative overflow-hidden`}
+                        style={{ minWidth: 0 }}
                     >
-                        <div className="flex items-center gap-3">
-                            <div className={`rounded-lg ${stat.color} p-2.5`}>
-                                <stat.icon className="h-5 w-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                                <h3 className="text-xl font-bold text-gray-900">{stat.value}</h3>
-                            </div>
+                        <div className={`rounded-xl ${stat.iconBg} p-4 shadow-lg`}>
+                            <stat.icon className="h-7 w-7 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-base font-medium text-gray-500">{stat.label}</p>
+                            {statsLoading ? (
+                                <div className="h-7 w-20 bg-gray-200 rounded animate-pulse mt-2"></div>
+                            ) : (
+                                <h3 className="text-3xl font-extrabold text-gray-900 mt-1">{stat.value}</h3>
+                            )}
+                        </div>
+                        <div className="absolute right-0 top-0 opacity-10 pointer-events-none select-none">
+                            <stat.icon className="h-20 w-20" />
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Listado de clases */}
-                <div className="bg-white rounded-xl shadow-sm">
-                    <div className="border-b border-gray-100">
-                        <div className="px-6 py-4">
-                            <ClasesProfesor onClaseCreated={loadStats} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Tareas pendientes */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                    <h2 className="text-lg font-semibold mb-4">Tareas Pendientes</h2>
-                    <TareasResumenProfesor />
-                </div>
+            {/* Resumen de Clases ocupa todo el ancho, se muestra siempre */}
+            <div className="animate-fadeIn animate-fadeIn-3">
+                <ClasesProfesor onClaseCreated={() => {}} />
             </div>
         </div>
     );

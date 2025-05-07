@@ -150,8 +150,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
-            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
-                ${isClosing ? 'modal-closing' : ''}`}>
+            <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
                 <div className={`bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
                     modal-content max-h-[90vh] overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
@@ -346,7 +346,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             </div>
             <div className="text-sm text-gray-600">
                 <Calendar className="h-4 w-4 inline mr-1" />
-                {tarea.fechaEntrega 
+                {tarea.fechaEntrega
                     ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
                         day: 'numeric',
                         month: 'long',

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { subirFotoPerfil, getPerfil, actualizarPerfil, cambiarPassword } from "../../services/perfil";
-import { Camera, X } from "lucide-react";
+import { Camera, X, User, Mail, Briefcase, Building2, Lock } from "lucide-react";
 
 export default function ConfiguracionProfesor() {
   const [perfil, setPerfil] = useState(null);
@@ -25,10 +25,8 @@ export default function ConfiguracionProfesor() {
 
   useEffect(() => {
     const fetchPerfil = async () => {
-      console.log("[Configuracion.jsx] Iniciando fetchPerfil");
       try {
         const data = await getPerfil();
-        console.log("[Configuracion.jsx] Datos perfil recibidos:", data);
         if (data) {
           setPerfil(data);
           setFotoPreview(data.fotoPerfilUrl || null);
@@ -41,7 +39,6 @@ export default function ConfiguracionProfesor() {
           });
         }
       } catch (error) {
-        console.error("[Configuracion.jsx] Error fetching perfil:", error);
         toast.error("Error al cargar perfil. Por favor, inténtalo de nuevo.");
       }
       setIsLoading(false);
@@ -49,7 +46,6 @@ export default function ConfiguracionProfesor() {
     fetchPerfil();
   }, []);
 
-  // Sincronizar editData si cambia perfil
   useEffect(() => {
     if (perfil) {
       setEditData({
@@ -85,8 +81,6 @@ export default function ConfiguracionProfesor() {
         const response = await subirFotoPerfil(formData);
         if (response.fotoPerfilUrl) {
             toast.success("Foto de perfil actualizada correctamente");
-            // Recargar la página después de una pequeña pausa para asegurar que 
-            // la transacción se complete y el toast se muestre
             setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -94,11 +88,10 @@ export default function ConfiguracionProfesor() {
             throw new Error('No se recibió la URL de la imagen');
         }
     } catch (error) {
-        console.error('Error en subida:', error);
         toast.error(error.message || "Error al subir la foto");
         setFotoFile(null);
     }
-};
+  };
 
   const handleRemoveFoto = () => {
     setFotoFile(null);
@@ -139,10 +132,7 @@ export default function ConfiguracionProfesor() {
             toast.error("Todos los campos son obligatorios");
             return;
         }
-
-        console.log('Enviando datos:', editData); // Debug
         const response = await actualizarPerfil(editData);
-        
         if (response.success) {
             setPerfil(prev => ({ ...prev, ...editData }));
             toast.success(response.message || "Perfil actualizado correctamente");
@@ -150,7 +140,6 @@ export default function ConfiguracionProfesor() {
             throw new Error(response.error || "Error al actualizar el perfil");
         }
     } catch (error) {
-        console.error('Error en handlePerfilSubmit:', error);
         toast.error(error.message || "Error al actualizar el perfil");
     }
   };
@@ -164,21 +153,25 @@ export default function ConfiguracionProfesor() {
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-6">Configuración de Perfil</h2>
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-8 animate-fadeIn"
+      style={{ animation: "fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards", opacity: 0 }}>
+      <h2 className="text-2xl font-extrabold mb-8 text-blue-900 flex items-center gap-3">
+        <User className="h-7 w-7 text-blue-500" />
+        Configuración de Perfil
+      </h2>
       
       {/* Foto de perfil */}
-      <form onSubmit={handleFotoUpload}>
-        <div className="flex items-center gap-6 mb-6">
-          <div className="relative">
+      <form onSubmit={handleFotoUpload} className="mb-10">
+        <div className="flex items-center gap-6">
+          <div className="relative group">
             <img
               src={fotoPreview || (perfil?.fotoPerfilUrl || "/default-avatar.png")}
               alt="Foto de perfil"
-              className="w-24 h-24 rounded-full object-cover border"
+              className="w-28 h-28 rounded-full object-cover border-4 border-blue-100 shadow-lg transition-all duration-300 group-hover:scale-105"
             />
             <button
               type="button"
-              className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700"
+              className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 shadow"
               onClick={() => fileInputRef.current.click()}
               title="Cambiar foto"
             >
@@ -187,7 +180,7 @@ export default function ConfiguracionProfesor() {
             {fotoFile && (
               <button
                 type="button"
-                className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 shadow"
                 onClick={handleRemoveFoto}
                 title="Quitar selección"
               >
@@ -203,7 +196,7 @@ export default function ConfiguracionProfesor() {
             onChange={handleFotoChange}
           />
           <div>
-            <div className="font-medium">
+            <div className="font-semibold text-lg text-blue-900">
               {perfil ? `${perfil.firstName} ${perfil.lastName}` : ''}
             </div>
             <div className="text-gray-500 text-sm">
@@ -214,7 +207,7 @@ export default function ConfiguracionProfesor() {
         {fotoFile && (
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition"
           >
             Guardar foto de perfil
           </button>
@@ -222,111 +215,119 @@ export default function ConfiguracionProfesor() {
       </form>
 
       {/* Formulario de datos personales */}
-      <form onSubmit={handlePerfilSubmit} className="space-y-4 mt-8">
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Nombre</label>
+      <form onSubmit={handlePerfilSubmit} className="space-y-5 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+              <User className="h-4 w-4 text-blue-400" /> Nombre
+            </label>
             <input
               type="text"
               name="firstName"
               value={editData.firstName}
               onChange={e => setEditData({ ...editData, firstName: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
             />
           </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Apellidos</label>
+          <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+              <User className="h-4 w-4 text-blue-400" /> Apellidos
+            </label>
             <input
               type="text"
               name="lastName"
               value={editData.lastName}
               onChange={e => setEditData({ ...editData, lastName: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
             />
           </div>
         </div>
-        
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
+          <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+            <Mail className="h-4 w-4 text-blue-400" /> Email
+          </label>
           <input
             type="email"
             name="email"
             value={editData.email}
             onChange={e => setEditData({ ...editData, email: e.target.value })}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-1">Especialidad</label>
+          <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+            <Briefcase className="h-4 w-4 text-blue-400" /> Especialidad
+          </label>
           <input
             type="text"
             name="especialidad"
             value={editData.especialidad}
             onChange={e => setEditData({ ...editData, especialidad: e.target.value })}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-1">Departamento</label>
+          <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+            <Building2 className="h-4 w-4 text-blue-400" /> Departamento
+          </label>
           <input
             type="text"
             name="departamento"
             value={editData.departamento}
             onChange={e => setEditData({ ...editData, departamento: e.target.value })}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
-
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="w-full mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition font-semibold"
         >
           Guardar cambios
         </button>
       </form>
 
       {/* Cambiar contraseña */}
-      <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-8">
-        <h3 className="font-semibold text-lg mb-2">Cambiar contraseña</h3>
+      <form onSubmit={handlePasswordSubmit} className="space-y-4">
+        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-blue-900">
+          <Lock className="h-5 w-5 text-blue-400" /> Cambiar contraseña
+        </h3>
         <div>
-          <label className="block text-sm font-medium mb-1">Contraseña actual</label>
+          <label className="block text-sm font-semibold mb-1">Contraseña actual</label>
           <input
             type="password"
             name="currentPassword"
             value={passwords.currentPassword}
             onChange={handlePasswordChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Nueva contraseña</label>
+          <label className="block text-sm font-semibold mb-1">Nueva contraseña</label>
           <input
             type="password"
             name="newPassword"
             value={passwords.newPassword}
             onChange={handlePasswordChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Repetir nueva contraseña</label>
+          <label className="block text-sm font-semibold mb-1">Repetir nueva contraseña</label>
           <input
             type="password"
             name="repeatPassword"
             value={passwords.repeatPassword}
             onChange={handlePasswordChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
           />
         </div>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="w-full mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition font-semibold"
         >
           Cambiar contraseña
         </button>
       </form>
     </div>
   );
-};
+}
