@@ -680,113 +680,145 @@ const ClaseDashboard = () => {
         const estaEntregada = !!tareaSeleccionada.entregada;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
-                <div className="bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative modal-content">
-                    {/* Botón de cerrar reposicionado más arriba */}
+            <div className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative shadow-2xl modal-content max-h-[90vh] overflow-hidden ${isClosing ? 'modal-content-closing' : ''}`}>
+                    {/* Botón de cerrar dentro del modal, arriba a la derecha */}
                     <button
                         onClick={() => setShowTareaModal(false)}
-                        className="absolute -top-3 -right-3 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg"
+                        className="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow-lg transition-all"
+                        style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
                     >
-                        <X className="h-6 w-6 text-white" />
+                        <X className="h-6 w-6" />
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="p-8 flex-1 modal-content-left">
-                        <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-                                <BookOpen className="h-7 w-7 text-blue-600" />
-                                {tareaSeleccionada.titulo}
-                            </h3>
-                            <div className="text-sm text-gray-500">
-                                Publicado por {tareaSeleccionada.autor?.nombre} · {new Date(tareaSeleccionada.fechaCreacion).toLocaleString()}
+                    <div className="p-8 flex-1 modal-content-left overflow-y-auto">
+                        <div className="modal-item-stagger space-y-6">
+                            <div className="flex items-start gap-4">
+                                <div className="bg-blue-100 p-3 rounded-xl">
+                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-900">{tareaSeleccionada.titulo}</h3>
+                                    <div className="text-sm text-gray-500 mt-1">
+                                        Publicado por {tareaSeleccionada.autor?.nombre} · {new Date(tareaSeleccionada.fechaCreacion).toLocaleString()}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
-                            <Calendar className="h-5 w-5 text-amber-600" />
-                            <span className="text-amber-800">
-                                <span className="font-medium">Fecha de entrega:</span>{" "}
-                                {tareaSeleccionada?.fechaEntrega
-                                    ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
-                                    : "Sin fecha límite"}
-                            </span>
-                        </div>
-
-                        <div className="mb-6">
-                            <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
-                            <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
-                                {tareaSeleccionada.contenido || tareaSeleccionada.descripcion}
+                            <div className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/50 rounded-xl px-4 py-3 flex items-center gap-3">
+                                <div className="bg-amber-200/50 p-2 rounded-lg">
+                                    <Calendar className="h-5 w-5 text-amber-700" />
+                                </div>
+                                <div>
+                                    <div className="font-medium text-amber-900">Fecha de entrega</div>
+                                    <div className="text-sm text-amber-800">
+                                        {tareaSeleccionada?.fechaEntrega
+                                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
+                                                dateStyle: 'long',
+                                                timeStyle: 'short'
+                                            })
+                                            : "Sin fecha límite"}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {tareaSeleccionada.archivoUrl && (
-                            <div className="border-t pt-6">
-                                <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
-                                <a
-                                    href={downloadUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    <FileText className="h-5 w-5" />
-                                    Descargar material
-                                </a>
+                            <div>
+                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-gray-500" />
+                                    Descripción de la tarea
+                                </h4>
+                                <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[200px] border border-gray-100">
+                                    {tareaSeleccionada.contenido || tareaSeleccionada.descripcion}
+                                </div>
                             </div>
-                        )}
+
+                            {tareaSeleccionada.archivoUrl && (
+                                <div className="pt-4">
+                                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                        <Paperclip className="h-5 w-5 text-gray-500" />
+                                        Material de la tarea
+                                    </h4>
+                                    <a
+                                        href={downloadUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow group"
+                                    >
+                                        <FileText className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
+                                        Descargar material
+                                    </a>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Panel derecho - Vista de profesor (entregas) o alumno (subir tarea) */}
                     {role === 'profesor' ? (
-                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right">
-                            <div className="sticky top-8">
-                                {/* Añadido mb-8 para dar más espacio */}
+                        <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                            <div className="modal-item-stagger">
                                 <div className="flex items-center justify-between mb-8">
                                     <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
                                     <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
-                                        0 entregas
+                                        {tareaSeleccionada.entregas?.length || 0} entregas
                                     </span>
                                 </div>
-                                
                                 <div className="space-y-4">
-                                    {/* Estado general de entregas */}
                                     <div className="bg-white rounded-lg p-4 border border-gray-200">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="text-center">
                                                 <p className="text-sm text-gray-500">Entregadas</p>
-                                                <p className="text-2xl font-semibold text-gray-900">0</p>
+                                                <p className="text-2xl font-semibold text-gray-900">{tareaSeleccionada.entregas?.length || 0}</p>
                                             </div>
                                             <div className="text-center">
                                                 <p className="text-sm text-gray-500">Pendientes</p>
                                                 <p className="text-2xl font-semibold text-gray-900">
-                                                    {claseData?.estudiantes?.length || 0}
+                                                    {claseData?.estudiantes?.length
+                                                        ? claseData.estudiantes.length - (tareaSeleccionada.entregas?.length || 0)
+                                                        : 0}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Lista de estudiantes y sus estados */}
                                     <div className="bg-white rounded-lg border border-gray-200">
                                         <div className="p-4 border-b border-gray-200">
                                             <h5 className="font-medium text-gray-900">Estado por estudiante</h5>
                                         </div>
                                         <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
                                             {claseData?.estudiantes?.map((estudiante) => {
-                                                // Buscar si el estudiante ha entregado la tarea
-                                                // Usar anuncio.entregas si está disponible, si no, tareaSeleccionada.entregas
-                                                // Si no viene en el anuncio, hay que pedirlo al backend
-                                                // Aquí usamos tareaSeleccionada.entregas, que debe ser un array de entregas con .alumno.id
                                                 const entregas = tareaSeleccionada.entregas || [];
-                                                // Puede que la API devuelva entregas como undefined, por eso el array vacío por defecto
                                                 const entrega = entregas.find(e =>
                                                     (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
                                                 );
-                                                const entregado = !!entrega;
+                                                if (loadingEntregas[estudiante.id]) {
+                                                    return (
+                                                        <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                                                            <div>
+                                                                <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                            </div>
+                                                            <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 flex items-center gap-1">
+                                                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                                                                <span>Comprobando...</span>
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                }
                                                 return (
                                                     <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
                                                         <div>
                                                             <p className="font-medium text-gray-900">{estudiante.nombre}</p>
                                                         </div>
-                                                        {renderEstadoEntrega(estudiante)}
+                                                        {entrega ? (
+                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                                                                <CheckCircle className="h-3.5 w-3.5" />
+                                                                Entregado
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                                                                <Clock className="h-3.5 w-3.5" />
+                                                                Pendiente
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
@@ -797,8 +829,8 @@ const ClaseDashboard = () => {
                         </div>
                     ) : (
                         // ALUMNO: formulario y resumen de entrega
-                        <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 relative modal-content-right">
-                            <div className="sticky top-8">
+                        <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                            <div className="modal-item-stagger">
                                 <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-lg p-4 border border-gray-200">

@@ -137,70 +137,85 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const renderTareaModal = () => {
         if (!showTareaModal || !tareaSeleccionada) return null;
 
-        // Construir la URL completa del archivo
-        const downloadUrl = tareaSeleccionada.archivoUrl ?
+        const downloadUrl = tareaSeleccionada.archivoUrl ? 
             `${API_BASE_URL}${tareaSeleccionada.archivoUrl}` : null;
-
-        // NUEVO: datos de la entrega del alumno
-        const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl
-            ? `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}`
-            : null;
-
-        // Usar el comentario de la tarea guardada o el estado local
+        const archivoEntregaUrl = tareaSeleccionada.archivoEntregaUrl ? 
+            `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}` : null;
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
-            <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
-                ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
-                <div className={`bg-white rounded-lg w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
-                    modal-content max-h-[90vh] overflow-hidden
+            <div className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm
+                ${isClosing ? 'modal-closing' : ''}`}>
+                <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
+                    shadow-2xl modal-content max-h-[90vh] overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
+                    {/* Botón de cerrar dentro del modal, arriba a la derecha */}
                     <button
                         onClick={handleCloseModal}
-                        className="absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 transition-colors z-10 bg-red-500 shadow-lg hover:scale-110 transform duration-200"
+                        className="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow-lg transition-all"
+                        style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
                     >
-                        <X className="h-6 w-6 text-white" />
+                        <X className="h-6 w-6" />
                     </button>
 
                     <div className="p-8 flex-1 modal-content-left overflow-y-auto">
-                        <div className="modal-item-stagger">
-                            <div className="mb-6 modal-item-stagger">
-                                <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-                                    <BookOpen className="h-7 w-7 text-blue-600" />
-                                    {tareaSeleccionada.titulo}
-                                </h3>
-                                <div className="text-sm text-gray-500">
-                                    Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
+                        <div className="modal-item-stagger space-y-6">
+                            <div className="flex items-start gap-4">
+                                <div className="bg-blue-100 p-3 rounded-xl">
+                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-900">{tareaSeleccionada.titulo}</h3>
+                                    <div className="text-sm text-gray-500 mt-1">
+                                        Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 flex items-center gap-2 modal-item-stagger">
-                                <Calendar className="h-5 w-5 text-amber-600" />
-                                <span className="text-amber-800">
-                                    <span className="font-medium">Fecha de entrega:</span>{" "}
-                                    {tareaSeleccionada.fechaEntrega
-                                        ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString()
-                                        : "Sin fecha límite"}
-                                </span>
+                            <div className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/50 
+                                        rounded-xl px-4 py-3 flex items-center gap-3">
+                                <div className="bg-amber-200/50 p-2 rounded-lg">
+                                    <Calendar className="h-5 w-5 text-amber-700" />
+                                </div>
+                                <div>
+                                    <div className="font-medium text-amber-900">Fecha de entrega</div>
+                                    <div className="text-sm text-amber-800">
+                                        {tareaSeleccionada.fechaEntrega
+                                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
+                                                dateStyle: 'long',
+                                                timeStyle: 'short'
+                                              })
+                                            : "Sin fecha límite"}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="mb-6 modal-item-stagger">
-                                <h4 className="font-medium text-gray-900 mb-3">Descripción de la tarea</h4>
-                                <div className="bg-gray-50 rounded-lg p-6 text-gray-700 whitespace-pre-line min-h-[200px]">
+                            <div>
+                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-gray-500" />
+                                    Descripción de la tarea
+                                </h4>
+                                <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[200px]
+                                            border border-gray-100">
                                     {tareaSeleccionada.contenido || "Sin descripción"}
                                 </div>
                             </div>
 
                             {downloadUrl && (
-                                <div className="border-t pt-6 modal-item-stagger">
-                                    <h4 className="font-medium text-gray-900 mb-3">Material de la tarea</h4>
+                                <div className="pt-4">
+                                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                        <Paperclip className="h-5 w-5 text-gray-500" />
+                                        Material de la tarea
+                                    </h4>
                                     <a
                                         href={downloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 
+                                                 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all
+                                                 shadow-sm hover:shadow group"
                                     >
-                                        <FileText className="h-5 w-5" />
+                                        <FileText className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
                                         Descargar material
                                     </a>
                                 </div>
@@ -208,8 +223,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                         </div>
                     </div>
 
-                    {/* Panel derecho - Vista de entrega */}
-                    <div className="bg-gray-50 p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
+                                 md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
                         <div className="modal-item-stagger">
                             <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                             <div className="space-y-6">
@@ -325,23 +340,29 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         <div
             key={tarea.id}
             onClick={() => handleClickTarea(tarea)}
-            className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition"
+            className="group bg-gradient-to-r from-blue-50 to-blue-50/50 border-l-4 border-blue-400 
+                     p-4 rounded-xl relative cursor-pointer hover:from-blue-100/80 hover:to-blue-50 
+                     transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
         >
             <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                        <BookOpen className="h-5 w-5 text-blue-600" />
+                    </div>
                     <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
                 </div>
                 {tarea.entregada ? (
-                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 
+                                text-xs font-medium rounded-full border border-emerald-200">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                         Entregada
-                    </span>
+                    </div>
                 ) : (
-                    <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 
+                                text-xs font-medium rounded-full border border-amber-200">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                         Pendiente
-                    </span>
+                    </div>
                 )}
             </div>
             <div className="text-sm text-gray-600">
