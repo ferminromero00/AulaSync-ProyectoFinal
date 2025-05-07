@@ -147,11 +147,13 @@ export const buscarClasePorCodigo = async (codigo) => {
 
 export const getClasesAlumno = async () => {
     try {
-        return handleRequest('/alumno/clases', {
+        const data = await handleRequest('/alumno/clases', {
             method: 'GET'
         });
+        console.log('Clases recibidas:', data); // Añadir este log
+        return data || [];
     } catch (error) {
-        console.error('Error en getClasesAlumno:', error);
+        console.error('Error obteniendo clases:', error); // Añadir este log
         throw error;
     }
 };

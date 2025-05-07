@@ -1,11 +1,16 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../services/auth'
+import { GlobalContext } from '../App'
+import { getPerfil } from '../services/perfil'
+import { getClasesAlumno, getClasesProfesor } from '../services/clases'
+import { obtenerInvitacionesPendientes } from '../services/invitaciones'
 
 export default function LoginForm({ role }) {
     const { register, handleSubmit, formState: { errors }, setError } = useForm()
     const navigate = useNavigate()
+    const { setUserData } = useContext(GlobalContext);
 
     const placeholderEmail = role === 'profesor' 
         ? 'profesor@centro.edu' 
@@ -21,6 +26,26 @@ export default function LoginForm({ role }) {
             console.log('Intentando login con:', loginData); // Debug
             const response = await login(loginData);
             console.log('Login exitoso:', response);
+            // Guardar token y role en localStorage si no lo hace el login()
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('role', role);
+
+            // Cargar datos de usuario y clases tras login
+            if (role === 'profesor') {
+                const [user, clases] = await Promise.all([
+                    getPerfil(),
+                    getClasesProfesor()
+                ]);
+                setUserData({ user, clases, invitaciones: [], loading: false });
+            } else {
+                const [user, clases, invitaciones] = await Promise.all([
+                    getPerfil(),
+                    getClasesAlumno(),
+                    obtenerInvitacionesPendientes()
+                ]);
+                setUserData({ user, clases, invitaciones, loading: false });
+            }
+
             navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard');
         } catch (error) {
             console.error('Error en login:', error);

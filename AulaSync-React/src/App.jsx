@@ -48,11 +48,13 @@ export function GlobalProvider({ children }) {
                         getClasesAlumno(),
                         obtenerInvitacionesPendientes()
                     ]);
+                    console.log('Datos cargados:', { user, clases, invitaciones }); // Añadir este log
                     setUserData({ user, clases, invitaciones, loading: false });
                 } else {
                     setUserData({ user: null, clases: [], invitaciones: [], loading: false });
                 }
-            } catch {
+            } catch (error) {
+                console.error('Error cargando datos:', error); // Añadir este log
                 setUserData({ user: null, clases: [], invitaciones: [], loading: false });
             }
         };

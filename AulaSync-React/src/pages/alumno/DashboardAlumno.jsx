@@ -26,6 +26,7 @@ const DashboardAlumno = () => {
     const notifBtnRef = useRef(null);
     const notifMenuRef = useRef(null);
     const navigate = useNavigate();
+    const [localLoading, setLocalLoading] = useState(false);
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
@@ -116,6 +117,7 @@ const DashboardAlumno = () => {
     useEffect(() => {
         const loadClases = async () => {
             try {
+                setLocalLoading(true);
                 const response = await getClasesAlumno();
                 setUserData(prev => ({
                     ...prev,
@@ -129,6 +131,8 @@ const DashboardAlumno = () => {
                     clases: [],
                     loading: false
                 }));
+            } finally {
+                setLocalLoading(false);
             }
         };
 
@@ -155,10 +159,10 @@ const DashboardAlumno = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
 
-    if (loading) {
+    if (loading || localLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500"></div>
             </div>
         );
     }
