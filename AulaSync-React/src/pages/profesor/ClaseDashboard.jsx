@@ -46,6 +46,8 @@ const ClaseDashboard = () => {
     const [isClosing, setIsClosing] = useState(false);
     const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'entregadas'
     const [loadingEntregas, setLoadingEntregas] = useState({});
+    const [showEntregaModal, setShowEntregaModal] = useState(false);
+    const [entregaSeleccionada, setEntregaSeleccionada] = useState(null);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -824,13 +826,20 @@ const ClaseDashboard = () => {
                                                         </div>
                                                     );
                                                 }
+                                                // Hacer todo el bloque clickeable si hay entrega
                                                 return (
-                                                    <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                                                    <div
+                                                        key={estudiante.id}
+                                                        className={`p-4 flex items-center justify-between hover:bg-gray-50 transition cursor-pointer ${entrega ? "hover:bg-emerald-50" : ""}`}
+                                                        onClick={() => entrega && handleOpenEntregaModal(entrega)}
+                                                        style={entrega ? { cursor: "pointer" } : { cursor: "default" }}
+                                                        title={entrega ? "Ver entrega" : undefined}
+                                                    >
                                                         <div>
                                                             <p className="font-medium text-gray-900">{estudiante.nombre}</p>
                                                         </div>
                                                         {entrega ? (
-                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
+                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
                                                                 <CheckCircle className="h-3.5 w-3.5" />
                                                                 Entregado
                                                             </span>
@@ -985,6 +994,99 @@ const ClaseDashboard = () => {
                 <Clock className="h-3.5 w-3.5" />
                 Pendiente
             </span>
+        );
+    };
+
+    const handleOpenEntregaModal = (entrega) => {
+        setEntregaSeleccionada(entrega);
+        setShowEntregaModal(true);
+    };
+    const handleCloseEntregaModal = () => {
+        setShowEntregaModal(false);
+        setEntregaSeleccionada(null);
+    };
+
+    const renderEntregaModal = () => {
+        if (!showEntregaModal || !entregaSeleccionada) return null;
+        const archivoUrl = entregaSeleccionada.archivoUrl ? `${API_BASE_URL}${entregaSeleccionada.archivoUrl}` : null;
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="relative w-full max-w-lg mx-4 animate-entregaModalIn">
+                    {/* Fondo decorativo */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 via-white to-emerald-100 rounded-2xl shadow-2xl scale-105 blur-[1.5px] z-0" />
+                    <div className="relative z-10 bg-white rounded-2xl shadow-2xl overflow-hidden p-0">
+                        {/* Cabecera */}
+                        <div className="flex items-center justify-between px-8 py-6 border-b border-blue-50 bg-gradient-to-r from-blue-50 to-emerald-50">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-blue-200 rounded-full p-2 shadow">
+                                    <CheckCircle className="h-7 w-7 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 mb-1">
+                                        <span className="text-blue-700">{entregaSeleccionada.alumno?.nombre}</span>
+                                    </h2>
+                                    <div className="text-xs text-gray-500">
+                                        Entregado el {entregaSeleccionada.fechaEntrega ? new Date(entregaSeleccionada.fechaEntrega).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' }) : 'Desconocida'}
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleCloseEntregaModal}
+                                className="bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow transition-all"
+                                aria-label="Cerrar"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        {/* Cuerpo */}
+                        <div className="px-8 py-7 space-y-7">
+                            {/* Comentario */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <FileText className="h-5 w-5 text-blue-500" />
+                                    <span className="font-semibold text-gray-800">Comentario del alumno</span>
+                                </div>
+                                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-gray-700 min-h-[60px] shadow-inner">
+                                    {entregaSeleccionada.comentario
+                                        ? <span>{entregaSeleccionada.comentario}</span>
+                                        : <span className="italic text-gray-400">Sin comentario</span>}
+                                </div>
+                            </div>
+                            {/* Archivo */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Paperclip className="h-5 w-5 text-emerald-500" />
+                                    <span className="font-semibold text-gray-800">Archivo entregado</span>
+                                </div>
+                                {archivoUrl ? (
+                                    <a
+                                        href={archivoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg hover:bg-emerald-200 hover:border-emerald-300 transition-all shadow group"
+                                    >
+                                        <FileText className="h-5 w-5 text-emerald-600 group-hover:text-emerald-900" />
+                                        Descargar archivo
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-400 italic">No se adjuntó archivo</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Animaciones CSS */}
+                    <style>{`
+                        @keyframes entregaModalIn {
+                            0% { opacity: 0; transform: translateY(60px) scale(0.97);}
+                            80% { opacity: 1; transform: translateY(-8px) scale(1.03);}
+                            100% { opacity: 1; transform: translateY(0) scale(1);}
+                        }
+                        .animate-entregaModalIn {
+                            animation: entregaModalIn 0.55s cubic-bezier(.4,1.7,.7,1) both;
+                        }
+                    `}</style>
+                </div>
+            </div>
         );
     };
 
@@ -1244,6 +1346,7 @@ const ClaseDashboard = () => {
             {renderAlumnosModal()}
             {renderAnuncioModal()}
             {renderTareaModal()}
+            {renderEntregaModal()}
         </div>
     );
 };
