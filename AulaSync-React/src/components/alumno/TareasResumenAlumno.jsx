@@ -22,8 +22,11 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const [comentarioCorreccionEdicion, setComentarioCorreccionEdicion] = useState('');
     const [isCalificando, setIsCalificando] = useState(false);
 
+    // Asegurar que todas las refs existen en el objeto seccionRefs
     const seccionRefs = {
         entregadas: useRef(null),
+        expirada: useRef(null), // Añadir si usas sección "expirada"
+        expiradas: useRef(null), // Añadir si usas sección "expiradas"
         estaSemana: useRef(null),
         esteMes: useRef(null),
         proximamente: useRef(null),
@@ -36,8 +39,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             [seccion]: !prev[seccion]
         }));
 
-        // Si estamos abriendo la sección, hacemos scroll
-        if (!seccionesAbiertas[seccion]) {
+        // Solo hacer scroll si la ref existe
+        if (!seccionesAbiertas[seccion] && seccionRefs[seccion] && seccionRefs[seccion].current) {
             setTimeout(() => {
                 seccionRefs[seccion].current?.scrollIntoView({
                     behavior: 'smooth',
@@ -80,6 +83,12 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
     // Añadir nuevo filtro para tareas entregadas
     const tareasEntregadas = tareasState.filter(t => t.entregada);
+
+    const tareasExpiradas = tareasNoEntregadas.filter(t => {
+        if (!t.fechaEntrega) return false;
+        const fecha = new Date(t.fechaEntrega);
+        return fecha < hoy;
+    });
 
     const handleClickTarea = (tarea) => {
         setTareaSeleccionada(tarea);
@@ -418,76 +427,91 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         );
     };
 
-    const renderTarea = (tarea) => (
-        <div
-            key={tarea.id}
-            onClick={() => handleClickTarea(tarea)}
-            className="group bg-gradient-to-r from-blue-50 to-blue-50/50 border-l-4 border-blue-400 
-                     p-4 rounded-xl relative cursor-pointer transition-all duration-300
-                     hover:shadow-xl hover:z-20"
-            style={{
-                outline: "none"
-            }}
-        >
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
-                        <BookOpen className="h-5 w-5 text-blue-600" />
+    const renderTarea = (tarea) => {
+        // Determinar si está expirada
+        let isExpirada = false;
+        if (!tarea.entregada && tarea.fechaEntrega) {
+            const fecha = new Date(tarea.fechaEntrega);
+            const hoy = new Date();
+            isExpirada = fecha < hoy;
+        }
+        return (
+            <div
+                key={tarea.id}
+                onClick={() => handleClickTarea(tarea)}
+                className="group bg-gradient-to-r from-blue-50 to-blue-50/50 border-l-4 border-blue-400 
+                         p-4 rounded-xl relative cursor-pointer transition-all duration-300
+                         hover:shadow-xl hover:z-20"
+                style={{
+                    outline: "none"
+                }}
+            >
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
                     </div>
-                    <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
-                </div>
-                {tarea.entregada ? (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 
-                                text-xs font-medium rounded-full border border-emerald-200">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                        Entregada
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 
-                                text-xs font-medium rounded-full border border-amber-200">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                        Pendiente
-                    </div>
-                )}
-            </div>
-            <div className="text-sm text-gray-600">
-                <Calendar className="h-4 w-4 inline mr-1" />
-                {tarea.fechaEntrega
-                    ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
-                    : "Sin fecha límite"}
-            </div>
-            <div className="mt-2 flex justify-between items-center">
-                <span className="text-sm text-gray-500">
-                    {tarea.clase?.nombre || 'Sin clase'}
-                </span>
-                <div className="flex items-center gap-2">
-                    {tarea.archivoUrl && (
-                        <span className="flex items-center gap-1 text-blue-600">
-                            <Paperclip className="h-4 w-4" />
-                            <span className="text-xs">Adjunto</span>
-                        </span>
+                    {tarea.entregada ? (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 
+                                    text-xs font-medium rounded-full border border-emerald-200">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                            Entregada
+                        </div>
+                    ) : isExpirada ? (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 
+                                    text-xs font-medium rounded-full border border-red-200">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                            Expirada
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 
+                                    text-xs font-medium rounded-full border border-amber-200">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                            Pendiente
+                        </div>
                     )}
-                    <span className="text-xs text-gray-500">
-                        Ver detalles →
-                    </span>
                 </div>
+                <div className="text-sm text-gray-600">
+                    <Calendar className="h-4 w-4 inline mr-1" />
+                    {tarea.fechaEntrega
+                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                        : "Sin fecha límite"}
+                </div>
+                <div className="mt-2 flex justify-between items-center">
+                    <span className="text-sm text-gray-500">
+                        {tarea.clase?.nombre || 'Sin clase'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        {tarea.archivoUrl && (
+                            <span className="flex items-center gap-1 text-blue-600">
+                                <Paperclip className="h-4 w-4" />
+                                <span className="text-xs">Adjunto</span>
+                            </span>
+                        )}
+                        <span className="text-xs text-gray-500">
+                            Ver detalles →
+                        </span>
+                    </div>
+                </div>
+                {/* Mejorar el hover: outline y z-index, sin scale */}
+                <style>{`
+                    .group:hover {
+                        outline: 2px solid #3b82f6; /* azul-500 */
+                        outline-offset: 2px;
+                        background: linear-gradient(to right, #e0e7ff, #f0f9ff 50%);
+                    }
+                `}</style>
             </div>
-            {/* Mejorar el hover: outline y z-index, sin scale */}
-            <style>{`
-                .group:hover {
-                    outline: 2px solid #3b82f6; /* azul-500 */
-                    outline-offset: 2px;
-                    background: linear-gradient(to right, #e0e7ff, #f0f9ff 50%);
-                }
-            `}</style>
-        </div>
-    );
+        );
+    };
 
     const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
         <div
@@ -562,6 +586,13 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                 "entregadas",
                 <FileText className="h-5 w-5 text-emerald-600" />,
                 "bg-emerald-50"
+            )}
+            {renderSeccion(
+                "Expiradas",
+                tareasExpiradas,
+                "expiradas",
+                <AlertCircle className="h-5 w-5 text-red-600" />,
+                "bg-red-50"
             )}
             {renderSeccion(
                 "Esta semana",
