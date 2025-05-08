@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Clase;
 use App\Entity\Anuncio;
 use App\Entity\EntregaTarea;
+use App\Entity\Notificacion;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -475,7 +476,11 @@ class ClaseController extends AbstractController
                     'entregada' => $entrega ? true : false,
                     'comentarioEntrega' => $entrega ? $entrega->getComentario() : null,
                     'archivoEntregaUrl' => $entrega ? $entrega->getArchivoUrl() : null,
-                    'fechaEntregada' => $entrega ? $entrega->getFechaEntrega()?->format('Y-m-d H:i:s') : null
+                    'fechaEntregada' => $entrega ? $entrega->getFechaEntrega()?->format('Y-m-d H:i:s') : null,
+                    // NUEVO: incluir entregaId, nota y comentarioCorreccion
+                    'entregaId' => $entrega ? $entrega->getId() : null,
+                    'nota' => $entrega ? $entrega->getNota() : null,
+                    'comentarioCorreccion' => $entrega ? $entrega->getComentarioCorreccion() : null
                 ];
             }, $tareas);
 
@@ -602,7 +607,10 @@ class ClaseController extends AbstractController
                     ],
                     'fechaEntrega' => $entrega->getFechaEntrega()->format('c'),
                     'comentario' => $entrega->getComentario(),
-                    'archivoUrl' => $entrega->getArchivoUrl()
+                    'archivoUrl' => $entrega->getArchivoUrl(),
+                    // Añadir nota y comentarioCorreccion para persistencia tras refresco
+                    'nota' => $entrega->getNota(),
+                    'comentarioCorreccion' => $entrega->getComentarioCorreccion()
                 ];
             }, $entregas);
 
@@ -613,6 +621,55 @@ class ClaseController extends AbstractController
                 'trace' => $e->getTraceAsString()
             ]);
             return $this->json(['error' => 'Error al obtener las entregas'], 500);
+        }
+    }
+
+    #[Route('/entregas/{id}/calificar', name: 'entrega_calificar', methods: ['POST'])]
+    public function calificarEntrega(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $profesor = $this->getUser();
+            $entrega = $em->getRepository(EntregaTarea::class)->find($id);
+
+            if (!$entrega) {
+                return new JsonResponse(['error' => 'Entrega no encontrada'], 404);
+            }
+
+            $tarea = $entrega->getTarea();
+            if ($tarea->getClase()->getProfesor() !== $profesor) {
+                return new JsonResponse(['error' => 'No autorizado'], 403);
+            }
+
+            $data = json_decode($request->getContent(), true);
+            $nota = $data['nota'] ?? null;
+            $comentarioCorreccion = $data['comentarioCorreccion'] ?? '';
+
+            if ($nota === null) {
+                return new JsonResponse(['error' => 'Nota requerida'], 400);
+            }
+
+            $entrega->setNota($nota);
+            $entrega->setComentarioCorreccion($comentarioCorreccion);
+            $em->flush();
+
+            // Crear notificación para el alumno
+            $notificacion = new \App\Entity\Notificacion();
+            $notificacion->setUsuario($entrega->getAlumno());
+            $notificacion->setTipo('tarea_calificada');
+            $notificacion->setMensaje('Tu tarea "' . ($tarea->getTitulo() ?: 'Sin título') . '" ha sido calificada.');
+            $notificacion->setDatos([
+                'tareaId' => $tarea->getId(),
+                'entregaId' => $entrega->getId(),
+                'nota' => $nota
+            ]);
+            $notificacion->setLeida(false);
+            $notificacion->setCreatedAt(new \DateTime());
+            $em->persist($notificacion);
+            $em->flush();
+
+            return new JsonResponse(['message' => 'Entrega calificada correctamente']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Error al calificar la entrega'], 500);
         }
     }
 }

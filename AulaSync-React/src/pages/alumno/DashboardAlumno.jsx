@@ -144,6 +144,17 @@ const DashboardAlumno = () => {
         }
     }, [setUserData]); // Eliminar userData.clases de las dependencias
 
+    // Añadir useEffect para manejar notificaciones de tarea calificada
+    useEffect(() => {
+        // Suponiendo que tienes una función para obtener notificaciones
+        // y que cada notificación tiene datos: { tipo, datos: { tareaId } }
+        if (notification.show && notification.type === 'tarea_calificada' && notification.tareaId) {
+            // Redirigir o abrir modal de tarea
+            navigate(`/alumno/tareas?tareaId=${notification.tareaId}`);
+            setNotification({ show: false, message: '', type: '' });
+        }
+    }, [notification, navigate]);
+
     // Cerrar menú de notificaciones al hacer click fuera
     useEffect(() => {
         if (!showNotifMenu) return;

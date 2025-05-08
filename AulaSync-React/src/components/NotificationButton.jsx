@@ -57,7 +57,6 @@ const NotificationButton = () => {
             toast.success(`Invitación ${respuesta === 'aceptar' ? 'aceptada' : 'rechazada'}`);
             if (respuesta === 'aceptar') {
                 setShowNotifMenu(false); // Cerrar el menú
-                // Forzar recarga completa para refrescar invitaciones y clases
                 window.location.href = `/alumno/clase/${claseId}`;
             } else {
                 fetchNotificaciones();
@@ -66,6 +65,14 @@ const NotificationButton = () => {
             toast.error('Error al responder la invitación');
         } finally {
             setNotifLoading(false); // Desactivar overlay de carga
+        }
+    };
+
+    // NUEVO: Manejar notificaciones de tarea calificada
+    const handleVerCalificacion = (notificacion) => {
+        setShowNotifMenu(false);
+        if (notificacion.datos?.tareaId) {
+            navigate(`/alumno/tareas?tareaId=${notificacion.datos.tareaId}`);
         }
     };
 
@@ -114,7 +121,8 @@ const NotificationButton = () => {
                                 {!loading && notificaciones.length === 0 && (
                                     <div className="text-gray-500">No tienes invitaciones pendientes.</div>
                                 )}
-                                {!loading && notificaciones.map((inv) => (
+                                {/* Invitaciones */}
+                                {!loading && notificaciones.filter(n => n.tipo !== 'tarea_calificada').map((inv) => (
                                     <div key={inv.id} className="bg-gray-50 rounded p-3 flex items-center justify-between">
                                         <div>
                                             <div className="font-medium">
@@ -141,6 +149,25 @@ const NotificationButton = () => {
                                                 <X className="h-4 w-4" />
                                             </button>
                                         </div>
+                                    </div>
+                                ))}
+                                {/* Notificaciones de tarea calificada */}
+                                {!loading && notificaciones.filter(n => n.tipo === 'tarea_calificada').map((notif) => (
+                                    <div key={notif.id} className="bg-blue-50 rounded p-3 flex items-center justify-between">
+                                        <div>
+                                            <div className="font-medium text-blue-800">
+                                                {notif.mensaje}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 ml-2 text-xs"
+                                            onClick={() => handleVerCalificacion(notif)}
+                                        >
+                                            Ver calificación
+                                        </button>
                                     </div>
                                 ))}
                             </>

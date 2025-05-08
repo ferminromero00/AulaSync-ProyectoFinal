@@ -2,10 +2,20 @@ import { useEffect, useState } from "react";
 import { getTareasByAlumno } from "../../services/stats";
 import TareasResumenAlumno from "../../components/alumno/TareasResumenAlumno";
 import { BookOpen } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const TareasAlumno = () => {
     const [tareas, setTareas] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const location = useLocation();
+    const [tareaIdToOpen, setTareaIdToOpen] = useState(null);
+
+    useEffect(() => {
+        // Leer tareaId de la query string
+        const params = new URLSearchParams(location.search);
+        const tareaId = params.get('tareaId');
+        if (tareaId) setTareaIdToOpen(tareaId);
+    }, [location.search]);
 
     useEffect(() => {
         const cargarTareas = async () => {
@@ -42,7 +52,7 @@ const TareasAlumno = () => {
                 <BookOpen className="h-8 w-8 text-blue-600" />
                 <h1 className="text-2xl font-bold text-gray-900">Tus Tareas</h1>
             </div>
-            <TareasResumenAlumno tareas={tareas} />
+            <TareasResumenAlumno tareas={tareas} tareaIdToOpen={tareaIdToOpen} />
         </div>
     );
 };

@@ -18,6 +18,9 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const [entregada, setEntregada] = useState(false);
     const [tareasState, setTareasState] = useState(tareas);
     const [isClosing, setIsClosing] = useState(false);
+    const [notaEdicion, setNotaEdicion] = useState('');
+    const [comentarioCorreccionEdicion, setComentarioCorreccionEdicion] = useState('');
+    const [isCalificando, setIsCalificando] = useState(false);
 
     const seccionRefs = {
         entregadas: useRef(null),
@@ -84,6 +87,9 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         setArchivoEntrega(null);
         setComentarioEntrega('');
         setEntregada(!!tarea.entregada); // Si ya está entregada, marcarlo
+        // Inicializar campos de edición si ya hay nota
+        setNotaEdicion(tarea.nota !== undefined ? tarea.nota : '');
+        setComentarioCorreccionEdicion(tarea.comentarioCorreccion || '');
     };
 
     const handleEntregaTarea = async () => {
@@ -123,6 +129,48 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             alert('Error al entregar la tarea');
         } finally {
             setIsEntregando(false);
+        }
+    };
+
+    // Nueva función para calificar la entrega
+    const handleCalificarEntrega = async () => {
+        if (!tareaSeleccionada || !tareaSeleccionada.entregaId) {
+            alert('No se puede calificar esta entrega');
+            return;
+        }
+        setIsCalificando(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/entregas/${tareaSeleccionada.entregaId}/calificar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    nota: notaEdicion,
+                    comentarioCorreccion: comentarioCorreccionEdicion
+                })
+            });
+            if (!response.ok) throw new Error('Error al calificar la entrega');
+            // Actualizar la tarea seleccionada y el array de tareas
+            setTareaSeleccionada(prev =>
+                prev
+                    ? { ...prev, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion }
+                    : prev
+            );
+            setTareasState(prev =>
+                prev.map(t =>
+                    t.id === tareaSeleccionada.id
+                        ? { ...t, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion }
+                        : t
+                )
+            );
+            alert('Entrega calificada correctamente');
+        } catch (e) {
+            alert('Error al calificar la entrega');
+        } finally {
+            setIsCalificando(false);
         }
     };
 
@@ -267,6 +315,40 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                             <div className="text-gray-700 whitespace-pre-line">
                                                 {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
                                             </div>
+                                        </div>
+                                        {/* Mostrar nota y comentario de corrección si existen */}
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <CheckCircle className="h-5 w-5 text-blue-600" />
+                                                <span className="font-medium text-blue-800">Nota:</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="10"
+                                                    step="0.1"
+                                                    className="ml-2 px-2 py-1 rounded border border-blue-200 w-20"
+                                                    value={notaEdicion}
+                                                    onChange={e => setNotaEdicion(e.target.value)}
+                                                    disabled={isCalificando}
+                                                />
+                                            </div>
+                                            <div className="text-blue-700 mt-2">
+                                                <span className="font-medium">Comentario del profesor:</span>
+                                                <textarea
+                                                    className="w-full mt-1 px-2 py-1 border border-blue-200 rounded"
+                                                    rows={2}
+                                                    value={comentarioCorreccionEdicion}
+                                                    onChange={e => setComentarioCorreccionEdicion(e.target.value)}
+                                                    disabled={isCalificando}
+                                                />
+                                            </div>
+                                            <button
+                                                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                                onClick={handleCalificarEntrega}
+                                                disabled={isCalificando}
+                                            >
+                                                {isCalificando ? "Guardando..." : "Guardar calificación"}
+                                            </button>
                                         </div>
                                         <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
                                             <div className="flex items-center gap-2">

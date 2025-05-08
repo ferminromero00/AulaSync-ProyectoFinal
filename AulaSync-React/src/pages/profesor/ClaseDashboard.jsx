@@ -44,10 +44,13 @@ const ClaseDashboard = () => {
     const [comentarioEntrega, setComentarioEntrega] = useState('');
     const [isEntregando, setIsEntregando] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'entregadas'
+    const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'finalizadas'
     const [loadingEntregas, setLoadingEntregas] = useState({});
     const [showEntregaModal, setShowEntregaModal] = useState(false);
     const [entregaSeleccionada, setEntregaSeleccionada] = useState(null);
+    const [notaEdicion, setNotaEdicion] = useState('');
+    const [comentarioCorreccionEdicion, setComentarioCorreccionEdicion] = useState('');
+    const [isCalificando, setIsCalificando] = useState(false);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -204,11 +207,21 @@ const ClaseDashboard = () => {
     };
 
     const handleDeleteAnuncio = async (anuncioId) => {
+        // Solo abrir el modal si el id es válido
+        if (!anuncioId) {
+            toast.error('No se puede eliminar: ID de anuncio no válido');
+            return;
+        }
         setAnuncioToDelete(anuncioId);
         setShowDeleteModal(true);
     };
 
     const confirmDeleteAnuncio = async () => {
+        if (!anuncioToDelete) {
+            toast.error('No se puede eliminar: ID de anuncio no válido');
+            setShowDeleteModal(false);
+            return;
+        }
         try {
             setIsDeletingAnuncio(true);
             await eliminarAnuncio(anuncioToDelete);
@@ -309,11 +322,26 @@ const ClaseDashboard = () => {
 
     // Filtrar las tareas según el estado seleccionado
     const filtrarTareas = (tareas) => {
+        if (!Array.isArray(tareas)) return [];
         switch (filtroTareas) {
             case 'pendientes':
-                return tareas.filter(t => t.tipo === 'tarea' && !t.entregada);
-            case 'entregadas':
-                return tareas.filter(t => t.tipo === 'tarea' && t.entregada);
+                // Tareas donde alguna entrega está sin calificar o faltan entregas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    (
+                        t.entregas.length < (claseData?.estudiantes?.length || 0) ||
+                        t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
+                    )
+                );
+            case 'finalizadas':
+                // Tareas donde todas las entregas posibles están entregadas y todas calificadas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    t.entregas.length === (claseData?.estudiantes?.length || 0) &&
+                    t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
+                );
             default:
                 return tareas;
         }
@@ -328,8 +356,8 @@ const ClaseDashboard = () => {
                 className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
             >
                 <option value="todas">Todas las tareas</option>
-                <option value="pendientes">Pendientes</option>
-                <option value="entregadas">Entregadas</option>
+                <option value="pendientes">Pendientes de calificar</option>
+                <option value="finalizadas">Finalizadas</option>
             </select>
         </div>
     );
@@ -839,10 +867,17 @@ const ClaseDashboard = () => {
                                                             <p className="font-medium text-gray-900">{estudiante.nombre}</p>
                                                         </div>
                                                         {entrega ? (
-                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
-                                                                <CheckCircle className="h-3.5 w-3.5" />
-                                                                Entregado
-                                                            </span>
+                                                            entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '' ? (
+                                                                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full border border-emerald-300 flex items-center gap-1">
+                                                                    <CheckCircle className="h-3.5 w-3.5" />
+                                                                    Calificado: <span className="ml-1 font-bold">{entrega.nota}</span>
+                                                                </span>
+                                                            ) : (
+                                                                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
+                                                                    <CheckCircle className="h-3.5 w-3.5" />
+                                                                    Entregado
+                                                                </span>
+                                                            )
                                                         ) : (
                                                             <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
                                                                 <Clock className="h-3.5 w-3.5" />
@@ -985,10 +1020,17 @@ const ClaseDashboard = () => {
         const entrega = tareaSeleccionada.entregas?.find(e => e.alumno.id === estudiante.id);
         
         return entrega ? (
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1">
-                <CheckCircle className="h-3.5 w-3.5" />
-                Entregado
-            </span>
+            entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '' ? (
+                <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full border border-emerald-300 flex items-center gap-1">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Calificado: <span className="ml-1 font-bold">{entrega.nota}</span>
+                </span>
+            ) : (
+                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Entregado
+                </span>
+            )
         ) : (
             <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
@@ -998,17 +1040,73 @@ const ClaseDashboard = () => {
     };
 
     const handleOpenEntregaModal = (entrega) => {
+        // Asegúrate de inicializar con los datos actuales del backend
         setEntregaSeleccionada(entrega);
+        setNotaEdicion(
+            entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== ''
+                ? entrega.nota
+                : ''
+        );
+        setComentarioCorreccionEdicion(entrega.comentarioCorreccion || '');
         setShowEntregaModal(true);
     };
+
     const handleCloseEntregaModal = () => {
         setShowEntregaModal(false);
         setEntregaSeleccionada(null);
     };
 
+    const handleCalificarEntrega = async () => {
+        if (!entregaSeleccionada || !entregaSeleccionada.id) {
+            toast.error('No se puede calificar esta entrega');
+            return;
+        }
+        setIsCalificando(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/entregas/${entregaSeleccionada.id}/calificar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    nota: notaEdicion,
+                    comentarioCorreccion: comentarioCorreccionEdicion
+                })
+            });
+            if (!response.ok) throw new Error('Error al calificar la entrega');
+            // Actualizar localmente la entrega seleccionada y su estado
+            setEntregaSeleccionada(prev =>
+                prev
+                    ? { ...prev, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion, calificado: true }
+                    : prev
+            );
+            // Actualizar la lista de entregas en tareaSeleccionada
+            setTareaSeleccionada(prev =>
+                prev && prev.entregas
+                    ? {
+                        ...prev,
+                        entregas: prev.entregas.map(e =>
+                            e.id === entregaSeleccionada.id
+                                ? { ...e, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion, calificado: true }
+                                : e
+                        )
+                    }
+                    : prev
+            );
+            toast.success('Entrega calificada correctamente');
+        } catch (e) {
+            toast.error('Error al calificar la entrega');
+        } finally {
+            setIsCalificando(false);
+        }
+    };
+
     const renderEntregaModal = () => {
         if (!showEntregaModal || !entregaSeleccionada) return null;
         const archivoUrl = entregaSeleccionada.archivoUrl ? `${API_BASE_URL}${entregaSeleccionada.archivoUrl}` : null;
+        const estaCalificado = entregaSeleccionada.nota !== undefined && entregaSeleccionada.nota !== null && entregaSeleccionada.nota !== '';
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                 <div className="relative w-full max-w-lg mx-4 animate-entregaModalIn">
@@ -1018,8 +1116,8 @@ const ClaseDashboard = () => {
                         {/* Cabecera */}
                         <div className="flex items-center justify-between px-8 py-6 border-b border-blue-50 bg-gradient-to-r from-blue-50 to-emerald-50">
                             <div className="flex items-center gap-4">
-                                <div className="bg-blue-200 rounded-full p-2 shadow">
-                                    <CheckCircle className="h-7 w-7 text-emerald-600" />
+                                <div className={`rounded-full p-2 shadow ${estaCalificado ? "bg-emerald-400" : "bg-blue-200"}`}>
+                                    <CheckCircle className={`h-7 w-7 ${estaCalificado ? "text-white" : "text-emerald-600"}`} />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -1070,6 +1168,63 @@ const ClaseDashboard = () => {
                                     </a>
                                 ) : (
                                     <span className="text-gray-400 italic">No se adjuntó archivo</span>
+                                )}
+                            </div>
+                            {/* Estado de calificación y nota */}
+                            <div className={`rounded-lg p-4 mt-4 ${estaCalificado ? "bg-emerald-50 border border-emerald-200" : "bg-blue-50 border border-blue-200"}`}>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <CheckCircle className={`h-5 w-5 ${estaCalificado ? "text-emerald-600" : "text-blue-600"}`} />
+                                    <span className={`font-medium ${estaCalificado ? "text-emerald-800" : "text-blue-800"}`}>
+                                        {estaCalificado ? "Calificado" : "Pendiente de calificar"}
+                                    </span>
+                                </div>
+                                {estaCalificado ? (
+                                    <>
+                                        <div className="text-emerald-700 text-lg font-bold mt-2">
+                                            Nota: <span className="ml-2">{entregaSeleccionada.nota}</span>
+                                        </div>
+                                        <div className="mt-2">
+                                            <span className="font-medium text-emerald-800">Comentario de corrección:</span>
+                                            <div className="bg-emerald-100 border border-emerald-200 rounded p-2 mt-1 text-emerald-900 min-h-[40px]">
+                                                {entregaSeleccionada.comentarioCorreccion
+                                                    ? entregaSeleccionada.comentarioCorreccion
+                                                    : <span className="italic text-emerald-400">Sin comentario</span>}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="font-medium text-blue-800">Nota:</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="10"
+                                                step="0.1"
+                                                className="ml-2 px-2 py-1 rounded border border-blue-200 w-20"
+                                                value={notaEdicion}
+                                                onChange={e => setNotaEdicion(e.target.value)}
+                                                disabled={isCalificando}
+                                            />
+                                        </div>
+                                        <div className="text-blue-700 mt-2">
+                                            <span className="font-medium">Comentario de corrección:</span>
+                                            <textarea
+                                                className="w-full mt-1 px-2 py-1 border border-blue-200 rounded"
+                                                rows={2}
+                                                value={comentarioCorreccionEdicion}
+                                                onChange={e => setComentarioCorreccionEdicion(e.target.value)}
+                                                disabled={isCalificando}
+                                            />
+                                        </div>
+                                        <button
+                                            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                            onClick={handleCalificarEntrega}
+                                            disabled={isCalificando}
+                                        >
+                                            {isCalificando ? "Guardando..." : "Guardar calificación"}
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
