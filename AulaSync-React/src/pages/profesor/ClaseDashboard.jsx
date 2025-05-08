@@ -60,8 +60,29 @@ const ClaseDashboard = () => {
                     obtenerAnuncios(id)
                 ]);
                 
+                // NUEVO: Para cada tarea, obtener entregas
+                let anunciosConEntregas = anunciosData || [];
+                if (claseResponse && claseResponse.estudiantes && anunciosConEntregas.length > 0) {
+                    const tareas = anunciosConEntregas.filter(a => a.tipo === 'tarea');
+                    const entregasPorTarea = await Promise.all(
+                        tareas.map(tarea => getEntregasTarea(tarea.id).catch(() => []))
+                    );
+                    anunciosConEntregas = anunciosConEntregas.map(anuncio => {
+                        if (anuncio.tipo === 'tarea') {
+                            const idx = tareas.findIndex(t => t.id === anuncio.id);
+                            const entregas = entregasPorTarea[idx] || [];
+                            return {
+                                ...anuncio,
+                                entregas: entregas,
+                                entregasRealizadas: entregas.length,
+                                entregasPendientes: claseResponse.estudiantes.length - entregas.length
+                            };
+                        }
+                        return anuncio;
+                    });
+                }
                 setClaseData(claseResponse);
-                setAnuncios(anunciosData || []);
+                setAnuncios(anunciosConEntregas);
             } catch (error) {
                 console.error('Error:', error);
                 toast.error('Error al cargar los datos de la clase');
@@ -760,7 +781,7 @@ const ClaseDashboard = () => {
                                 <div className="flex items-center justify-between mb-8">
                                     <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
                                     <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
-                                        {tareaSeleccionada.entregas?.length || 0} entregas
+                                        
                                     </span>
                                 </div>
                                 <div className="space-y-4">
@@ -1107,14 +1128,16 @@ const ClaseDashboard = () => {
                                                         <X className="h-5 w-5 text-gray-600" />
                                                     </button>
                                                 )}
-                                                {/* Entregas pendientes al lado izquierdo de la X */}
+                                                {/* NUEVO: Entregas realizadas y pendientes */}
                                                 {role === 'profesor' && (
-                                                    <div className="absolute top-4 right-16 flex items-center z-10">
+                                                    <div className="absolute top-4 right-16 flex items-center z-10 gap-2">
+                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
+                                                            Entregadas:&nbsp;
+                                                            {anuncio.entregasRealizadas ?? 0}
+                                                        </span>
                                                         <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                                                            Entregas pendientes:&nbsp;
-                                                            {claseData?.estudiantes
-                                                                ? claseData.estudiantes.length - (anuncio.entregas?.length || 0)
-                                                                : 0}
+                                                            Pendientes:&nbsp;
+                                                            {anuncio.entregasPendientes ?? (claseData?.estudiantes?.length || 0)}
                                                         </span>
                                                     </div>
                                                 )}
