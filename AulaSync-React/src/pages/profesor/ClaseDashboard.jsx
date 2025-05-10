@@ -347,7 +347,7 @@ const ClaseDashboard = () => {
         }
     };
 
-    // Modificar el renderizado de tareas para mostrar el estado
+    // Modificar el renderizado de tareas para mostrar el estado y los contadores en la vista de profesor
     const renderTareaCard = (anuncio, index) => (
         <div
             key={anuncio.id}
@@ -367,7 +367,8 @@ const ClaseDashboard = () => {
                     >
                         <X className="h-5 w-5 text-gray-600" />
                     </button>
-                    <div className="absolute top-4 right-16 flex items-center z-10 gap-2">
+                    {/* Mostrar contadores de entregadas y pendientes en la parte superior derecha */}
+                    <div className="absolute top-4 right-20 flex items-center gap-2 z-10">
                         <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
                             Entregadas:&nbsp;
                             {anuncio.entregasRealizadas ?? 0}
