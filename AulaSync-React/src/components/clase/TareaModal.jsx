@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
+import { toast } from 'react-hot-toast'; // Añadir este import
 
 const TareaModal = ({
     showModal,
@@ -16,15 +17,82 @@ const TareaModal = ({
     isEntregando,
     loadingEntregas,
     onOpenEntrega,
-    entregaAlumno
+    entregaAlumno,
+    onTareaEntregada
 }) => {
     const [isClosing, setIsClosing] = useState(false);
+    const [localIsEntregando, setLocalIsEntregando] = useState(false);
+    const [entregada, setEntregada] = useState(!!(tarea && tarea.entregada));
+    const [tareaEntregadaData, setTareaEntregadaData] = useState(tarea && tarea.entregada ? tarea : null);
+
+    useEffect(() => {
+        const tareaEntregada = !!(tarea && (tarea.entregada || entregaAlumno));
+        setEntregada(tareaEntregada);
+        setTareaEntregadaData(tareaEntregada ? {
+            ...tarea,
+            entregada: true,
+            archivoEntregaUrl: entregaAlumno?.archivoEntregaUrl || tarea.archivoEntregaUrl,
+            comentarioEntrega: entregaAlumno?.comentarioEntrega || tarea.comentarioEntrega,
+            nota: entregaAlumno?.nota || tarea.nota,
+            comentarioCorreccion: entregaAlumno?.comentarioCorreccion || tarea.comentarioCorreccion,
+            fechaEntregada: entregaAlumno?.fechaEntregada || tarea.fechaEntregada
+        } : null);
+    }, [tarea, entregaAlumno]);
+
+    const handleEntregaTarea = async () => {
+        if (!tarea) return;
+        setLocalIsEntregando(true);
+        try {
+            const formData = new FormData();
+            formData.append('comentario', comentarioEntrega);
+            if (archivoEntrega) formData.append('archivo', archivoEntrega);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/tareas/${tarea.id}/entregar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            if (!response.ok) throw new Error('Error al entregar la tarea');
+            const data = await response.json();
+
+            // Crear objeto con los datos de la entrega
+            const datosEntrega = {
+                archivoEntregaUrl: data.archivoEntregaUrl || null,
+                comentarioEntrega: comentarioEntrega,
+                fechaEntregada: data.fechaEntregada ?? new Date().toISOString()
+            };
+
+            // Actualizar estado local
+            setEntregada(true);
+            setTareaEntregadaData({
+                ...tarea,
+                entregada: true,
+                ...datosEntrega,
+                nota: data.nota ?? null,
+                comentarioCorreccion: data.comentarioCorreccion ?? null
+            });
+
+            // Notificar al componente padre
+            if (onTareaEntregada) {
+                onTareaEntregada(tarea.id, datosEntrega);
+            }
+
+            toast.success('Tarea entregada correctamente');
+        } catch (e) {
+            toast.error('Error al entregar la tarea');
+        } finally {
+            setLocalIsEntregando(false);
+        }
+    };
 
     if (!showModal || !tarea) return null;
 
-    const downloadUrl = tarea.archivoUrl ? `${API_BASE_URL}${tarea.archivoUrl}` : null;
-    const archivoEntregaUrl = tarea.archivoEntregaUrl ? `${API_BASE_URL}${tarea.archivoEntregaUrl}` : null;
-    const estaEntregada = !!tarea.entregada;
+    const tareaToShow = (entregada || tarea.entregada || entregaAlumno) ? tareaEntregadaData || tarea : tarea;
+    const downloadUrl = tareaToShow.archivoUrl ? `${API_BASE_URL}${tareaToShow.archivoUrl}` : null;
+    const archivoEntregaUrl = tareaToShow.archivoEntregaUrl ? `${API_BASE_URL}${tareaToShow.archivoEntregaUrl}` : null;
 
     return (
         <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
@@ -207,7 +275,7 @@ const TareaModal = ({
                             <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                             <div className="space-y-6">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    {estaEntregada ? (
+                                    {entregada ? (
                                         <div className="flex items-center gap-2 text-emerald-600 mb-2">
                                             <CheckCircle className="h-5 w-5" />
                                             <span className="font-medium">¡Tarea entregada!</span>
@@ -219,7 +287,7 @@ const TareaModal = ({
                                         </div>
                                     )}
                                 </div>
-                                {estaEntregada ? (
+                                {entregada ? (
                                     <div className="space-y-4">
                                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                             <div className="flex items-center gap-2 mb-2">
@@ -243,7 +311,9 @@ const TareaModal = ({
                                         <div className="bg-white border border-gray-200 rounded-lg p-4">
                                             <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
                                             <div className="text-gray-700 whitespace-pre-line">
-                                                {tarea.comentarioEntrega ? tarea.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                                {tareaToShow.comentarioEntrega
+                                                    ? tareaToShow.comentarioEntrega
+                                                    : <span className="italic text-gray-400">Sin comentario</span>}
                                             </div>
                                         </div>
                                         {/* Nota y comentario del profesor */}
@@ -252,8 +322,8 @@ const TareaModal = ({
                                                 <CheckCircle className="h-5 w-5 text-blue-600" />
                                                 <span className="font-medium text-blue-800">Nota:</span>
                                                 <span className="ml-2 text-blue-900 font-bold">
-                                                    {tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== ''
-                                                        ? tarea.nota
+                                                    {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                                        ? tareaToShow.nota
                                                         : <span className="italic text-blue-400">Sin calificar</span>
                                                     }
                                                 </span>
@@ -261,8 +331,8 @@ const TareaModal = ({
                                             <div className="text-blue-700 mt-2">
                                                 <span className="font-medium">Comentario del profesor:</span>
                                                 <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[40px]">
-                                                    {tarea.comentarioCorreccion
-                                                        ? tarea.comentarioCorreccion
+                                                    {tareaToShow.comentarioCorreccion
+                                                        ? tareaToShow.comentarioCorreccion
                                                         : <span className="italic text-blue-400">Sin comentario</span>
                                                     }
                                                 </div>
@@ -273,15 +343,15 @@ const TareaModal = ({
                                                 <Calendar className="h-5 w-5 text-blue-600" />
                                                 <span className="font-medium text-gray-700">Fecha de entrega:</span>
                                                 <span className="text-gray-700">
-                                                    {tarea.fechaEntregada
-                                                        ? new Date(tarea.fechaEntregada).toLocaleString()
+                                                    {tareaToShow.fechaEntregada
+                                                        ? new Date(tareaToShow.fechaEntregada).toLocaleString()
                                                         : 'Desconocida'}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <BookOpen className="h-5 w-5 text-blue-600" />
                                                 <span className="font-medium text-gray-700">Título:</span>
-                                                <span className="text-gray-700">{tarea.titulo || tarea.contenido}</span>
+                                                <span className="text-gray-700">{tareaToShow.titulo || tareaToShow.contenido}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -320,11 +390,11 @@ const TareaModal = ({
                                         <button
                                             type="button"
                                             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                            // onClick={handleEntregaTarea} // Si tienes lógica de entrega, pásala por props
-                                            disabled={isEntregando}
+                                            onClick={handleEntregaTarea}
+                                            disabled={isEntregando || localIsEntregando}
                                         >
                                             <FileText className="h-5 w-5" />
-                                            {isEntregando ? "Entregando..." : "Entregar tarea"}
+                                            {(isEntregando || localIsEntregando) ? "Entregando..." : "Entregar tarea"}
                                         </button>
                                     </div>
                                 )}
