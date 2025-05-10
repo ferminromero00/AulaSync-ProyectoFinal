@@ -116,12 +116,23 @@ const NotificationButton = () => {
                 invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
             }));
 
-            // Navegar a la clase
-            navigate(`/alumno/clase/${notif.datos.claseId}`);
+            // Navegar a la clase y abrir el modal de la tarea si hay tareaId
+            if (notif.datos?.claseId && notif.datos?.tareaId) {
+                navigate(`/alumno/clase/${notif.datos.claseId}?tareaId=${notif.datos.tareaId}`);
+            } else if (notif.datos?.claseId) {
+                navigate(`/alumno/clase/${notif.datos.claseId}`);
+            }
         } catch (error) {
             console.error('Error al eliminar notificación:', error);
         }
     };
+
+    // Filtrar notificaciones realmente visibles
+    const notificacionesVisibles = notificaciones.filter(n =>
+        (n.tipo === 'invitacion') ||
+        (n.tipo === 'nueva_tarea') ||
+        (n.tipo === 'tarea_calificada' && n.mensaje)
+    );
 
     return (
         <div className="relative">
@@ -142,9 +153,9 @@ const NotificationButton = () => {
                 type="button"
             >
                 <Bell className="h-6 w-6 text-gray-700" />
-                {role === 'alumno' && notificaciones.length > 0 && (
+                {role === 'alumno' && notificacionesVisibles.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full px-1.5 text-xs font-bold z-10">
-                        {notificaciones.length}
+                        {notificacionesVisibles.length}
                     </span>
                 )}
             </button>
@@ -165,11 +176,11 @@ const NotificationButton = () => {
                         ) : (
                             <>
                                 {loading && <div>Cargando notificaciones...</div>}
-                                {!loading && notificaciones.length === 0 && (
+                                {!loading && notificacionesVisibles.length === 0 && (
                                     <div className="text-gray-500">No tienes invitaciones pendientes.</div>
                                 )}
                                 {/* Invitaciones */}
-                                {!loading && notificaciones.filter(n => n.tipo === 'invitacion').map((inv) => (
+                                {!loading && notificacionesVisibles.filter(n => n.tipo === 'invitacion').map((inv) => (
                                     <div key={inv.id} className="bg-gray-50 rounded p-3 flex items-center justify-between">
                                         <div>
                                             <div className="font-medium">
@@ -201,7 +212,7 @@ const NotificationButton = () => {
                                     </div>
                                 ))}
                                 {/* Notificaciones de tarea */}
-                                {!loading && notificaciones.filter(n => n.tipo === 'nueva_tarea').map((notif) => (
+                                {!loading && notificacionesVisibles.filter(n => n.tipo === 'nueva_tarea').map((notif) => (
                                     <div key={notif.id} className="bg-yellow-50 rounded p-3">
                                         <div className="flex flex-col gap-2">
                                             <div className="font-medium text-yellow-800">
@@ -225,7 +236,9 @@ const NotificationButton = () => {
                                     </div>
                                 ))}
                                 {/* Notificaciones de tarea calificada */}
-                                {!loading && notificaciones.filter(n => n.tipo === 'tarea_calificada').map((notif) => (
+                                {!loading && notificacionesVisibles
+                                    .filter(n => n.tipo === 'tarea_calificada' && n.mensaje)
+                                    .map((notif) => (
                                     <div key={notif.id} className="bg-blue-50 rounded p-3">
                                         <div className="flex flex-col gap-2">
                                             <div className="font-bold text-lg text-blue-600 border-b border-blue-100 pb-2 mb-3">

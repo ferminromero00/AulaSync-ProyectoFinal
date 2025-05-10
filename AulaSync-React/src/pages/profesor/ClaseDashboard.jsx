@@ -12,7 +12,9 @@ import { useClase } from '../../contexts/ClaseContext';
 import '../../styles/animations.css';
 import '../../styles/modalAnimations.css';
 import { getEntregasTarea } from '../../services/entregas';
-import { TareaModal, EntregaModal, AnuncioModal } from '../../components/clase';
+import TareaModal from '../../components/clase/TareaModal';
+import EntregaModal from '../../components/clase/EntregaModal';
+import AnuncioModal from '../../components/clase/AnuncioModal';
 
 const ClaseDashboard = () => {
     const { id } = useParams();

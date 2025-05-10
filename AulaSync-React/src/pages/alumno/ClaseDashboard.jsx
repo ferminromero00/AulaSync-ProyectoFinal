@@ -7,6 +7,7 @@ import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
 import { toast } from 'react-hot-toast';
 import '../../styles/animations.css';
+import TareasResumenAlumno from '../../components/alumno/TareasResumenAlumno';
 
 const ClaseDashboard = () => {
     const { id } = useParams();
@@ -19,6 +20,9 @@ const ClaseDashboard = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
     const [showAlumnosModal, setShowAlumnosModal] = useState(false);
+    const [tareas, setTareas] = useState([]);
+    const [showTareasModal, setShowTareasModal] = useState(false);
+    const [tareaIdToOpen, setTareaIdToOpen] = useState(null);
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -29,6 +33,8 @@ const ClaseDashboard = () => {
             try {
                 const data = await getClaseById(id);
                 setClase(data);
+                // Ajusta aquí si tus tareas vienen en otro campo
+                setTareas(data.tareas || data.anuncios?.filter(a => a.tipo === 'tarea') || []);
             } catch (error) {
                 console.error('Error al cargar la clase:', error);
                 if (error.message.includes('No autorizado')) {
@@ -92,6 +98,10 @@ const ClaseDashboard = () => {
         } finally {
             setIsInviting(false);
         }
+    };
+
+    const handleAbrirTarea = (tareaId) => {
+        setTareaIdToOpen(tareaId);
     };
 
     const renderStudentSearchModal = () => {
@@ -240,11 +250,19 @@ const ClaseDashboard = () => {
                     <div className="lg:col-span-3 space-y-6 opacity-0 animate-slideRight"
                          style={{ animationDelay: '400ms' }}>
                         <div className="space-y-4">
-                            {anuncios?.map((anuncio, index) => (
-                                <div key={anuncio.id}
+                            {tareas?.map((tarea, index) => (
+                                <div key={tarea.id}
                                      className="opacity-0 animate-bounceIn"
                                      style={{ animationDelay: `${600 + (index * 100)}ms` }}>
-                                    {/* ...existing announcement item code... */}
+                                    <div
+                                        className="cursor-pointer"
+                                        onClick={() => handleAbrirTarea(tarea.id)}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <BookOpen className="h-5 w-5 text-blue-600" />
+                                            <span className="font-semibold">{tarea.titulo}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -289,6 +307,15 @@ const ClaseDashboard = () => {
                 </div>
             )}
             {renderStudentSearchModal()}
+            {tareaIdToOpen !== null && (
+                <div className="fixed inset-0 z-50">
+                    <TareasResumenAlumno
+                        tareas={tareas}
+                        tareaIdToOpen={tareaIdToOpen}
+                        onClose={() => setTareaIdToOpen(null)}
+                    />
+                </div>
+            )}
         </div>
     );
 };
