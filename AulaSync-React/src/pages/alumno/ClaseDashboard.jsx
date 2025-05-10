@@ -112,12 +112,9 @@ const ClaseDashboard = () => {
         return 'pendiente';
     };
 
-    // Al hacer click en una tarea, primero muestra el preview de estado
+    // Al hacer click en una tarea, abrir el modal de TareasResumenAlumno con la tarea seleccionada
     const handleAbrirTarea = (tareaId) => {
-        const tarea = tareas.find(t => t.id === tareaId);
-        if (!tarea) return;
-        const estado = getEstadoTarea(tarea);
-        setTareaEstadoPreview({ tarea, estado });
+        setTareaIdToOpen(tareaId);
     };
 
     // Cuando el usuario confirma el preview, abre el modal real

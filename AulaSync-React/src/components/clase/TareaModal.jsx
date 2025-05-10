@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
-import { toast } from 'react-hot-toast';
 
 const TareaModal = ({
     showModal,
@@ -10,7 +9,6 @@ const TareaModal = ({
     role,
     claseData,
     onClose,
-    onEntregaTarea,
     comentarioEntrega,
     setComentarioEntrega,
     archivoEntrega,
@@ -18,104 +16,15 @@ const TareaModal = ({
     isEntregando,
     loadingEntregas,
     onOpenEntrega,
-    entregaAlumno // info de la entrega del alumno actual (opcional)
+    entregaAlumno
 }) => {
-    // Solo usar estado para la calificación si eres profesor, no para alumno
-    const [calificacion, setCalificacion] = useState({
-        nota: null,
-        comentarioCorreccion: ''
-    });
-    const [isLoadingCalificacion, setIsLoadingCalificacion] = useState(false);
-
-    // Añadir estado para animación de cierre
     const [isClosing, setIsClosing] = useState(false);
-
-    // Función para cerrar el modal con animación
-    const handleCloseModal = () => {
-        setIsClosing(true);
-        setTimeout(() => {
-            setIsClosing(false);
-            onClose();
-        }, 200);
-    };
-
-    // LOGS para depuración
-    if (showModal) {
-        console.log('[TareaModal] tarea:', tarea);
-        console.log('[TareaModal] tarea.nota:', tarea?.nota);
-        console.log('[TareaModal] tarea.comentarioCorreccion:', tarea?.comentarioCorreccion);
-        console.log('[TareaModal] entregaAlumno:', entregaAlumno);
-    }
-
-    // Solo hacer fetch de entregas si eres alumno (para estadísticas o similares)
-    useEffect(() => {
-        if (!showModal || !tarea || role !== 'alumno') return;
-
-        const cargarEntregaAlumno = async () => {
-            setIsLoadingCalificacion(true);
-            try {
-                const token = localStorage.getItem('token');
-                const userId = localStorage.getItem('userId');
-                const response = await fetch(`${API_BASE_URL}/api/tareas/${tarea.id}/entregas`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) throw new Error('Error al cargar entregas');
-                const entregas = await response.json();
-                console.log('[TareaModal] Entregas recibidas:', entregas);
-
-                // Buscar la entrega del alumno actual
-                const miEntrega = entregas.find(e =>
-                    String(e.alumno_id) === String(userId) ||
-                    String(e.alumno?.id) === String(userId)
-                );
-                console.log('[TareaModal] Entrega encontrada para userId', userId, ':', miEntrega);
-
-                if (miEntrega) {
-                    // Actualizar calificación con los datos de la entrega
-                    setCalificacion({
-                        nota: miEntrega.nota,
-                        comentarioCorreccion: miEntrega.comentarioCorreccion
-                    });
-
-                    // También actualizar la tarea con estos datos
-                    // setTareaSeleccionada(prev => ({
-                    //     ...prev,
-                    //     nota: miEntrega.nota,
-                    //     comentarioCorreccion: miEntrega.comentarioCorreccion
-                    // }));
-                }
-            } catch (error) {
-                console.error('[TareaModal] Error al cargar entrega:', error);
-            } finally {
-                setIsLoadingCalificacion(false);
-            }
-        };
-
-        cargarEntregaAlumno();
-    }, [showModal, tarea, role]);
 
     if (!showModal || !tarea) return null;
 
-    const downloadUrl = tarea.archivoUrl ?
-        `${API_BASE_URL}${tarea.archivoUrl}` :
-        null;
-
-    const archivoEntregaUrl = tarea.archivoEntregaUrl
-        ? `${API_BASE_URL}${tarea.archivoEntregaUrl}`
-        : null;
-
+    const downloadUrl = tarea.archivoUrl ? `${API_BASE_URL}${tarea.archivoUrl}` : null;
+    const archivoEntregaUrl = tarea.archivoEntregaUrl ? `${API_BASE_URL}${tarea.archivoEntregaUrl}` : null;
     const estaEntregada = !!tarea.entregada;
-
-    // Obtener nota y comentario de la entrega del alumno
-    const notaMostrada = role === 'alumno'
-        ? (tarea.entregas?.[0]?.nota ?? calificacion.nota)
-        : calificacion.nota;
-
-    const comentarioCorreccionMostrado = role === 'alumno'
-        ? (tarea.entregas?.[0]?.comentarioCorreccion ?? calificacion.comentarioCorreccion)
-        : calificacion.comentarioCorreccion;
 
     return (
         <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
@@ -125,14 +34,20 @@ const TareaModal = ({
                 ${isClosing ? 'modal-content-closing' : ''}`}>
                 {/* Botón de cerrar */}
                 <button
-                    onClick={handleCloseModal}
+                    onClick={() => {
+                        setIsClosing(true);
+                        setTimeout(() => {
+                            setIsClosing(false);
+                            onClose();
+                        }, 200);
+                    }}
                     className="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow-lg transition-all"
                     style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
                 >
                     <X className="h-6 w-6" />
                 </button>
 
-                {/* Panel izquierdo */}
+                {/* Panel izquierdo - Detalles de la tarea */}
                 <div className="p-8 flex-1 modal-content-left overflow-y-auto">
                     <div className="modal-item-stagger space-y-6">
                         <div className="flex items-start gap-4">
@@ -200,12 +115,12 @@ const TareaModal = ({
 
                 {/* Panel derecho - Vista de profesor o alumno */}
                 {role === 'profesor' ? (
-                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto">
+                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
                         <div>
                             <div className="flex items-center justify-between mb-8">
                                 <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
                                 <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
-                                    {/* Aquí puedes agregar el estado de las entregas */}
+                                    {/* Estado de las entregas */}
                                 </span>
                             </div>
                             <div className="space-y-4">
@@ -286,8 +201,9 @@ const TareaModal = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto">
-                        <div>
+                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
+                                 md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                        <div className="modal-item-stagger">
                             <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
                             <div className="space-y-6">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
@@ -330,31 +246,28 @@ const TareaModal = ({
                                                 {tarea.comentarioEntrega ? tarea.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
                                             </div>
                                         </div>
-                                        {/* --- BLOQUE DE CALIFICACIÓN DEL PROFESOR --- */}
+                                        {/* Nota y comentario del profesor */}
                                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                                            <div className="font-medium text-blue-800 mb-2">Calificación del profesor:</div>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center">
-                                                    <span className="font-medium text-blue-700 w-24">Nota:</span>
-                                                    <span className="text-blue-900">
-                                                        {notaMostrada !== null && notaMostrada !== undefined && notaMostrada !== ''
-                                                            ? notaMostrada
-                                                            : <span className="italic text-blue-400">Sin calificar</span>
-                                                        }
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-blue-700">Comentario:</span>
-                                                    <div className="mt-1 p-2 bg-white border border-blue-200 rounded min-h-[60px] text-blue-800">
-                                                        {comentarioCorreccionMostrado
-                                                            ? comentarioCorreccionMostrado
-                                                            : <span className="italic text-blue-400">Sin comentarios del profesor</span>
-                                                        }
-                                                    </div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <CheckCircle className="h-5 w-5 text-blue-600" />
+                                                <span className="font-medium text-blue-800">Nota:</span>
+                                                <span className="ml-2 text-blue-900 font-bold">
+                                                    {tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== ''
+                                                        ? tarea.nota
+                                                        : <span className="italic text-blue-400">Sin calificar</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div className="text-blue-700 mt-2">
+                                                <span className="font-medium">Comentario del profesor:</span>
+                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[40px]">
+                                                    {tarea.comentarioCorreccion
+                                                        ? tarea.comentarioCorreccion
+                                                        : <span className="italic text-blue-400">Sin comentario</span>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
-                                        {/* ...fecha de entrega y título... */}
                                         <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-5 w-5 text-blue-600" />
@@ -407,11 +320,11 @@ const TareaModal = ({
                                         <button
                                             type="button"
                                             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                            onClick={onEntregaTarea}
-                                            disabled={isEntregando || estaEntregada}
+                                            // onClick={handleEntregaTarea} // Si tienes lógica de entrega, pásala por props
+                                            disabled={isEntregando}
                                         >
                                             <FileText className="h-5 w-5" />
-                                            {isEntregando ? "Entregando..." : (estaEntregada ? "Ya entregada" : "Entregar tarea")}
+                                            {isEntregando ? "Entregando..." : "Entregar tarea"}
                                         </button>
                                     </div>
                                 )}
