@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical } from 'lucide-react';
+import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -23,6 +23,7 @@ const ClaseDashboard = () => {
     const [tareas, setTareas] = useState([]);
     const [showTareasModal, setShowTareasModal] = useState(false);
     const [tareaIdToOpen, setTareaIdToOpen] = useState(null);
+    const [tareaEstadoPreview, setTareaEstadoPreview] = useState(null); // { tarea, estado }
 
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
@@ -100,8 +101,29 @@ const ClaseDashboard = () => {
         }
     };
 
+    // Determina el estado de la tarea: 'pendiente', 'entregada', 'expirada'
+    const getEstadoTarea = (tarea) => {
+        if (tarea.entregada) return 'entregada';
+        if (tarea.fechaEntrega) {
+            const fechaEntrega = new Date(tarea.fechaEntrega);
+            const ahora = new Date();
+            if (fechaEntrega < ahora) return 'expirada';
+        }
+        return 'pendiente';
+    };
+
+    // Al hacer click en una tarea, primero muestra el preview de estado
     const handleAbrirTarea = (tareaId) => {
-        setTareaIdToOpen(tareaId);
+        const tarea = tareas.find(t => t.id === tareaId);
+        if (!tarea) return;
+        const estado = getEstadoTarea(tarea);
+        setTareaEstadoPreview({ tarea, estado });
+    };
+
+    // Cuando el usuario confirma el preview, abre el modal real
+    const handleConfirmEstadoTarea = () => {
+        setTareaIdToOpen(tareaEstadoPreview.tarea.id);
+        setTareaEstadoPreview(null);
     };
 
     const renderStudentSearchModal = () => {
@@ -269,7 +291,6 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </main>
-
             {/* Modal de lista completa de alumnos */}
             {showAlumnosModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -307,6 +328,48 @@ const ClaseDashboard = () => {
                 </div>
             )}
             {renderStudentSearchModal()}
+            {/* Modal de preview de estado de tarea */}
+            {tareaEstadoPreview && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-8 max-w-sm w-full mx-4 flex flex-col items-center gap-4">
+                        {tareaEstadoPreview.estado === 'entregada' && (
+                            <>
+                                <CheckCircle className="h-12 w-12 text-emerald-500 mb-2" />
+                                <h3 className="text-xl font-semibold text-emerald-700">¡Tarea ya entregada!</h3>
+                                <p className="text-gray-600 text-center">Ya has entregado esta tarea. Puedes ver los detalles o tu entrega.</p>
+                            </>
+                        )}
+                        {tareaEstadoPreview.estado === 'expirada' && (
+                            <>
+                                <AlertCircle className="h-12 w-12 text-red-500 mb-2" />
+                                <h3 className="text-xl font-semibold text-red-700">Tarea expirada</h3>
+                                <p className="text-gray-600 text-center">La fecha de entrega ha pasado. Consulta si puedes entregar o revisa los detalles.</p>
+                            </>
+                        )}
+                        {tareaEstadoPreview.estado === 'pendiente' && (
+                            <>
+                                <Clock className="h-12 w-12 text-amber-500 mb-2" />
+                                <h3 className="text-xl font-semibold text-amber-700">Tarea pendiente</h3>
+                                <p className="text-gray-600 text-center">Esta tarea está pendiente de entrega. Puedes entregarla ahora.</p>
+                            </>
+                        )}
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                onClick={() => setTareaEstadoPreview(null)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                                onClick={handleConfirmEstadoTarea}
+                            >
+                                Ver detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {tareaIdToOpen !== null && (
                 <div className="fixed inset-0 z-50">
                     <TareasResumenAlumno
