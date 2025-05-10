@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Invitacion;
 use App\Entity\Alumno;
 use App\Entity\Clase;
+use App\Entity\Notificacion; // Add this at the top with other use statements
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -82,9 +83,10 @@ class InvitacionController extends AbstractController
     public function obtenerInvitacionesPendientes(EntityManagerInterface $em): JsonResponse
     {
         $alumno = $this->getUser();
+        error_log('[InvitacionController] Obteniendo invitaciones para alumno ID: ' . $alumno->getId());
 
-        // Añade este chequeo para evitar consultas erróneas
         if (!$alumno instanceof \App\Entity\Alumno) {
+            error_log('[InvitacionController] Usuario no es instancia de Alumno');
             return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
         }
         
@@ -93,11 +95,48 @@ class InvitacionController extends AbstractController
             'estado' => 'pendiente'
         ]);
 
-        $data = array_map(function(Invitacion $inv) {
+        error_log('[InvitacionController] Invitaciones encontradas: ' . count($invitaciones));
+
+        // También buscar notificaciones de tareas
+        $notificaciones = $em->getRepository(Notificacion::class)->findBy([
+            'alumno' => $alumno,
+            'tipo' => ['nueva_tarea', 'tarea_calificada']
+        ]);
+
+        error_log('[InvitacionController] Notificaciones encontradas: ' . count($notificaciones));
+
+        // Combinar invitaciones y notificaciones
+        $todasLasNotificaciones = array_merge(
+            $this->formatearInvitaciones($invitaciones),
+            $this->formatearNotificaciones($notificaciones)
+        );
+
+        error_log('[InvitacionController] Total notificaciones enviadas: ' . count($todasLasNotificaciones));
+        return new JsonResponse($todasLasNotificaciones);
+    }
+
+    #[Route('/notificaciones/{id}/leer', name: 'notificacion_leer', methods: ['POST'])]
+    public function marcarNotificacionLeida(Notificacion $notificacion, EntityManagerInterface $em): JsonResponse
+    {
+        $alumno = $this->getUser();
+        if (!$alumno instanceof \App\Entity\Alumno || $notificacion->getAlumno() !== $alumno) {
+            return new JsonResponse(['error' => 'No autorizado'], 403);
+        }
+
+        $em->remove($notificacion);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Notificación leída']);
+    }
+
+    private function formatearInvitaciones($invitaciones): array 
+    {
+        return array_map(function($inv) {
             $clase = $inv->getClase();
             $profesor = $clase ? $clase->getProfesor() : null;
             return [
                 'id' => $inv->getId(),
+                'tipo' => 'invitacion',
                 'clase' => [
                     'id' => $clase ? $clase->getId() : null,
                     'nombre' => $clase ? $clase->getNombre() : 'Clase eliminada',
@@ -106,7 +145,18 @@ class InvitacionController extends AbstractController
                 'fecha' => $inv->getFecha() ? $inv->getFecha()->format('Y-m-d H:i:s') : null
             ];
         }, $invitaciones);
+    }
 
-        return new JsonResponse($data);
+    private function formatearNotificaciones($notificaciones): array 
+    {
+        return array_map(function($notif) {
+            return [
+                'id' => $notif->getId(),
+                'tipo' => $notif->getTipo(),
+                'mensaje' => $notif->getContenido(), // Changed from getMensaje to getContenido
+                'datos' => $notif->getDatos(),
+                'createdAt' => $notif->getCreatedAt()->format('Y-m-d H:i:s')
+            ];
+        }, $notificaciones);
     }
 }

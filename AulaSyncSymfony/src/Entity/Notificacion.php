@@ -13,29 +13,31 @@ class Notificacion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: Alumno::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Alumno $alumno = null;
 
     #[ORM\Column(length: 255)]
     private ?string $tipo = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $contenido = null;
-
-    #[ORM\Column]
-    private ?bool $leida = false;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $referenciaId = null;
 
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $datos = null;
+
+    #[ORM\Column(type: 'text')]
+    private ?string $mensaje = null;
+
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->leida = false;
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -70,26 +72,10 @@ class Notificacion
         return $this->contenido;
     }
 
-    public function setContenido(string $contenido): self
+    public function setContenido(?string $contenido): self
     {
         $this->contenido = $contenido;
         return $this;
-    }
-
-    public function isLeida(): ?bool
-    {
-        return $this->leida;
-    }
-
-    public function setLeida(bool $leida): self
-    {
-        $this->leida = $leida;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
     }
 
     public function getReferenciaId(): ?int
@@ -100,6 +86,39 @@ class Notificacion
     public function setReferenciaId(?int $referenciaId): self
     {
         $this->referenciaId = $referenciaId;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getDatos(): ?array
+    {
+        return $this->datos;
+    }
+
+    public function setDatos(?array $datos): self
+    {
+        $this->datos = $datos;
+        return $this;
+    }
+
+    public function getMensaje(): ?string
+    {
+        return $this->mensaje;
+    }
+
+    public function setMensaje(string $mensaje): self
+    {
+        $this->mensaje = $mensaje;
         return $this;
     }
 }

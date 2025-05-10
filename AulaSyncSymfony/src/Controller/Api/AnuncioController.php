@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Anuncio;
 use App\Entity\Clase;
+use App\Entity\Notificacion;
 use App\Repository\ClaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -61,6 +62,20 @@ class AnuncioController extends AbstractController
                     } catch (FileException $e) {
                         return $this->json(['error' => 'Error al subir el archivo: '.$e->getMessage()], 500);
                     }
+                }
+
+                // Crear notificaciones para cada alumno de la clase
+                foreach ($clase->getAlumnos() as $alumno) {
+                    $notificacion = new Notificacion();
+                    $notificacion->setAlumno($alumno)
+                        ->setTipo('nueva_tarea')
+                        ->setMensaje("Nueva tarea: {$data['titulo']}")
+                        ->setDatos([
+                            'tareaId' => $anuncio->getId(),
+                            'claseId' => $clase->getId(),
+                            'profesor' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName()
+                        ]);
+                    $entityManager->persist($notificacion);
                 }
             }
 

@@ -4,10 +4,11 @@ import { obtenerInvitacionesPendientes, responderInvitacion } from '../services/
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from "../App";
+import { API_BASE_URL } from '../config/config';
 
 const NotificationButton = () => {
     const navigate = useNavigate();
-    const { userData } = useContext(GlobalContext);
+    const { userData, setUserData } = useContext(GlobalContext); // Añadir setUserData
     const notificaciones = userData.invitaciones || [];
     const [showNotifMenu, setShowNotifMenu] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -19,21 +20,26 @@ const NotificationButton = () => {
 
     const fetchNotificaciones = async () => {
         if (role !== 'alumno') {
+            console.log('[NotificationButton] No es alumno, no se cargan notificaciones');
             setNotificaciones([]);
             setLoading(false);
             return;
         }
         setLoading(true);
         try {
+            console.log('[NotificationButton] Obteniendo notificaciones...');
             const data = await obtenerInvitacionesPendientes();
+            console.log('[NotificationButton] Notificaciones recibidas:', data);
             setNotificaciones(data);
         } catch (e) {
+            console.error('[NotificationButton] Error al obtener notificaciones:', e);
             setNotificaciones([]);
         }
         setLoading(false);
     };
 
     useEffect(() => {
+        console.log('[NotificationButton] Estado actual:', { role, notificaciones, showNotifMenu });
         if (!showNotifMenu) return;
         const handleClickOutside = (event) => {
             if (
@@ -69,10 +75,49 @@ const NotificationButton = () => {
     };
 
     // NUEVO: Manejar notificaciones de tarea calificada
-    const handleVerCalificacion = (notificacion) => {
-        setShowNotifMenu(false);
-        if (notificacion.datos?.tareaId) {
-            navigate(`/alumno/tareas?tareaId=${notificacion.datos.tareaId}`);
+    const handleVerCalificacion = async (notif) => {
+        try {
+            setShowNotifMenu(false);
+            const token = localStorage.getItem('token');
+            await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            // Actualizar el estado global
+            setUserData(prev => ({
+                ...prev,
+                invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
+            }));
+
+            if (notif.datos?.tareaId) {
+                navigate(`/alumno/tareas?tareaId=${notif.datos.tareaId}`);
+            }
+        } catch (error) {
+            console.error('Error al eliminar notificación:', error);
+        }
+    };
+
+    const handleVerTarea = async (notif) => {
+        try {
+            setShowNotifMenu(false);
+            // Eliminar notificación
+            const token = localStorage.getItem('token');
+            await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            // Actualizar el estado global eliminando la notificación
+            setUserData(prev => ({
+                ...prev,
+                invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
+            }));
+
+            // Navegar a la clase
+            navigate(`/alumno/clase/${notif.datos.claseId}`);
+        } catch (error) {
+            console.error('Error al eliminar notificación:', error);
         }
     };
 
@@ -122,32 +167,58 @@ const NotificationButton = () => {
                                     <div className="text-gray-500">No tienes invitaciones pendientes.</div>
                                 )}
                                 {/* Invitaciones */}
-                                {!loading && notificaciones.filter(n => n.tipo !== 'tarea_calificada').map((inv) => (
+                                {!loading && notificaciones.filter(n => n.tipo === 'invitacion').map((inv) => (
                                     <div key={inv.id} className="bg-gray-50 rounded p-3 flex items-center justify-between">
                                         <div>
                                             <div className="font-medium">
-                                                Invitación a <span className="text-blue-600">{inv.clase.nombre}</span>
+                                                Invitación a <span className="text-blue-600">
+                                                    {inv.clase?.nombre || 'Clase no disponible'}
+                                                </span>
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                Profesor: {inv.clase.profesor}<br />
-                                                Fecha: {inv.fecha}
+                                                Profesor: {inv.clase?.profesor || 'No disponible'}<br />
+                                                Fecha: {inv.fecha || 'No disponible'}
                                             </div>
                                         </div>
                                         <div className="flex flex-col gap-1 ml-2">
                                             <button
                                                 className="bg-green-500 hover:bg-green-600 text-white rounded px-2 py-1 flex items-center"
-                                                onClick={() => handleRespuesta(inv.id, 'aceptar', inv.clase.id)}
+                                                onClick={() => handleRespuesta(inv.id, 'aceptar', inv.clase?.id)}
                                                 title="Aceptar"
                                             >
                                                 <Check className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 flex items-center"
-                                                onClick={() => handleRespuesta(inv.id, 'rechazar', inv.clase.id)}
+                                                onClick={() => handleRespuesta(inv.id, 'rechazar')}
                                                 title="Rechazar"
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {/* Notificaciones de tarea */}
+                                {!loading && notificaciones.filter(n => n.tipo === 'nueva_tarea').map((notif) => (
+                                    <div key={notif.id} className="bg-yellow-50 rounded p-3">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="font-medium text-yellow-800">
+                                                {notif.mensaje}
+                                            </div>
+                                            <div className="text-xs text-gray-600">
+                                                Profesor: {notif.datos.profesor}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                                            </div>
+                                            <div className="flex justify-end mt-2">
+                                                <button
+                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white rounded px-3 py-1 text-xs"
+                                                    onClick={() => handleVerTarea(notif)}
+                                                >
+                                                    Ir a clase
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -156,7 +227,7 @@ const NotificationButton = () => {
                                     <div key={notif.id} className="bg-blue-50 rounded p-3 flex items-center justify-between">
                                         <div>
                                             <div className="font-medium text-blue-800">
-                                                {notif.mensaje}
+                                                {notif.contenido || notif.mensaje || 'Nueva notificación'}
                                             </div>
                                             <div className="text-xs text-gray-500">
                                                 {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
