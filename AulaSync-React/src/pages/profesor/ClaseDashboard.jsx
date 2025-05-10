@@ -553,30 +553,49 @@ const ClaseDashboard = () => {
         return 'pendiente';
     };
 
-    // Filtrar las tareas según el estado seleccionado
+    // NUEVO: función para saber si está finalizada (entregada y calificada)
+    const isFinalizada = (anuncio) => {
+        return anuncio.entregada && anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '';
+    };
+
+    // NUEVO: filtrar tareas según el filtro seleccionado y el rol
     const filtrarTareas = (tareas) => {
         if (!Array.isArray(tareas)) return [];
-        switch (filtroTareas) {
-            case 'pendientes':
-                // Tareas donde alguna entrega está sin calificar o faltan entregas
-                return tareas.filter(t =>
-                    t.tipo === 'tarea' &&
-                    Array.isArray(t.entregas) &&
-                    (
-                        t.entregas.length < (claseData?.estudiantes?.length || 0) ||
-                        t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
-                    )
-                );
-            case 'finalizadas':
-                // Tareas donde todas las entregas posibles están entregadas y todas calificadas
-                return tareas.filter(t =>
-                    t.tipo === 'tarea' &&
-                    Array.isArray(t.entregas) &&
-                    t.entregas.length === (claseData?.estudiantes?.length || 0) &&
-                    t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
-                );
-            default:
-                return tareas;
+        if (role === 'alumno') {
+            switch (filtroTareas) {
+                case 'pendientes':
+                    return tareas.filter(t => getEstadoTarea(t) === 'pendiente');
+                case 'entregadas':
+                    return tareas.filter(t => getEstadoTarea(t) === 'entregada');
+                case 'expiradas':
+                    return tareas.filter(t => getEstadoTarea(t) === 'expirada');
+                case 'finalizadas':
+                    return tareas.filter(t => isFinalizada(t));
+                default:
+                    return tareas;
+            }
+        } else {
+            // Profesor (igual que antes)
+            switch (filtroTareas) {
+                case 'pendientes':
+                    return tareas.filter(t =>
+                        t.tipo === 'tarea' &&
+                        Array.isArray(t.entregas) &&
+                        (
+                            t.entregas.length < (claseData?.estudiantes?.length || 0) ||
+                            t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
+                        )
+                    );
+                case 'finalizadas':
+                    return tareas.filter(t =>
+                        t.tipo === 'tarea' &&
+                        Array.isArray(t.entregas) &&
+                        t.entregas.length === (claseData?.estudiantes?.length || 0) &&
+                        t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
+                    );
+                default:
+                    return tareas;
+            }
         }
     };
 
@@ -588,9 +607,21 @@ const ClaseDashboard = () => {
                 onChange={(e) => setFiltroTareas(e.target.value)}
                 className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
             >
-                <option value="todas">Todas las tareas</option>
-                <option value="pendientes">Pendientes de calificar</option>
-                <option value="finalizadas">Finalizadas</option>
+                {role === 'alumno' ? (
+                    <>
+                        <option value="todas">Todas</option>
+                        <option value="pendientes">Pendientes</option>
+                        <option value="entregadas">Entregadas</option>
+                        <option value="expiradas">Expiradas</option>
+                        <option value="finalizadas">Finalizadas</option>
+                    </>
+                ) : (
+                    <>
+                        <option value="todas">Todas las tareas</option>
+                        <option value="pendientes">Pendientes de calificar</option>
+                        <option value="finalizadas">Finalizadas</option>
+                    </>
+                )}
             </select>
         </div>
     );
