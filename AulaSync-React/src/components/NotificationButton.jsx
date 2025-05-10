@@ -222,7 +222,8 @@ const NotificationButton = () => {
                                                 Profesor: {notif.datos.profesor}
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''} <br /><br />
+                                                Nueva tarea creada {/* Cambiar este texto por defecto cuando no hay título */}
                                             </div>
                                             <div className="flex justify-end mt-2">
                                                 <button
