@@ -257,9 +257,17 @@ const ClaseDashboard = () => {
         try {
             const entregas = await getEntregasTarea(tarea.id);
             if (Array.isArray(entregas)) {
+                // Asegurarse de que cada entrega tenga su información de alumno completa
+                const entregasConAlumno = entregas.map(entrega => ({
+                    ...entrega,
+                    alumnoId: entrega.alumno?.id // Guardar el ID del alumno explícitamente
+                }));
+    
                 setTareaSeleccionada(prev => ({
                     ...prev,
-                    entregas: entregas
+                    entregas: entregasConAlumno,
+                    entregasRealizadas: entregasConAlumno.length,
+                    entregasPendientes: claseData?.estudiantes?.length - entregasConAlumno.length || 0
                 }));
             } else {
                 throw new Error('Formato de respuesta inválido');
@@ -269,102 +277,14 @@ const ClaseDashboard = () => {
             toast.error('Error al cargar las entregas');
             setTareaSeleccionada(prev => ({
                 ...prev,
-                entregas: []
+                entregas: [],
+                entregasRealizadas: 0,
+                entregasPendientes: claseData?.estudiantes?.length || 0
             }));
         } finally {
             setLoadingEntregas({}); // Limpiar estados de carga
         }
     };
-
-    // NUEVO: función para entregar tarea (solo alumno)
-    const handleEntregaTarea = async () => {
-        if (!tareaSeleccionada) return;
-        if (tareaSeleccionada.entregada) {
-            toast.error('Ya has entregado esta tarea');
-            return;
-        }
-        setIsEntregando(true);
-        try {
-            const formData = new FormData();
-            formData.append('comentario', comentarioEntrega);
-            if (archivoEntrega) formData.append('archivo', archivoEntrega);
-
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/tareas/${tareaSeleccionada.id}/entregar`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Error al entregar la tarea');
-            }
-            // Obtener datos de la entrega para actualizar el estado local
-            const now = new Date();
-            setTareaSeleccionada(prev => prev ? {
-                ...prev,
-                entregada: true,
-                comentarioEntrega,
-                archivoEntregaUrl: archivoEntrega ? null : prev.archivoEntregaUrl, // Si hay archivo, se actualizará al recargar
-                fechaEntregada: now.toISOString()
-            } : prev);
-            toast.success('Tarea entregada correctamente');
-        } catch (e) {
-            toast.error(e.message || 'Error al entregar la tarea');
-        } finally {
-            setIsEntregando(false);
-        }
-    };
-
-    // NUEVO: función para recortar texto con puntos suspensivos
-    const recortarTexto = (texto, max = 80) => {
-        if (!texto) return '';
-        return texto.length > max ? texto.slice(0, max) + '...' : texto;
-    };
-
-    // Filtrar las tareas según el estado seleccionado
-    const filtrarTareas = (tareas) => {
-        if (!Array.isArray(tareas)) return [];
-        switch (filtroTareas) {
-            case 'pendientes':
-                // Tareas donde alguna entrega está sin calificar o faltan entregas
-                return tareas.filter(t =>
-                    t.tipo === 'tarea' &&
-                    Array.isArray(t.entregas) &&
-                    (
-                        t.entregas.length < (claseData?.estudiantes?.length || 0) ||
-                        t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
-                    )
-                );
-            case 'finalizadas':
-                // Tareas donde todas las entregas posibles están entregadas y todas calificadas
-                return tareas.filter(t =>
-                    t.tipo === 'tarea' &&
-                    Array.isArray(t.entregas) &&
-                    t.entregas.length === (claseData?.estudiantes?.length || 0) &&
-                    t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
-                );
-            default:
-                return tareas;
-        }
-    };
-
-    // Renderizar filtros antes del listado de anuncios
-    const renderFiltros = () => (
-        <div className="flex items-center gap-2 mb-4">
-            <select
-                value={filtroTareas}
-                onChange={(e) => setFiltroTareas(e.target.value)}
-                className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-                <option value="todas">Todas las tareas</option>
-                <option value="pendientes">Pendientes de calificar</option>
-                <option value="finalizadas">Finalizadas</option>
-            </select>
-        </div>
-    );
 
     const handleCloseModal = () => {
         setIsClosing(true);
@@ -607,6 +527,54 @@ const ClaseDashboard = () => {
             e.alumno && (String(e.alumno.id) === String(alumnoId) || String(e.alumno) === String(alumnoId))
         );
     };
+
+    // NUEVO: función para recortar texto con puntos suspensivos
+    const recortarTexto = (texto, max = 80) => {
+        if (!texto) return '';
+        return texto.length > max ? texto.slice(0, max) + '...' : texto;
+    };
+
+    // Filtrar las tareas según el estado seleccionado
+    const filtrarTareas = (tareas) => {
+        if (!Array.isArray(tareas)) return [];
+        switch (filtroTareas) {
+            case 'pendientes':
+                // Tareas donde alguna entrega está sin calificar o faltan entregas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    (
+                        t.entregas.length < (claseData?.estudiantes?.length || 0) ||
+                        t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
+                    )
+                );
+            case 'finalizadas':
+                // Tareas donde todas las entregas posibles están entregadas y todas calificadas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    t.entregas.length === (claseData?.estudiantes?.length || 0) &&
+                    t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
+                );
+            default:
+                return tareas;
+        }
+    };
+
+    // Renderizar filtros antes del listado de anuncios
+    const renderFiltros = () => (
+        <div className="flex items-center gap-2 mb-4">
+            <select
+                value={filtroTareas}
+                onChange={(e) => setFiltroTareas(e.target.value)}
+                className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+                <option value="todas">Todas las tareas</option>
+                <option value="pendientes">Pendientes de calificar</option>
+                <option value="finalizadas">Finalizadas</option>
+            </select>
+        </div>
+    );
 
     if (isLoading) {
         return (
@@ -881,7 +849,6 @@ const ClaseDashboard = () => {
                 role={role}
                 claseData={claseData}
                 onClose={() => setShowTareaModal(false)}
-                onEntregaTarea={handleEntregaTarea}
                 comentarioEntrega={comentarioEntrega}
                 setComentarioEntrega={setComentarioEntrega}
                 archivoEntrega={archivoEntrega}

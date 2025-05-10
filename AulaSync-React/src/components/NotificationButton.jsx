@@ -78,23 +78,25 @@ const NotificationButton = () => {
     const handleVerCalificacion = async (notif) => {
         try {
             setShowNotifMenu(false);
+            // Marcar como leída
             const token = localStorage.getItem('token');
             await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
-            // Actualizar el estado global
+            // Actualizar estado global
             setUserData(prev => ({
                 ...prev,
                 invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
             }));
 
+            // Navegar a la vista de tareas con el ID de la tarea seleccionada
             if (notif.datos?.tareaId) {
                 navigate(`/alumno/tareas?tareaId=${notif.datos.tareaId}`);
             }
         } catch (error) {
-            console.error('Error al eliminar notificación:', error);
+            console.error('Error al procesar notificación:', error);
         }
     };
 
@@ -224,21 +226,23 @@ const NotificationButton = () => {
                                 ))}
                                 {/* Notificaciones de tarea calificada */}
                                 {!loading && notificaciones.filter(n => n.tipo === 'tarea_calificada').map((notif) => (
-                                    <div key={notif.id} className="bg-blue-50 rounded p-3 flex items-center justify-between">
-                                        <div>
-                                            <div className="font-medium text-blue-800">
-                                                {notif.contenido || notif.mensaje || 'Nueva notificación'}
+                                    <div key={notif.id} className="bg-blue-50 rounded p-3">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="font-bold text-lg text-blue-600 border-b border-blue-100 pb-2 mb-3">
+                                                Tu tarea: {notif.datos?.tareaTitulo} ha sido corregida!
                                             </div>
-                                            <div className="text-xs text-gray-500">
-                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                                            <div className="whitespace-pre-line text-blue-800">
+                                                {notif.mensaje}
+                                            </div>
+                                            <div className="flex justify-end mt-2">
+                                                <button
+                                                    onClick={() => handleVerCalificacion(notif)}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-xs"
+                                                >
+                                                    {notif.datos?.mensaje_accion || 'Ver calificación'}
+                                                </button>
                                             </div>
                                         </div>
-                                        <button
-                                            className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 ml-2 text-xs"
-                                            onClick={() => handleVerCalificacion(notif)}
-                                        >
-                                            Ver calificación
-                                        </button>
                                     </div>
                                 ))}
                             </>

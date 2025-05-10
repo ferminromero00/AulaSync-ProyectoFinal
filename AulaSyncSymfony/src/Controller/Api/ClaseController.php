@@ -458,9 +458,10 @@ class ClaseController extends AbstractController
 
             $tareas = $qb->getQuery()->getResult();
 
-            $result = array_map(function($tarea) {
+            $result = array_map(function($tarea) use ($alumno) {
+                // Filtramos específicamente por el alumno actual
                 $entrega = $tarea->getEntregas()->filter(
-                    fn($e) => $e->getAlumno() === $this->getUser()
+                    fn($e) => $e->getAlumno()->getId() === $alumno->getId()
                 )->first();
                 
                 return [
@@ -477,7 +478,6 @@ class ClaseController extends AbstractController
                     'comentarioEntrega' => $entrega ? $entrega->getComentario() : null,
                     'archivoEntregaUrl' => $entrega ? $entrega->getArchivoUrl() : null,
                     'fechaEntregada' => $entrega ? $entrega->getFechaEntrega()?->format('Y-m-d H:i:s') : null,
-                    // NUEVO: incluir entregaId, nota y comentarioCorreccion
                     'entregaId' => $entrega ? $entrega->getId() : null,
                     'nota' => $entrega ? $entrega->getNota() : null,
                     'comentarioCorreccion' => $entrega ? $entrega->getComentarioCorreccion() : null
@@ -571,24 +571,58 @@ class ClaseController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/tareas/{id}/entregas', name: 'get_tarea_entregas', methods: ['GET'])]
-    public function getTareaEntregas(int $id, EntityManagerInterface $em): JsonResponse
+    #[Route('/tareas/{id}/entregas', name: 'get_tarea_entregas', methods: ['GET', 'OPTIONS'])]
+    public function getTareaEntregas(int $id, Request $request, EntityManagerInterface $em): JsonResponse
     {
+        // Manejar la petición OPTIONS para CORS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new JsonResponse([], JsonResponse::HTTP_OK, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET',
+                'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+            ]);
+        }
+
         try {
             $tarea = $em->getRepository(Anuncio::class)->find($id);
+            $user = $this->getUser();
             
             if (!$tarea || $tarea->getTipo() !== 'tarea') {
                 return $this->json(['error' => 'Tarea no encontrada'], 404);
             }
 
-            // Verificar permisos (profesor de la clase o alumno inscrito)
-            $user = $this->getUser();
             $clase = $tarea->getClase();
-            
             if (!($clase->getProfesor() === $user || $clase->getAlumnos()->contains($user))) {
                 return $this->json(['error' => 'No tienes permiso para ver estas entregas'], 403);
             }
 
+            // Si es alumno, solo devolver su propia entrega
+            if ($user instanceof \App\Entity\Alumno) {
+                $entrega = $em->getRepository(EntregaTarea::class)
+                    ->findOneBy([
+                        'tarea' => $tarea,
+                        'alumno' => $user
+                    ]);
+
+                $entregaData = $entrega ? [[
+                    'id' => $entrega->getId(),
+                    'alumno' => [
+                        'id' => $user->getId(),
+                        'nombre' => $user->getFirstName() . ' ' . $user->getLastName()
+                    ],
+                    'fechaEntrega' => $entrega->getFechaEntrega()->format('c'),
+                    'comentario' => $entrega->getComentario(),
+                    'archivoUrl' => $entrega->getArchivoUrl(),
+                    'nota' => $entrega->getNota(),
+                    'comentarioCorreccion' => $entrega->getComentarioCorreccion()
+                ]] : [];
+
+                return $this->json($entregaData, 200, [
+                    'Access-Control-Allow-Origin' => '*'
+                ]);
+            }
+
+            // Si es profesor, devolver todas las entregas
             $entregas = $em->getRepository(EntregaTarea::class)
                 ->createQueryBuilder('e')
                 ->select('e', 'a')
@@ -614,58 +648,75 @@ class ClaseController extends AbstractController
                 ];
             }, $entregas);
 
-            return $this->json($entregasData);
+            return $this->json($entregasData, 200, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
         } catch (\Exception $e) {
             $this->apiLogger->error('Error al obtener entregas', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return $this->json(['error' => 'Error al obtener las entregas'], 500);
+            return $this->json(['error' => 'Error al obtener las entregas'], 500, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
         }
     }
 
     #[Route('/entregas/{id}/calificar', name: 'entrega_calificar', methods: ['POST'])]
-    public function calificarEntrega(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+    public function calificarEntrega(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         try {
-            $profesor = $this->getUser();
-            $entrega = $em->getRepository(EntregaTarea::class)->find($id);
-
-            if (!$entrega) {
-                return new JsonResponse(['error' => 'Entrega no encontrada'], 404);
-            }
-
-            $tarea = $entrega->getTarea();
-            if ($tarea->getClase()->getProfesor() !== $profesor) {
-                return new JsonResponse(['error' => 'No autorizado'], 403);
-            }
-
             $data = json_decode($request->getContent(), true);
-            $nota = $data['nota'] ?? null;
-            $comentarioCorreccion = $data['comentarioCorreccion'] ?? '';
-
-            if ($nota === null) {
-                return new JsonResponse(['error' => 'Nota requerida'], 400);
+            $entrega = $entityManager->getRepository(EntregaTarea::class)->find($id);
+            
+            if (!$entrega) {
+                return $this->json(['error' => 'Entrega no encontrada'], 404);
             }
 
-            $entrega->setNota($nota);
-            $entrega->setComentarioCorreccion($comentarioCorreccion);
-            $em->flush();
+            // Verificar que el profesor es el de la clase
+            if ($entrega->getTarea()->getClase()->getProfesor() !== $this->getUser()) {
+                return $this->json(['error' => 'No tienes permiso para calificar esta entrega'], 403);
+            }
 
-            // Crear notificación para el alumno
+            $entrega->setNota($data['nota']);
+            $entrega->setComentarioCorreccion($data['comentarioCorreccion'] ?? null);
+
+            // Crear notificación para el alumno con el nuevo formato
+            $fechaActual = new \DateTime();
+            $mensaje = sprintf(
+                "Tu tarea \"%s\" ha sido corregida\n\nCalificación: %s\n\nFecha: %s",
+                $entrega->getTarea()->getTitulo(),
+                $data['nota'],
+                $fechaActual->format('d/m/Y, H:i:s')
+            );
+
             $notificacion = new Notificacion();
-            $notificacion->setAlumno($entrega->getAlumno()) // <-- Cambiado de setUsuario a setAlumno
-                         ->setTipo('tarea_calificada')
-                         ->setContenido("Tu tarea '" . ($tarea->getTitulo() ?: 'Sin título') . "' ha sido calificada")
-                         ->setReferenciaId($tarea->getId());
-            
-            $em->persist($notificacion);
-            $em->flush();
+            $notificacion->setAlumno($entrega->getAlumno())
+                ->setTipo('tarea_calificada')
+                ->setMensaje($mensaje)
+                ->setDatos([
+                    'tareaId' => $entrega->getTarea()->getId(),
+                    'claseId' => $entrega->getTarea()->getClase()->getId(),
+                    'nota' => $data['nota'],
+                    'profesor' => $entrega->getTarea()->getClase()->getProfesor()->getFirstName() . ' ' . 
+                                $entrega->getTarea()->getClase()->getProfesor()->getLastName(),
+                    'tareaTitulo' => $entrega->getTarea()->getTitulo(),
+                    'mensaje_accion' => 'Ir a tarea para verla',
+                    'fechaCalificacion' => $fechaActual->format('d/m/Y, H:i:s')
+                ]);
 
-            return new JsonResponse(['message' => 'Entrega calificada correctamente']);
+            $entityManager->persist($notificacion);
+            $entityManager->persist($entrega);
+            $entityManager->flush();
+
+            return $this->json([
+                'message' => 'Entrega calificada correctamente',
+                'nota' => $entrega->getNota(),
+                'comentarioCorreccion' => $entrega->getComentarioCorreccion()
+            ]);
         } catch (\Exception $e) {
-            $this->logger->error('Error al calificar entrega: ' . $e->getMessage());
-            return new JsonResponse(['error' => 'Error al calificar la entrega'], 500);
+            $this->apiLogger->error('Error al calificar entrega: ' . $e->getMessage());
+            return $this->json(['error' => 'Error al calificar la entrega: ' . $e->getMessage()], 500);
         }
     }
 
