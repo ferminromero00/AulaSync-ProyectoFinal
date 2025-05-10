@@ -56,6 +56,9 @@ const ClaseDashboard = () => {
     // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
 
+    // NUEVO: obtener el id del alumno autenticado (ajusta según tu auth)
+    const alumnoId = localStorage.getItem('userId');
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -307,16 +310,6 @@ const ClaseDashboard = () => {
                 archivoEntregaUrl: archivoEntrega ? null : prev.archivoEntregaUrl, // Si hay archivo, se actualizará al recargar
                 fechaEntregada: now.toISOString()
             } : prev);
-
-            // ACTUALIZAR EL ESTADO DE LA TAREA EN EL LISTADO DE ANUNCIOS
-            setAnuncios(prevAnuncios =>
-                prevAnuncios.map(a =>
-                    a.id === tareaSeleccionada.id
-                        ? { ...a, entregada: true }
-                        : a
-                )
-            );
-
             toast.success('Tarea entregada correctamente');
         } catch (e) {
             toast.error(e.message || 'Error al entregar la tarea');
@@ -331,165 +324,34 @@ const ClaseDashboard = () => {
         return texto.length > max ? texto.slice(0, max) + '...' : texto;
     };
 
-    // Función para determinar el estado de una tarea
-    const getTareaStatus = (tarea) => {
-        if (role === 'alumno') {
-            const now = new Date();
-            const fechaLimite = tarea.fechaEntrega ? new Date(tarea.fechaEntrega) : null;
-            
-            if (tarea.entregada) return 'entregada';
-            if (fechaLimite && now > fechaLimite) return 'expirada';
-            return 'pendiente';
-        }
-        return null;
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'entregada':
-                return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-            case 'expirada':
-                return 'bg-red-50 text-red-700 border-red-200';
-            case 'pendiente':
-                return 'bg-amber-50 text-amber-700 border-amber-200';
-            default:
-                return 'bg-gray-50 text-gray-700 border-gray-200';
-        }
-    };
-
-    // Modificar el renderizado de tareas para mostrar el estado y los contadores en la vista de profesor
-    const renderTareaCard = (anuncio, index) => (
-        <div
-            key={anuncio.id}
-            className="bg-white border border-gray-200 p-4 rounded-lg relative cursor-pointer hover:bg-gray-50 transition opacity-0 animate-slideRight"
-            style={{ animationDelay: `${600 + (index * 100)}ms` }}
-            onClick={() => handleOpenTarea(anuncio)}
-        >
-            {role === 'profesor' ? (
-                <>
-                    <button
-                        onClick={e => {
-                            e.stopPropagation();
-                            handleDeleteAnuncio(anuncio.id);
-                        }}
-                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
-                        title="Eliminar tarea"
-                    >
-                        <X className="h-5 w-5 text-gray-600" />
-                    </button>
-                    {/* Mostrar contadores de entregadas y pendientes en la parte superior derecha */}
-                    <div className="absolute top-4 right-20 flex items-center gap-2 z-10">
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
-                            Entregadas:&nbsp;
-                            {anuncio.entregasRealizadas ?? 0}
-                        </span>
-                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                            Pendientes:&nbsp;
-                            {anuncio.entregasPendientes ?? (claseData?.estudiantes?.length || 0)}
-                        </span>
-                    </div>
-                    {/* Mostrar nota y comentario del profesor si la tarea está entregada y calificada (solo para alumnos, pero aquí ejemplo para profesor) */}
-                    {anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '' && (
-                        <div className="absolute bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-blue-800">
-                            <div><b>Nota:</b> {anuncio.nota}</div>
-                            <div><b>Comentario:</b> {anuncio.comentarioCorreccion || <span className="italic text-blue-400">Sin comentario</span>}</div>
-                        </div>
-                    )}
-                </>
-            ) : (
-                <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(getTareaStatus(anuncio))}`}>
-                        {getTareaStatus(anuncio).charAt(0).toUpperCase() + getTareaStatus(anuncio).slice(1)}
-                    </span>
-                </div>
-            )}
-            
-            <div className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <h3 className="font-semibold text-gray-900">{anuncio.titulo || "Tarea sin título"}</h3>
-            </div>
-
-            <div className="text-sm text-gray-600 mb-3">
-                <Calendar className="h-4 w-4 inline mr-1" />
-                {anuncio.fechaEntrega 
-                    ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
-                    : "Sin fecha límite"}
-            </div>
-
-            <div className="flex justify-between items-center">
-                {anuncio.archivoUrl && (
-                    <span className="flex items-center gap-1 text-blue-600 text-sm">
-                        <Paperclip className="h-4 w-4" />
-                        <span>Adjunto</span>
-                    </span>
-                )}
-                <span className="text-blue-600 text-sm ml-auto">
-                    Ver detalles →
-                </span>
-            </div>
-        </div>
-    );
-
-    // Modificar la lógica de filtrado para incluir expiradas
+    // Filtrar las tareas según el estado seleccionado
     const filtrarTareas = (tareas) => {
         if (!Array.isArray(tareas)) return [];
-        if (role === 'profesor') {
-            switch (filtroTareas) {
-                case 'pendientes':
-                    // Tareas donde alguna entrega está sin calificar o faltan entregas
-                    return tareas.filter(t =>
-                        t.tipo === 'tarea' &&
-                        Array.isArray(t.entregas) &&
-                        (
-                            t.entregas.length < (claseData?.estudiantes?.length || 0) ||
-                            t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
-                        )
-                    );
-                case 'finalizadas':
-                    // Tareas donde todas las entregas posibles están entregadas y todas calificadas
-                    return tareas.filter(t =>
-                        t.tipo === 'tarea' &&
-                        Array.isArray(t.entregas) &&
-                        t.entregas.length === (claseData?.estudiantes?.length || 0) &&
-                        t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
-                    );
-                default:
-                    return tareas;
-            }
-        } else {
-            const now = new Date();
-            switch (filtroTareas) {
-                case 'pendientes':
-                    return tareas.filter(t =>
-                        t.tipo === 'tarea' &&
-                        !t.entregada &&
-                        (!t.fechaEntrega || new Date(t.fechaEntrega) > now)
-                    );
-                case 'entregadas':
-                    return tareas.filter(t =>
-                        t.tipo === 'tarea' &&
-                        t.entregada
-                    );
-                case 'expiradas':
-                    return tareas.filter(t =>
-                        t.tipo === 'tarea' &&
-                        !t.entregada &&
-                        t.fechaEntrega &&
-                        new Date(t.fechaEntrega) < now
-                    );
-                default:
-                    return tareas.filter(t => t.tipo === 'tarea');
-            }
+        switch (filtroTareas) {
+            case 'pendientes':
+                // Tareas donde alguna entrega está sin calificar o faltan entregas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    (
+                        t.entregas.length < (claseData?.estudiantes?.length || 0) ||
+                        t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
+                    )
+                );
+            case 'finalizadas':
+                // Tareas donde todas las entregas posibles están entregadas y todas calificadas
+                return tareas.filter(t =>
+                    t.tipo === 'tarea' &&
+                    Array.isArray(t.entregas) &&
+                    t.entregas.length === (claseData?.estudiantes?.length || 0) &&
+                    t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
+                );
+            default:
+                return tareas;
         }
     };
 
-    // Modificar el renderizado del selector de filtros
+    // Renderizar filtros antes del listado de anuncios
     const renderFiltros = () => (
         <div className="flex items-center gap-2 mb-4">
             <select
@@ -497,20 +359,9 @@ const ClaseDashboard = () => {
                 onChange={(e) => setFiltroTareas(e.target.value)}
                 className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
             >
-                {role === 'profesor' ? (
-                    <>
-                        <option value="todas">Todas las tareas</option>
-                        <option value="pendientes">Pendientes de calificar</option>
-                        <option value="finalizadas">Finalizadas</option>
-                    </>
-                ) : (
-                    <>
-                        <option value="todas">Todas las tareas</option>
-                        <option value="pendientes">Pendientes</option>
-                        <option value="entregadas">Entregadas</option>
-                        <option value="expiradas">Expiradas</option>
-                    </>
-                )}
+                <option value="todas">Todas las tareas</option>
+                <option value="pendientes">Pendientes de calificar</option>
+                <option value="finalizadas">Finalizadas</option>
             </select>
         </div>
     );
@@ -749,6 +600,14 @@ const ClaseDashboard = () => {
         }
     };
 
+    // NUEVO: Función para obtener la entrega del alumno actual para la tarea seleccionada
+    const getEntregaAlumnoActual = () => {
+        if (!tareaSeleccionada || !Array.isArray(tareaSeleccionada.entregas) || !alumnoId) return null;
+        return tareaSeleccionada.entregas.find(e => 
+            e.alumno && (String(e.alumno.id) === String(alumnoId) || String(e.alumno) === String(alumnoId))
+        );
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -870,7 +729,72 @@ const ClaseDashboard = () => {
                                 <div className="space-y-4">
                                     {filtrarTareas(anuncios).map((anuncio, index) =>
                                         anuncio.tipo === "tarea" ? (
-                                            renderTareaCard(anuncio, index)
+                                            <div
+                                                key={anuncio.id}
+                                                className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg relative cursor-pointer hover:bg-blue-100 transition opacity-0 animate-slideRight"
+                                                style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                onClick={() => handleOpenTarea(anuncio)}
+                                            >
+                                                {/* Botón eliminar SIEMPRE arriba a la derecha */}
+                                                {role === 'profesor' && (
+                                                    <button
+                                                        onClick={e => {
+                                                            e.stopPropagation();
+                                                            handleDeleteAnuncio(anuncio.id);
+                                                        }}
+                                                        className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors z-10"
+                                                        title="Eliminar tarea"
+                                                    >
+                                                        <X className="h-5 w-5 text-gray-600" />
+                                                    </button>
+                                                )}
+                                                {/* NUEVO: Entregas realizadas y pendientes */}
+                                                {role === 'profesor' && (
+                                                    <div className="absolute top-4 right-16 flex items-center z-10 gap-2">
+                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
+                                                            Entregadas:&nbsp;
+                                                            {anuncio.entregasRealizadas ?? 0}
+                                                        </span>
+                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
+                                                            Pendientes:&nbsp;
+                                                            {anuncio.entregasPendientes ?? (claseData?.estudiantes?.length || 0)}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {/* Título y resto del contenido */}
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <BookOpen className="h-5 w-5 text-blue-600" />
+                                                    <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
+                                                </div>
+                                                <div className="text-sm text-gray-600">
+                                                    <Calendar className="h-4 w-4 inline mr-1" />
+                                                    {anuncio.fechaEntrega 
+                                                        ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })
+                                                        : "Sin fecha límite"}
+                                                </div>
+                                                <div className="mt-2 flex justify-between items-center">
+                                                    <span className="text-sm text-gray-500">
+                                                        {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        {anuncio.archivoUrl && (
+                                                            <span className="flex items-center gap-1 text-blue-600">
+                                                                <Paperclip className="h-4 w-4" />
+                                                                <span className="text-xs">Adjunto</span>
+                                                            </span>
+                                                        )}
+                                                        <span className="text-xs text-gray-500">
+                                                            Ver detalles →
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative opacity-0 animate-slideRight"
                                                  style={{ animationDelay: `${600 + (index * 100)}ms` }}>
@@ -965,6 +889,7 @@ const ClaseDashboard = () => {
                 isEntregando={isEntregando}
                 loadingEntregas={loadingEntregas}
                 onOpenEntrega={handleOpenEntregaModal}
+                entregaAlumno={role === 'alumno' ? getEntregaAlumnoActual() : null}
             />
 
             <EntregaModal

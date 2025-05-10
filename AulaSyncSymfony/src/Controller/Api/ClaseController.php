@@ -653,23 +653,36 @@ class ClaseController extends AbstractController
             $em->flush();
 
             // Crear notificación para el alumno
-            $notificacion = new \App\Entity\Notificacion();
-            $notificacion->setUsuario($entrega->getAlumno());
-            $notificacion->setTipo('tarea_calificada');
-            $notificacion->setMensaje('Tu tarea "' . ($tarea->getTitulo() ?: 'Sin título') . '" ha sido calificada.');
-            $notificacion->setDatos([
-                'tareaId' => $tarea->getId(),
-                'entregaId' => $entrega->getId(),
-                'nota' => $nota
-            ]);
-            $notificacion->setLeida(false);
-            $notificacion->setCreatedAt(new \DateTime());
+            $notificacion = new Notificacion();
+            $notificacion->setAlumno($entrega->getAlumno()) // <-- Cambiado de setUsuario a setAlumno
+                         ->setTipo('tarea_calificada')
+                         ->setContenido("Tu tarea '" . ($tarea->getTitulo() ?: 'Sin título') . "' ha sido calificada")
+                         ->setReferenciaId($tarea->getId());
+            
             $em->persist($notificacion);
             $em->flush();
 
             return new JsonResponse(['message' => 'Entrega calificada correctamente']);
         } catch (\Exception $e) {
+            $this->logger->error('Error al calificar entrega: ' . $e->getMessage());
             return new JsonResponse(['error' => 'Error al calificar la entrega'], 500);
+        }
+    }
+
+    private function crearNotificacionCalificacion(EntregaTarea $entrega): void
+    {
+        try {
+            $notificacion = new Notificacion();
+            $notificacion->setAlumno($entrega->getAlumno())
+                         ->setTipo('tarea_calificada')
+                         ->setContenido("Tu tarea ha sido calificada")
+                         ->setReferenciaId($entrega->getTarea()->getId());
+
+            $this->entityManager->persist($notificacion);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            // Log error pero no detener el proceso
+            $this->logger->error('Error al crear notificación: ' . $e->getMessage());
         }
     }
 }
