@@ -307,6 +307,16 @@ const ClaseDashboard = () => {
                 archivoEntregaUrl: archivoEntrega ? null : prev.archivoEntregaUrl, // Si hay archivo, se actualizará al recargar
                 fechaEntregada: now.toISOString()
             } : prev);
+
+            // ACTUALIZAR EL ESTADO DE LA TAREA EN EL LISTADO DE ANUNCIOS
+            setAnuncios(prevAnuncios =>
+                prevAnuncios.map(a =>
+                    a.id === tareaSeleccionada.id
+                        ? { ...a, entregada: true }
+                        : a
+                )
+            );
+
             toast.success('Tarea entregada correctamente');
         } catch (e) {
             toast.error(e.message || 'Error al entregar la tarea');
@@ -378,6 +388,13 @@ const ClaseDashboard = () => {
                             {anuncio.entregasPendientes ?? (claseData?.estudiantes?.length || 0)}
                         </span>
                     </div>
+                    {/* Mostrar nota y comentario del profesor si la tarea está entregada y calificada (solo para alumnos, pero aquí ejemplo para profesor) */}
+                    {anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '' && (
+                        <div className="absolute bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-blue-800">
+                            <div><b>Nota:</b> {anuncio.nota}</div>
+                            <div><b>Comentario:</b> {anuncio.comentarioCorreccion || <span className="italic text-blue-400">Sin comentario</span>}</div>
+                        </div>
+                    )}
                 </>
             ) : (
                 <div className="absolute top-4 right-4">

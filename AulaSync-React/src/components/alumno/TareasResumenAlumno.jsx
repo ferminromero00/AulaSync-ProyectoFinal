@@ -201,8 +201,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
         return (
-            <div className={`fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm
-                ${isClosing ? 'modal-closing' : ''}`}>
+            <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
+                ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
                 <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
                     shadow-2xl modal-content max-h-[90vh] overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
@@ -325,39 +325,27 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                                 {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
                                             </div>
                                         </div>
-                                        {/* Mostrar nota y comentario de corrección si existen */}
+                                        {/* Mostrar solo la nota y comentario del profesor, sin permitir editar */}
                                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <CheckCircle className="h-5 w-5 text-blue-600" />
                                                 <span className="font-medium text-blue-800">Nota:</span>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    max="10"
-                                                    step="0.1"
-                                                    className="ml-2 px-2 py-1 rounded border border-blue-200 w-20"
-                                                    value={notaEdicion}
-                                                    onChange={e => setNotaEdicion(e.target.value)}
-                                                    disabled={isCalificando}
-                                                />
+                                                <span className="ml-2 text-blue-900 font-bold">
+                                                    {tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
+                                                        ? tareaSeleccionada.nota
+                                                        : <span className="italic text-blue-400">Sin calificar</span>
+                                                    }
+                                                </span>
                                             </div>
                                             <div className="text-blue-700 mt-2">
                                                 <span className="font-medium">Comentario del profesor:</span>
-                                                <textarea
-                                                    className="w-full mt-1 px-2 py-1 border border-blue-200 rounded"
-                                                    rows={2}
-                                                    value={comentarioCorreccionEdicion}
-                                                    onChange={e => setComentarioCorreccionEdicion(e.target.value)}
-                                                    disabled={isCalificando}
-                                                />
+                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[40px]">
+                                                    {tareaSeleccionada.comentarioCorreccion
+                                                        ? tareaSeleccionada.comentarioCorreccion
+                                                        : <span className="italic text-blue-400">Sin comentario</span>
+                                                    }
+                                                </div>
                                             </div>
-                                            <button
-                                                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                                                onClick={handleCalificarEntrega}
-                                                disabled={isCalificando}
-                                            >
-                                                {isCalificando ? "Guardando..." : "Guardar calificación"}
-                                            </button>
                                         </div>
                                         <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
                                             <div className="flex items-center gap-2">
