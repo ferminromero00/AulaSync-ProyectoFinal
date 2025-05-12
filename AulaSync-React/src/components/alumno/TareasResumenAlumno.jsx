@@ -228,6 +228,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 <div>
                                     <h3 className="text-2xl font-bold text-gray-900">{tareaSeleccionada.titulo}</h3>
                                     <div className="text-sm text-gray-500 mt-1">
+                                        {/* Mostrar correctamente el nombre de la clase */}
                                         Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
                                     </div>
                                 </div>
@@ -361,11 +362,12 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                                         : 'Desconocida'}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            {/* Eliminar el bloque de Título */}
+                                            {/* <div className="flex items-center gap-2">
                                                 <BookOpen className="h-5 w-5 text-blue-600" />
                                                 <span className="font-medium text-gray-700">Título:</span>
                                                 <span className="text-gray-700">{tareaSeleccionada.titulo || tareaSeleccionada.contenido}</span>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                 ) : (
