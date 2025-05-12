@@ -681,19 +681,15 @@ class ClaseController extends AbstractController
             $entrega->setNota($data['nota']);
             $entrega->setComentarioCorreccion($data['comentarioCorreccion'] ?? null);
 
-            // Crear notificación para el alumno con el nuevo formato
+            // Crear notificación personalizada para el alumno
             $fechaActual = new \DateTime();
-            $mensaje = sprintf(
-                "Tu tarea \"%s\" ha sido corregida\n\nCalificación: %s\n\nFecha: %s",
-                $entrega->getTarea()->getTitulo(),
-                $data['nota'],
-                $fechaActual->format('d/m/Y, H:i:s')
-            );
+            $mensaje = "Ve a ver tu nota!";
 
             $notificacion = new Notificacion();
             $notificacion->setAlumno($entrega->getAlumno())
                 ->setTipo('tarea_calificada')
-                ->setMensaje($mensaje)
+                ->setContenido($mensaje)
+                ->setMensaje($mensaje) // <-- AÑADE ESTA LÍNEA
                 ->setDatos([
                     'tareaId' => $entrega->getTarea()->getId(),
                     'claseId' => $entrega->getTarea()->getClase()->getId(),
@@ -701,7 +697,7 @@ class ClaseController extends AbstractController
                     'profesor' => $entrega->getTarea()->getClase()->getProfesor()->getFirstName() . ' ' . 
                                 $entrega->getTarea()->getClase()->getProfesor()->getLastName(),
                     'tareaTitulo' => $entrega->getTarea()->getTitulo(),
-                    'mensaje_accion' => 'Ir a tarea para verla',
+                    'mensaje_accion' => '¡Wow! Ve a ver tu nota!',
                     'fechaCalificacion' => $fechaActual->format('d/m/Y, H:i:s')
                 ]);
 

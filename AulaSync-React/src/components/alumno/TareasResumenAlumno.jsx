@@ -8,7 +8,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         esteMes: false,
         proximamente: false,
         sinFecha: false,
-        entregadas: false // Añadir nueva sección
+        entregadas: false, // Añadir nueva sección
+        calificadas: false // Añadir nueva sección
     });
     const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
     const [showTareaModal, setShowTareaModal] = useState(false);
@@ -25,6 +26,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     // Asegurar que todas las refs existen en el objeto seccionRefs
     const seccionRefs = {
         entregadas: useRef(null),
+        calificadas: useRef(null), // Añadir si usas sección "calificadas"
         expirada: useRef(null), // Añadir si usas sección "expirada"
         expiradas: useRef(null), // Añadir si usas sección "expiradas"
         estaSemana: useRef(null),
@@ -82,7 +84,16 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     const tareasSinFecha = tareasNoEntregadas.filter(t => !t.fechaEntrega);
 
     // Añadir nuevo filtro para tareas entregadas
-    const tareasEntregadas = tareasState.filter(t => t.entregada);
+    const tareasEntregadas = tareasState.filter(t => {
+        // Si está entregada pero NO calificada
+        return t.entregada && (!t.nota || t.nota === '' || t.nota === null);
+    });
+
+    // Nuevo filtro para tareas calificadas
+    const tareasCalificadas = tareasState.filter(t => {
+        // Si está entregada Y calificada
+        return t.entregada && t.nota !== undefined && t.nota !== null && t.nota !== '';
+    });
 
     const tareasExpiradas = tareasNoEntregadas.filter(t => {
         if (!t.fechaEntrega) return false;
@@ -429,6 +440,10 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             const hoy = new Date();
             isExpirada = fecha < hoy;
         }
+
+        // MODIFICADO: Determinar si está calificada
+        const isCalificada = tarea.entregada && tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '';
+
         return (
             <div
                 key={tarea.id}
@@ -447,7 +462,14 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                         </div>
                         <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
                     </div>
-                    {tarea.entregada ? (
+                    {/* MODIFICADO: Añadir estado "Calificada" */}
+                    {isCalificada ? (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 
+                                    text-xs font-medium rounded-full border border-blue-200">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                            Calificada ({tarea.nota})
+                        </div>
+                    ) : tarea.entregada ? (
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 
                                     text-xs font-medium rounded-full border border-emerald-200">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
@@ -574,6 +596,13 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
     return (
         <div className="space-y-4">
+            {renderSeccion(
+                "Calificadas",
+                tareasCalificadas,
+                "calificadas",
+                <CheckCircle className="h-5 w-5 text-blue-600" />,
+                "bg-blue-50"
+            )}
             {renderSeccion(
                 "Entregadas",
                 tareasEntregadas,

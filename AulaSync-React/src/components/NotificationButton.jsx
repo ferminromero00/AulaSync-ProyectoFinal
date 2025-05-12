@@ -216,19 +216,45 @@ const NotificationButton = () => {
                                     <div key={notif.id} className="bg-yellow-50 rounded p-3">
                                         <div className="flex flex-col gap-2">
                                             <div className="font-medium text-yellow-800">
-                                                {notif.mensaje}
+                                                {notif.datos?.tareaTitulo
+                                                    ? <>Nueva tarea: <span className="font-bold">{notif.datos.tareaTitulo}</span></>
+                                                    : notif.mensaje
+                                                }
                                             </div>
                                             <div className="text-xs text-gray-600">
-                                                Profesor: {notif.datos.profesor}
+                                                Profesor: {notif.datos?.profesor}
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''} <br /><br />
-                                                Nueva tarea creada {/* Cambiar este texto por defecto cuando no hay título */}
+                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                                                <br /><br />
+                                                {!notif.datos?.tareaTitulo && 'Nueva tarea creada'}
                                             </div>
                                             <div className="flex justify-end mt-2">
                                                 <button
                                                     className="bg-yellow-600 hover:bg-yellow-700 text-white rounded px-3 py-1 text-xs"
-                                                    onClick={() => handleVerTarea(notif)}
+                                                    onClick={async () => {
+                                                        setShowNotifMenu(false);
+                                                        // Eliminar notificación antes de navegar
+                                                        const token = localStorage.getItem('token');
+                                                        try {
+                                                            await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
+                                                                method: 'POST',
+                                                                headers: { 'Authorization': `Bearer ${token}` }
+                                                            });
+                                                            setUserData(prev => ({
+                                                                ...prev,
+                                                                invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
+                                                            }));
+                                                        } catch (e) {
+                                                            // Si falla, navega igual
+                                                        }
+                                                        // Navegar a la clase y abrir el modal de la tarea si hay tareaId
+                                                        if (notif.datos?.claseId && notif.datos?.tareaId) {
+                                                            navigate(`/alumno/clase/${notif.datos.claseId}?tareaId=${notif.datos.tareaId}`);
+                                                        } else if (notif.datos?.claseId) {
+                                                            navigate(`/alumno/clase/${notif.datos.claseId}`);
+                                                        }
+                                                    }}
                                                 >
                                                     Ir a clase
                                                 </button>
@@ -250,10 +276,26 @@ const NotificationButton = () => {
                                             </div>
                                             <div className="flex justify-end mt-2">
                                                 <button
-                                                    onClick={() => handleVerCalificacion(notif)}
+                                                    onClick={async () => {
+                                                        setShowNotifMenu(false);
+                                                        // Marcar como leída y eliminar la notificación
+                                                        const token = localStorage.getItem('token');
+                                                        await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
+                                                            method: 'POST',
+                                                            headers: { 'Authorization': `Bearer ${token}` }
+                                                        });
+                                                        setUserData(prev => ({
+                                                            ...prev,
+                                                            invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
+                                                        }));
+                                                        // Navegar a la clase donde se calificó la tarea
+                                                        if (notif.datos?.claseId) {
+                                                            navigate(`/alumno/clase/${notif.datos.claseId}`);
+                                                        }
+                                                    }}
                                                     className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-xs"
                                                 >
-                                                    {notif.datos?.mensaje_accion || 'Ver calificación'}
+                                                    {notif.datos?.mensaje_accion || 'Ve a ver tu nota!'}
                                                 </button>
                                             </div>
                                         </div>

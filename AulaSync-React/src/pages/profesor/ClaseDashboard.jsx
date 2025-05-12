@@ -810,6 +810,16 @@ const ClaseDashboard = () => {
                                                     <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
                                                     {/* Estado visual SOLO para alumnos */}
                                                     {role === 'alumno' && (() => {
+                                                        // Mostrar "Calificada (nota)" si entregada y nota
+                                                        const isCalificada = anuncio.entregada && anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '';
+                                                        if (isCalificada) {
+                                                            return (
+                                                                <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200 ml-2">
+                                                                    <CheckCircle className="h-4 w-4" />
+                                                                    Calificada ({anuncio.nota})
+                                                                </span>
+                                                            );
+                                                        }
                                                         const estado = getEstadoTarea(anuncio);
                                                         if (estado === 'entregada') {
                                                             return (

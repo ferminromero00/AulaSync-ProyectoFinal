@@ -315,10 +315,18 @@ const TareaModal = ({
                             <div className="space-y-6">
                                 <div className="bg-white rounded-lg p-4 border border-gray-200">
                                     {entregada ? (
-                                        <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                                            <CheckCircle className="h-5 w-5" />
-                                            <span className="font-medium">¡Tarea entregada!</span>
-                                        </div>
+                                        // NUEVO: Mostrar "Calificada" si hay nota
+                                        (tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== '') ? (
+                                            <div className="flex items-center gap-2 text-blue-600 mb-2">
+                                                <CheckCircle className="h-5 w-5" />
+                                                <span className="font-medium">¡Tarea calificada!</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                                                <CheckCircle className="h-5 w-5" />
+                                                <span className="font-medium">¡Tarea entregada!</span>
+                                            </div>
+                                        )
                                     ) : (
                                         <div className="flex items-center gap-2 text-amber-600 mb-2">
                                             <Calendar className="h-5 w-5" />
