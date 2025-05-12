@@ -837,6 +837,20 @@ const ClaseDashboard = () => {
                                                     </button>
                                                 )}
 
+                                                {/* RESUMEN ENTREGAS/PENDIENTES SOLO PROFESOR */}
+                                                {role === 'profesor' && (
+                                                    <div className="absolute top-4 right-20 flex items-center gap-2 z-10">
+                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
+                                                            Entregadas:&nbsp;
+                                                            {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)}
+                                                        </span>
+                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
+                                                            Pendientes:&nbsp;
+                                                            {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))}
+                                                        </span>
+                                                    </div>
+                                                )}
+
                                                 {/* Contenedor flex para título y estado */}
                                                 <div className="flex items-start justify-between mb-2">
                                                     <div className="flex items-center gap-2">
