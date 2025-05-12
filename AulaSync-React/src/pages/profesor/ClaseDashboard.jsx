@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { getClaseById } from '../../services/clases';
 import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText, CheckCircle, Paperclip, Clock, AlertCircle } from 'lucide-react';
 import debounce from 'lodash/debounce';
@@ -13,8 +13,10 @@ import '../../styles/animations.css';
 import '../../styles/modalAnimations.css';
 import { getEntregasTarea } from '../../services/entregas';
 import { TareaModal, EntregaModal, AnuncioModal } from '../../components/clase';
+import { GlobalContext } from '../../App';
 
 const ClaseDashboard = () => {
+    const { userData } = useContext(GlobalContext);
     const { id } = useParams();
     const navigate = useNavigate();
     const { claseData, setClaseData, anuncios, setAnuncios } = useClase();
@@ -57,7 +59,10 @@ const ClaseDashboard = () => {
     const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
 
     // NUEVO: obtener el id del alumno autenticado (ajusta según tu auth)
-    const alumnoId = localStorage.getItem('userId');
+    const alumnoId = userData?.user?.id || localStorage.getItem('userId');
+
+    console.log('[ClaseDashboard] alumnoId:', alumnoId);
+    console.log('[ClaseDashboard] role:', role);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,11 +85,19 @@ const ClaseDashboard = () => {
                         if (anuncio.tipo === 'tarea') {
                             const idx = tareas.findIndex(t => t.id === anuncio.id);
                             const entregas = entregasPorTarea[idx] || [];
+                            
+                            // Si hay entregas, actualizar el estado de entregada
+                            const entregaAlumno = entregas.find(e => 
+                                String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                            );
+                            
                             return {
                                 ...anuncio,
                                 entregas: entregas,
                                 entregasRealizadas: entregas.length,
-                                entregasPendientes: claseResponse.estudiantes.length - entregas.length
+                                entregasPendientes: claseResponse.estudiantes.length - entregas.length,
+                                entregada: !!entregaAlumno,
+                                alumnoId: alumnoId // Añadir el alumnoId aquí
                             };
                         }
                         return anuncio;
@@ -101,13 +114,15 @@ const ClaseDashboard = () => {
             }
         };
 
-        fetchData();
+        if (alumnoId) { // Solo cargar si tenemos alumnoId
+            fetchData();
+        }
         
         return () => {
             setClaseData(null);
             setAnuncios([]);
         };
-    }, [id, setClaseData, setAnuncios]);
+    }, [id, setClaseData, setAnuncios, alumnoId]);
 
     const fetchAnuncios = async () => {
         try {
@@ -542,17 +557,47 @@ const ClaseDashboard = () => {
     // NUEVO: función para determinar el estado de la tarea (igual que en TareasResumenAlumno)
     const getEstadoTarea = (anuncio) => {
         if (anuncio.tipo !== 'tarea') return null;
-        if (anuncio.entregada) return 'entregada';
+        
+        console.log('[ClaseDashboard][getEstadoTarea] Evaluando tarea:', {
+            id: anuncio.id,
+            alumnoId,
+            entregas: anuncio.entregas
+        });
+
+        // Buscar la entrega del alumno actual
+        const entrega = anuncio.entregas?.find(e => 
+            String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+        );
+
+        console.log('[ClaseDashboard][getEstadoTarea] Entrega encontrada:', entrega);
+
+        // Si hay entrega y tiene nota, está calificada
+        if (entrega?.nota !== undefined && entrega?.nota !== null && entrega?.nota !== '') {
+            return 'calificada';
+        }
+        
+        // Si hay entrega pero no tiene nota, está solo entregada
+        if (entrega) {
+            return 'entregada';
+        }
+
+        // Si no hay entrega y la fecha ha pasado, está expirada
         if (anuncio.fechaEntrega) {
             const fechaEntrega = new Date(anuncio.fechaEntrega);
             const ahora = new Date();
-            if (fechaEntrega < ahora) return 'expirada';
+            if (fechaEntrega < ahora) {
+                return 'expirada';
+            }
         }
+
+        // Si no cumple ninguna de las anteriores, está pendiente
         return 'pendiente';
     };
 
     // NUEVO: función para saber si está finalizada (entregada y calificada)
     const isFinalizada = (anuncio) => {
+        // Log para depuración
+        console.log('[ClaseDashboard][isFinalizada] anuncio:', anuncio);
         return anuncio.entregada && anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '';
     };
 
@@ -778,7 +823,7 @@ const ClaseDashboard = () => {
                                                 style={{ animationDelay: `${600 + (index * 100)}ms` }}
                                                 onClick={() => handleOpenTarea(anuncio)}
                                             >
-                                                {/* Botón eliminar SIEMPRE arriba a la derecha */}
+                                                {/* Botón eliminar siempre arriba a la derecha */}
                                                 {role === 'profesor' && (
                                                     <button
                                                         onClick={e => {
@@ -791,61 +836,53 @@ const ClaseDashboard = () => {
                                                         <X className="h-5 w-5 text-gray-600" />
                                                     </button>
                                                 )}
-                                                {/* NUEVO: Entregas realizadas y pendientes */}
-                                                {role === 'profesor' && (
-                                                    <div className="absolute top-4 right-16 flex items-center z-10 gap-2">
-                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
-                                                            Entregadas:&nbsp;
-                                                            {anuncio.entregasRealizadas ?? 0}
-                                                        </span>
-                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                                                            Pendientes:&nbsp;
-                                                            {anuncio.entregasPendientes ?? (claseData?.estudiantes?.length || 0)}
-                                                        </span>
+
+                                                {/* Contenedor flex para título y estado */}
+                                                <div className="flex items-start justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <BookOpen className="h-5 w-5 text-blue-600" />
+                                                        <h3 className="font-semibold">{anuncio.titulo || "Tarea sin título"}</h3>
                                                     </div>
-                                                )}
-                                                {/* Estado visual SOLO para alumnos */}
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <BookOpen className="h-5 w-5 text-blue-600" />
-                                                    <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
                                                     {/* Estado visual SOLO para alumnos */}
                                                     {role === 'alumno' && (() => {
-                                                        // Mostrar "Calificada (nota)" si entregada y nota
-                                                        const isCalificada = anuncio.entregada && anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '';
-                                                        if (isCalificada) {
-                                                            return (
-                                                                <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200 ml-2">
-                                                                    <CheckCircle className="h-4 w-4" />
-                                                                    Calificada ({anuncio.nota})
-                                                                </span>
-                                                            );
-                                                        }
                                                         const estado = getEstadoTarea(anuncio);
-                                                        if (estado === 'entregada') {
-                                                            return (
-                                                                <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 ml-2">
-                                                                    <CheckCircle className="h-4 w-4" />
-                                                                    Entregada
-                                                                </span>
-                                                            );
+                                                        console.log('[ClaseDashboard][render] Estado final:', estado);
+
+                                                        switch (estado) {
+                                                            case 'calificada':
+                                                                const entrega = anuncio.entregas?.find(e => 
+                                                                    String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                                                                );
+                                                                return (
+                                                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+                                                                        <CheckCircle className="h-4 w-4" />
+                                                                        Calificada ({entrega?.nota})
+                                                                    </span>
+                                                                );
+                                                            case 'entregada':
+                                                                return (
+                                                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                                                                        <CheckCircle className="h-4 w-4" />
+                                                                        Entregada
+                                                                    </span>
+                                                                );
+                                                            case 'expirada':
+                                                                return (
+                                                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
+                                                                        <AlertCircle className="h-4 w-4" />
+                                                                        Expirada
+                                                                    </span>
+                                                                );
+                                                            case 'pendiente':
+                                                                return (
+                                                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                                                                        <Clock className="h-4 w-4" />
+                                                                        Pendiente
+                                                                    </span>
+                                                                );
+                                                            default:
+                                                                return null;
                                                         }
-                                                        if (estado === 'expirada') {
-                                                            return (
-                                                                <span className="flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200 ml-2">
-                                                                    <AlertCircle className="h-4 w-4" />
-                                                                    Expirada
-                                                                </span>
-                                                            );
-                                                        }
-                                                        if (estado === 'pendiente') {
-                                                            return (
-                                                                <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 ml-2">
-                                                                    <Clock className="h-4 w-4" />
-                                                                    Pendiente
-                                                                </span>
-                                                            );
-                                                        }
-                                                        return null;
                                                     })()}
                                                 </div>
                                                 <div className="text-sm text-gray-600">

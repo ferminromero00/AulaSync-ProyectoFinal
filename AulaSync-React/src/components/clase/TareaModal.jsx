@@ -91,6 +91,8 @@ const TareaModal = ({
             if (!response.ok) throw new Error('Error al entregar la tarea');
             const data = await response.json();
 
+            console.log('[TareaModal] Datos de entrega recibidos:', data);
+
             // Crear objeto con los datos de la entrega
             const datosEntrega = {
                 archivoEntregaUrl: data.archivoEntregaUrl || null,
@@ -115,6 +117,7 @@ const TareaModal = ({
 
             toast.success('Tarea entregada correctamente');
         } catch (e) {
+            console.error('[TareaModal] Error al entregar la tarea:', e);
             toast.error('Error al entregar la tarea');
         } finally {
             setLocalIsEntregando(false);

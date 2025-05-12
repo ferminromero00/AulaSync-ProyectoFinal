@@ -443,6 +443,9 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
         // MODIFICADO: Determinar si está calificada
         const isCalificada = tarea.entregada && tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '';
+        // LOGS para depuración
+        console.log('[TareasResumenAlumno][renderTarea] tarea:', tarea);
+        console.log('[TareasResumenAlumno][renderTarea] isCalificada:', isCalificada, 'nota:', tarea.nota, 'entregada:', tarea.entregada);
 
         return (
             <div
