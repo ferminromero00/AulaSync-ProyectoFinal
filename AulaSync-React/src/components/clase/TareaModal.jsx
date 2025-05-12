@@ -26,17 +26,50 @@ const TareaModal = ({
     const [tareaEntregadaData, setTareaEntregadaData] = useState(tarea && tarea.entregada ? tarea : null);
 
     useEffect(() => {
-        const tareaEntregada = !!(tarea && (tarea.entregada || entregaAlumno));
+        console.log('[TareaModal] Iniciando useEffect');
+        console.log('[TareaModal] tarea prop:', tarea);
+        console.log('[TareaModal] entregaAlumno prop:', entregaAlumno);
+
+        // Obtener el ID del usuario actual - asegurarse de que sea string y nunca null
+        let userId = localStorage.getItem('userId');
+        if (!userId && tarea?.entregas?.length === 1) {
+            // fallback: si solo hay una entrega y no hay userId, asumimos que es del usuario
+            userId = String(tarea.entregas[0].alumno?.id || tarea.entregas[0].alumnoId);
+            console.log('[TareaModal] Fallback userId:', userId);
+        }
+        console.log('[TareaModal] userId:', userId);
+
+        // Buscar la entrega del usuario actual en el array de entregas
+        let entregaActual = null;
+        if (tarea?.entregas && Array.isArray(tarea.entregas)) {
+            entregaActual = tarea.entregas.find(e => {
+                const alumnoId = String(e.alumno?.id || e.alumnoId);
+                console.log('[TareaModal] Comparando alumnoId:', alumnoId, 'con userId:', userId);
+                return alumnoId === userId;
+            });
+        }
+        console.log('[TareaModal] entrega encontrada:', entregaActual);
+
+        // Determinar si está entregada basándonos en la entrega encontrada o en el estado de la tarea
+        const tareaEntregada = !!(entregaActual || entregaAlumno || tarea?.entregada);
+        console.log('[TareaModal] tareaEntregada:', tareaEntregada);
+        
         setEntregada(tareaEntregada);
-        setTareaEntregadaData(tareaEntregada ? {
-            ...tarea,
-            entregada: true,
-            archivoEntregaUrl: entregaAlumno?.archivoEntregaUrl || tarea.archivoEntregaUrl,
-            comentarioEntrega: entregaAlumno?.comentarioEntrega || tarea.comentarioEntrega,
-            nota: entregaAlumno?.nota || tarea.nota,
-            comentarioCorreccion: entregaAlumno?.comentarioCorreccion || tarea.comentarioCorreccion,
-            fechaEntregada: entregaAlumno?.fechaEntregada || tarea.fechaEntregada
-        } : null);
+
+        if (tareaEntregada) {
+            const data = {
+                ...tarea,
+                entregada: true,
+                archivoEntregaUrl: entregaAlumno?.archivoEntregaUrl || entregaActual?.archivoUrl || tarea?.archivoEntregaUrl,
+                comentarioEntrega: entregaAlumno?.comentarioEntrega || entregaActual?.comentario || tarea?.comentarioEntrega,
+                // Tomar nota y comentario de la entrega encontrada
+                nota: entregaActual?.nota ?? entregaAlumno?.nota ?? tarea?.nota ?? '',
+                comentarioCorreccion: entregaActual?.comentarioCorreccion ?? entregaAlumno?.comentarioCorreccion ?? tarea?.comentarioCorreccion ?? '',
+                fechaEntregada: entregaAlumno?.fechaEntregada || entregaActual?.fechaEntrega || tarea?.fechaEntregada
+            };
+            console.log('[TareaModal] tareaEntregadaData construida:', data);
+            setTareaEntregadaData(data);
+        }
     }, [tarea, entregaAlumno]);
 
     const handleEntregaTarea = async () => {
@@ -90,9 +123,14 @@ const TareaModal = ({
 
     if (!showModal || !tarea) return null;
 
-    const tareaToShow = (entregada || tarea.entregada || entregaAlumno) ? tareaEntregadaData || tarea : tarea;
+    const tareaToShow = entregada ? tareaEntregadaData : tarea;
     const downloadUrl = tareaToShow.archivoUrl ? `${API_BASE_URL}${tareaToShow.archivoUrl}` : null;
     const archivoEntregaUrl = tareaToShow.archivoEntregaUrl ? `${API_BASE_URL}${tareaToShow.archivoEntregaUrl}` : null;
+
+    // Añadir antes del return para ver los datos finales
+    console.log('[TareaModal] Estado final - entregada:', entregada);
+    console.log('[TareaModal] Estado final - tareaEntregadaData:', tareaEntregadaData);
+    console.log('[TareaModal] Estado final - tareaToShow:', tareaToShow);
 
     return (
         <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
@@ -407,4 +445,4 @@ const TareaModal = ({
     );
 };
 
-export default TareaModal;
+export default TareaModal;  // Asegúrate de que esta línea existe

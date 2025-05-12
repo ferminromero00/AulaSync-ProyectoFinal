@@ -91,6 +91,10 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
     });
 
     const handleClickTarea = (tarea) => {
+        console.log('[TareasResumenAlumno] Tarea seleccionada:', tarea);
+        console.log('[TareasResumenAlumno] Tiene nota:', tarea.nota);
+        console.log('[TareasResumenAlumno] Comentario corrección:', tarea.comentarioCorreccion);
+        
         setTareaSeleccionada(tarea);
         setShowTareaModal(true);
         setArchivoEntrega(null);
