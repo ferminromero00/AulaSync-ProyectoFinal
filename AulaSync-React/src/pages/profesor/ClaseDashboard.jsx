@@ -806,12 +806,12 @@ const ClaseDashboard = () => {
                                                         </span>
                                                     </div>
                                                 )}
-                                                {/* NUEVO: Estado de la tarea */}
+                                                {/* Estado visual SOLO para alumnos */}
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <BookOpen className="h-5 w-5 text-blue-600" />
                                                     <h3 className="font-semibold text-blue-700">{anuncio.titulo || "Tarea sin título"}</h3>
-                                                    {/* Estado visual */}
-                                                    {(() => {
+                                                    {/* Estado visual SOLO para alumnos */}
+                                                    {role === 'alumno' && (() => {
                                                         const estado = getEstadoTarea(anuncio);
                                                         if (estado === 'entregada') {
                                                             return (
