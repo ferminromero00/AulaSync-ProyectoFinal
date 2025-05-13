@@ -231,6 +231,7 @@ const TareaModal = ({
                                 <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
                                 <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
                                     {/* Estado de las entregas */}
+                                    {tarea.entregas?.length || 0} / {claseData?.estudiantes?.length || 0}
                                 </span>
                             </div>
                             <div className="space-y-4">
@@ -256,10 +257,11 @@ const TareaModal = ({
                                     </div>
                                     <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
                                         {claseData?.estudiantes?.map((estudiante) => {
-                                            const entregas = tarea.entregas || [];
-                                            const entrega = entregas.find(e =>
+                                            // Buscar la entrega de este estudiante
+                                            const entrega = tarea.entregas?.find(e =>
                                                 (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
                                             );
+                                            // Estado de carga
                                             if (loadingEntregas && loadingEntregas[estudiante.id]) {
                                                 return (
                                                     <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">

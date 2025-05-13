@@ -11,6 +11,7 @@ import Configuracion from './pages/profesor/Configuracion'
 import ClaseDashboard from './pages/profesor/ClaseDashboard'
 import ConfiguracionAlumno from './pages/alumno/Configuracion'
 import TareasAlumno from './pages/alumno/TareasAlumno';
+import TareasProfesor from './pages/profesor/TareasProfesor';
 import { Toaster } from 'react-hot-toast';
 import { createContext, useState, useEffect } from 'react';
 import { getPerfil } from './services/perfil';
@@ -95,6 +96,7 @@ function App() {
                             <Route path="clases" element={<Clases />} />
                             <Route path="configuracion" element={<Configuracion />} />
                             <Route path="clase/:id" element={<ClaseDashboard />} />
+                            <Route path="tareas" element={<TareasProfesor />} />
                             {/* ...otras rutas de profesor... */}
                         </Route>
 

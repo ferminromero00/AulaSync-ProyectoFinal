@@ -732,4 +732,59 @@ class ClaseController extends AbstractController
             $this->logger->error('Error al crear notificación: ' . $e->getMessage());
         }
     }
+
+    #[Route('/tareas/profesor', name: 'api_tareas_profesor', methods: ['GET'])]
+    public function getTareasProfesor(EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\Profesor) {
+            return new JsonResponse(['error' => 'No autenticado como profesor'], 401);
+        }
+
+        $qb = $em->createQueryBuilder();
+        $qb->select('a', 'c', 'e')
+            ->from(Anuncio::class, 'a')
+            ->join('a.clase', 'c')
+            ->leftJoin('a.entregas', 'e')
+            ->where('a.tipo = :tipo')
+            ->andWhere('c.profesor = :profesor')
+            ->setParameter('tipo', 'tarea')
+            ->setParameter('profesor', $user)
+            ->orderBy('a.fechaCreacion', 'DESC');
+
+        $tareas = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($tareas as $tarea) {
+            $entregas = [];
+            foreach ($tarea->getEntregas() as $entrega) {
+                $alumno = $entrega->getAlumno();
+                $entregas[] = [
+                    'id' => $entrega->getId(),
+                    'alumno' => $alumno ? [
+                        'id' => $alumno->getId(),
+                        'nombre' => method_exists($alumno, 'getNombre') ? $alumno->getNombre() : ($alumno->getFirstName() . ' ' . $alumno->getLastName()),
+                        'email' => $alumno->getEmail(),
+                    ] : null,
+                    'nota' => $entrega->getNota(),
+                    'comentarioCorreccion' => $entrega->getComentarioCorreccion(),
+                ];
+            }
+            $result[] = [
+                'id' => $tarea->getId(),
+                'titulo' => $tarea->getTitulo(),
+                'contenido' => $tarea->getContenido(),
+                'fechaEntrega' => $tarea->getFechaEntrega() ? $tarea->getFechaEntrega()->format('Y-m-d H:i:s') : null,
+                'clase' => [
+                    'id' => $tarea->getClase()->getId(),
+                    'nombre' => $tarea->getClase()->getNombre(),
+                ],
+                'numEstudiantes' => $tarea->getClase()->getAlumnos()->count(),
+                'entregas' => $entregas,
+                'tipo' => $tarea->getTipo(),
+            ];
+        }
+
+        return new JsonResponse($result);
+    }
 }
