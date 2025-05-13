@@ -1,8 +1,22 @@
 import { useRef, useState } from "react";
 
 // Cambia esto por tu API Key real de AIMLAPI
-const API_KEY = "d4fb5a5063ab4078a6f61ff6a4395aed";
+const API_KEY = "84bd259c834644c2a3d40c62b6d7be44";
 const BASE_URL = "https://api.aimlapi.com/v1";
+
+// Resumen del proyecto y funciones principales para contexto de la IA
+const PROJECT_CONTEXT = `
+Eres el asistente IA de AulaSync, una plataforma para estudiantes y profesores. 
+Funciones principales del proyecto:
+- Gestión de usuarios (alumnos y profesores)
+- Creación y gestión de clases y asignaturas
+- Envío y recepción de mensajes y notificaciones
+- Subida y descarga de materiales y tareas
+- Chat en tiempo real y asistencia personalizada
+- Panel de administración para profesores
+- Integración con IA para ayuda y soporte educativo
+Utiliza este contexto para responder preguntas relacionadas con el funcionamiento y uso de AulaSync.
+`;
 
 const IaChatWidget = () => {
   const [open, setOpen] = useState(false);
@@ -38,7 +52,10 @@ const IaChatWidget = () => {
         body: JSON.stringify({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: "Eres un asistente útil para estudiantes y profesores." },
+            { 
+              role: "system", 
+              content: PROJECT_CONTEXT + "\nEres un asistente útil para estudiantes y profesores." 
+            },
             ...newMessages.filter(m => m.role !== "system"),
           ],
           temperature: 0.7,
