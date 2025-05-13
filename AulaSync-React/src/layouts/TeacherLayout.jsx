@@ -4,6 +4,7 @@ import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 
 import { logout } from '../services/auth';
 import NotificationButton from '../components/NotificationButton'
 import AvatarButton from '../components/AvatarButton'
+import IaChatWidget from '../components/IaChatWidget'
 
 const TeacherLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -103,6 +104,7 @@ const TeacherLayout = () => {
                     </div>
                 </main>
             </div>
+            <IaChatWidget />
         </div>
     )
 }

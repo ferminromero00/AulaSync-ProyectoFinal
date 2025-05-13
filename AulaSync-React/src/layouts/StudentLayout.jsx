@@ -5,6 +5,7 @@ import { logout } from '../services/auth'
 import NotificationButton from '../components/NotificationButton'
 import AvatarButton from '../components/AvatarButton'
 import { GlobalContext } from '../App'
+import IaChatWidget from '../components/IaChatWidget'
 
 const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -150,6 +151,7 @@ const StudentLayout = () => {
                     </div>
                 </main>
             </div>
+            <IaChatWidget />
         </div>
     )
 }
