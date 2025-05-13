@@ -101,8 +101,10 @@ const ClaseDashboard = () => {
         }
     };
 
-    // Determina el estado de la tarea: 'pendiente', 'entregada', 'expirada'
+    // Determina el estado de la tarea: 'pendiente', 'entregada', 'expirada', 'calificada'
     const getEstadoTarea = (tarea) => {
+        // Considerar calificada si tiene nota
+        if (tarea.entregada && tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '') return 'calificada';
         if (tarea.entregada) return 'entregada';
         if (tarea.fechaEntrega) {
             const fechaEntrega = new Date(tarea.fechaEntrega);

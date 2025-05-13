@@ -609,7 +609,11 @@ const ClaseDashboard = () => {
                 case 'pendientes':
                     return tareas.filter(t => getEstadoTarea(t) === 'pendiente');
                 case 'entregadas':
-                    return tareas.filter(t => getEstadoTarea(t) === 'entregada');
+                    // Mostrar tanto entregadas como calificadas
+                    return tareas.filter(t => {
+                        const estado = getEstadoTarea(t);
+                        return estado === 'entregada' || estado === 'calificada';
+                    });
                 case 'expiradas':
                     return tareas.filter(t => getEstadoTarea(t) === 'expirada');
                 case 'finalizadas':
