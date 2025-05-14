@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { subirFotoPerfil, getPerfil, actualizarPerfil, cambiarPasswordAlumno } from "../../services/perfil";
-import { Camera, X, User, Mail, Lock } from "lucide-react";
+import { Camera, X, User, Mail, Lock, Briefcase, BookOpen } from "lucide-react";
 
 const ConfiguracionAlumno = () => {
   const [perfil, setPerfil] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fotoPreview, setFotoPreview] = useState(null);
   const [fotoFile, setFotoFile] = useState(null);
-  const [editData, setEditData] = useState({ firstName: "", lastName: "", email: "" });
+  const [editData, setEditData] = useState({ firstName: "", lastName: "", email: "", especialidad: "", departamento: "" });
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", repeatPassword: "" });
   const fileInputRef = useRef();
-  const [foto, setFoto] = useState(null);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -22,7 +21,9 @@ const ConfiguracionAlumno = () => {
         setEditData({
           firstName: data?.firstName || "",
           lastName: data?.lastName || "",
-          email: data?.email || ""
+          email: data?.email || "",
+          especialidad: data?.especialidad || "",
+          departamento: data?.departamento || ""
         });
       } catch (error) {
         toast.error("Error al cargar perfil");
@@ -37,7 +38,9 @@ const ConfiguracionAlumno = () => {
       setEditData({
         firstName: perfil.firstName || "",
         lastName: perfil.lastName || "",
-        email: perfil.email || ""
+        email: perfil.email || "",
+        especialidad: perfil.especialidad || "",
+        departamento: perfil.departamento || ""
       });
     }
   }, [perfil]);
@@ -48,29 +51,26 @@ const ConfiguracionAlumno = () => {
       setFotoFile(file);
       setFotoPreview(URL.createObjectURL(file));
     }
-    setFoto(e.target.files[0]);
   };
 
   const handleFotoUpload = async (e) => {
     e.preventDefault();
     if (!fotoFile) {
-        toast.error("No se ha seleccionado ningún archivo");
-        return;
+      toast.error("No se ha seleccionado ningún archivo");
+      return;
     }
-
     const formData = new FormData();
     formData.append('foto', fotoFile);
-
     try {
-        const response = await subirFotoPerfil(formData);
-        if (response.success) {
-            window.location.reload();
-        } else {
-            throw new Error('Error al actualizar la foto de perfil');
-        }
+      const response = await subirFotoPerfil(formData);
+      if (response.success) {
+        window.location.reload();
+      } else {
+        throw new Error('Error al actualizar la foto de perfil');
+      }
     } catch (error) {
-        toast.error(error.message || "Error al subir la foto");
-        setFotoFile(null);
+      toast.error(error.message || "Error al subir la foto");
+      setFotoFile(null);
     }
   };
 
@@ -134,15 +134,15 @@ const ConfiguracionAlumno = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-8 animate-fadeIn"
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-8 animate-fadeIn border border-green-100"
       style={{ animation: "fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards", opacity: 0 }}>
       <h2 className="text-2xl font-extrabold mb-8 text-green-900 flex items-center gap-3">
         <User className="h-7 w-7 text-green-500" />
         Configuración de Perfil
       </h2>
       {/* Foto de perfil */}
-      <form onSubmit={handleFotoUpload} className="mb-10">
-        <div className="flex items-center gap-6">
+      <form onSubmit={handleFotoUpload} className="mb-8">
+        <div className="flex items-center gap-8">
           <div className="relative group">
             <img
               src={fotoPreview || (perfil?.fotoPerfilUrl || "/default-avatar.png")}
@@ -176,16 +176,14 @@ const ConfiguracionAlumno = () => {
             onChange={handleFotoChange}
           />
           <div>
-            <div className="font-semibold text-lg text-green-900">
-              {perfil?.firstName} {perfil?.lastName}
-            </div>
-            <div className="text-gray-500 text-sm">{perfil?.email}</div>
+            <div className="font-bold text-xl text-green-900">{perfil?.firstName} {perfil?.lastName}</div>
+            <div className="text-gray-500 text-base">{perfil?.email}</div>
           </div>
         </div>
         {fotoFile && (
           <button
             type="submit"
-            className="mt-4 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition"
+            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold"
           >
             Guardar foto de perfil
           </button>
@@ -193,10 +191,10 @@ const ConfiguracionAlumno = () => {
       </form>
 
       {/* Formulario de datos personales */}
-      <form onSubmit={handlePerfilSubmit} className="space-y-5 mb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handlePerfilSubmit} className="space-y-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
               <User className="h-4 w-4 text-green-400" /> Nombre
             </label>
             <input
@@ -204,11 +202,11 @@ const ConfiguracionAlumno = () => {
               name="firstName"
               value={editData.firstName}
               onChange={handleInputChange}
-              className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+              className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
               <User className="h-4 w-4 text-green-400" /> Apellidos
             </label>
             <input
@@ -216,12 +214,12 @@ const ConfiguracionAlumno = () => {
               name="lastName"
               value={editData.lastName}
               onChange={handleInputChange}
-              className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+              className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
             />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+          <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
             <Mail className="h-4 w-4 text-green-400" /> Email
           </label>
           <input
@@ -229,12 +227,40 @@ const ConfiguracionAlumno = () => {
             name="email"
             value={editData.email}
             onChange={handleInputChange}
-            className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+              <BookOpen className="h-4 w-4 text-green-400" /> Especialidad
+            </label>
+            <input
+              type="text"
+              name="especialidad"
+              value={editData.especialidad}
+              onChange={handleInputChange}
+              className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+              placeholder="(opcional)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+              <Briefcase className="h-4 w-4 text-green-400" /> Departamento
+            </label>
+            <input
+              type="text"
+              name="departamento"
+              value={editData.departamento}
+              onChange={handleInputChange}
+              className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+              placeholder="(opcional)"
+            />
+          </div>
         </div>
         <button
           type="submit"
-          className="w-full mt-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition font-semibold"
+          className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
         >
           Guardar cambios
         </button>
@@ -246,42 +272,51 @@ const ConfiguracionAlumno = () => {
           <Lock className="h-5 w-5 text-green-400" /> Cambiar contraseña
         </h3>
         <div>
-          <label className="block text-sm font-semibold mb-1">Contraseña actual</label>
+          <label className="block text-sm font-semibold mb-1 text-green-900">Contraseña actual</label>
           <input
             type="password"
             name="currentPassword"
             value={passwords.currentPassword}
             onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold mb-1">Nueva contraseña</label>
+          <label className="block text-sm font-semibold mb-1 text-green-900">Nueva contraseña</label>
           <input
             type="password"
             name="newPassword"
             value={passwords.newPassword}
             onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold mb-1">Repetir nueva contraseña</label>
+          <label className="block text-sm font-semibold mb-1 text-green-900">Repetir nueva contraseña</label>
           <input
             type="password"
             name="repeatPassword"
             value={passwords.repeatPassword}
             onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-200"
+            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
           />
         </div>
         <button
           type="submit"
-          className="w-full mt-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition font-semibold"
+          className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
         >
           Cambiar contraseña
         </button>
       </form>
+      <style>{`
+        @keyframes fadeSlideIn {
+          0% { opacity: 0; transform: translateY(20px);}
+          100% { opacity: 1; transform: none;}
+        }
+        .animate-fadeIn {
+          animation: fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards;
+        }
+      `}</style>
     </div>
   );
 };

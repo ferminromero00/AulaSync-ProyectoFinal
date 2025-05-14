@@ -28,50 +28,85 @@ const TeacherLayout = () => {
             {/* Sidebar */}
             <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-                <div className="flex h-full flex-col bg-gradient-to-b from-blue-900 to-blue-800 text-white">
+                <div className="flex h-full flex-col bg-gradient-to-b from-blue-900 via-blue-800 to-indigo-900 text-white shadow-2xl">
                     {/* Logo y título */}
                     <div className="flex h-16 items-center gap-2 px-6 border-b border-blue-700/50">
-                        <BookOpen className="h-7 w-7 text-blue-300" />
-                        <span className="text-xl font-bold tracking-wider text-white/90">AulaSync</span>
+                        <BookOpen className="h-7 w-7 text-blue-300 animate-sidebarIcon" />
+                        <span className="text-xl font-bold tracking-wider text-white/90 animate-sidebarTitle">AulaSync</span>
                     </div>
 
                     {/* Navegación principal */}
                     <nav className="flex-1 space-y-2 px-3 py-4">
-                        <Link to="/profesor/dashboard" 
-                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
-                            <BarChart2 className="h-5 w-5 text-blue-300" />
-                            <span className="font-medium">Dashboard</span>
-                        </Link>
-
-                        <Link to="/profesor/clases"
-                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
-                            <Users className="h-5 w-5 text-blue-300" />
-                            <span className="font-medium">Clases</span>
-                        </Link>
-
-                        <Link to="/profesor/tareas"
-                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
-                            <FileText className="h-5 w-5 text-blue-300" />
-                            <span className="font-medium">Tareas</span>
-                        </Link>
+                        <SidebarLink
+                            to="/profesor/dashboard"
+                            icon={<BarChart2 className="h-5 w-5" />}
+                            label="Dashboard"
+                        />
+                        <SidebarLink
+                            to="/profesor/clases"
+                            icon={<Users className="h-5 w-5" />}
+                            label="Clases"
+                        />
+                        <SidebarLink
+                            to="/profesor/tareas"
+                            icon={<FileText className="h-5 w-5" />}
+                            label="Tareas"
+                        />
                     </nav>
 
                     {/* Footer navigation */}
                     <div className="border-t border-blue-700/50 p-4 space-y-2">
-                        <Link to="/profesor/configuracion"
-                              className="flex items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-blue-700/20 bg-blue-800/20 hover:bg-blue-600/30 hover:text-white hover:border-blue-400 hover:shadow-md hover:shadow-blue-500/20 transition-all duration-200">
-                            <Settings className="h-5 w-5 text-blue-300" />
-                            <span className="font-medium">Configuración</span>
-                        </Link>
+                        <SidebarLink
+                            to="/profesor/configuracion"
+                            icon={<Settings className="h-5 w-5" />}
+                            label="Configuración"
+                        />
                         <button
                             onClick={handleLogout}
-                            className="flex w-full items-center gap-3 px-4 py-3 text-gray-300 rounded-lg border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 hover:text-red-100 hover:shadow-md hover:shadow-red-500/20 transition-all duration-200"
+                            className="flex w-full items-center gap-3 px-4 py-3 text-red-100 rounded-xl border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 hover:text-white hover:shadow-md hover:shadow-red-500/20 transition-all duration-200 group"
                         >
-                            <LogOut className="h-5 w-5 text-red-400" />
+                            <LogOut className="h-5 w-5 text-red-400 group-hover:text-white transition-colors" />
                             <span className="font-medium">Cerrar Sesión</span>
                         </button>
                     </div>
                 </div>
+                {/* Animaciones CSS */}
+                <style>{`
+                    .sidebar-link {
+                        transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+                        border-radius: 0.75rem;
+                        border-width: 2px;
+                        border-color: transparent;
+                    }
+                    .sidebar-link-active, .sidebar-link:hover {
+                        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+                        color: #fff !important;
+                        border-color: #60a5fa;
+                        box-shadow: 0 4px 24px 0 rgba(59,130,246,0.10);
+                    }
+                    .sidebar-link .sidebar-icon {
+                        transition: color 0.18s, transform 0.18s;
+                    }
+                    .sidebar-link:hover .sidebar-icon, .sidebar-link-active .sidebar-icon {
+                        color: #fff !important;
+                        transform: scale(1.1) rotate(-6deg);
+                    }
+                    @keyframes sidebarIconPop {
+                        0% { transform: scale(0.8);}
+                        80% { transform: scale(1.08);}
+                        100% { transform: scale(1);}
+                    }
+                    .animate-sidebarIcon {
+                        animation: sidebarIconPop 0.5s both;
+                    }
+                    @keyframes sidebarTitleFade {
+                        from { opacity: 0; transform: translateY(-10px);}
+                        to { opacity: 1; transform: none;}
+                    }
+                    .animate-sidebarTitle {
+                        animation: sidebarTitleFade 0.6s 0.1s both;
+                    }
+                `}</style>
             </aside>
 
             {/* Main content */}
@@ -107,6 +142,23 @@ const TeacherLayout = () => {
             <IaChatWidget />
         </div>
     )
+}
+
+// Nuevo componente para los enlaces del sidebar con animación y active
+import { useLocation } from 'react-router-dom'
+function SidebarLink({ to, icon, label }) {
+    const location = useLocation();
+    const isActive = location.pathname.startsWith(to);
+    return (
+        <Link
+            to={to}
+            className={`sidebar-link flex items-center gap-3 px-4 py-3 text-blue-100 font-medium rounded-xl border border-transparent
+                ${isActive ? 'sidebar-link-active' : 'hover:sidebar-link-active'}`}
+        >
+            <span className="sidebar-icon">{icon}</span>
+            <span>{label}</span>
+        </Link>
+    );
 }
 
 export default TeacherLayout;
