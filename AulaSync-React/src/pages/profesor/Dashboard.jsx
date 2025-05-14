@@ -1,10 +1,13 @@
 import { BookOpen, Calendar, FileText } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getProfesorStats, getTareasStats } from "../../services/stats";
 import ClasesProfesor from "../../components/profesor/ClasesProfesor";
+import { useNavigate } from "react-router-dom";
 import "../../styles/animations.css";
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+    const clasesRef = useRef(null);
     const [stats, setStats] = useState({
         totalClases: 0,
         totalEstudiantes: 0
@@ -36,50 +39,50 @@ const Dashboard = () => {
         { 
             icon: BookOpen, 
             label: "Clases Activas", 
-            value: stats.totalClases.toString(), 
-            color: "from-blue-500 to-blue-400",
-            bg: "bg-gradient-to-br from-blue-100 to-blue-50",
-            iconBg: "bg-gradient-to-br from-blue-500 to-blue-400"
+            value: stats.totalClases.toString(),
+            color: "from-violet-500 to-purple-500",
+            bg: "bg-gradient-to-br from-violet-50 to-purple-50",
+            iconBg: "bg-gradient-to-br from-violet-500 to-purple-500",
+            valueColor: "text-violet-700",
+            onClick: () => {
+                clasesRef.current?.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         },
         { 
             icon: FileText, 
             label: "Tareas", 
-            value: tareasCount.toString(), 
-            color: "from-amber-500 to-amber-400",
-            bg: "bg-gradient-to-br from-amber-100 to-amber-50",
-            iconBg: "bg-gradient-to-br from-amber-500 to-amber-400"
+            value: tareasCount.toString(),
+            color: "from-pink-500 to-rose-500",
+            bg: "bg-gradient-to-br from-pink-50 to-rose-50",
+            iconBg: "bg-gradient-to-br from-pink-500 to-rose-500",
+            valueColor: "text-pink-700",
+            onClick: () => navigate('/profesor/tareas')
         }
     ];
 
     return (
-        <div className="space-y-10">
-            <style>{`
-                .modern-shadow {
-                    box-shadow: 0 4px 24px 0 rgba(30, 64, 175, 0.07), 0 1.5px 6px 0 rgba(30, 64, 175, 0.03);
-                }
-                .modern-card {
-                    border-radius: 1.25rem;
-                    background: white;
-                    transition: box-shadow 0.2s, transform 0.2s;
-                }
-                .modern-card:hover {
-                    box-shadow: 0 8px 32px 0 rgba(30, 64, 175, 0.13), 0 3px 12px 0 rgba(30, 64, 175, 0.06);
-                    transform: translateY(-2px) scale(1.01);
-                }
-            `}</style>
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fadeIn animate-fadeIn-1">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+        <div className="space-y-8 p-6">
+            {/* Header Section con nueva animación */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6
+                          animate-fade-in-up">
+                <div className="space-y-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent 
+                                 bg-gradient-to-r from-indigo-500 to-blue-600
+                                 animate-gradient-x">
                         Dashboard del Profesor
                     </h1>
-                    <p className="mt-1 text-gray-500 text-lg">
+                    <p className="text-gray-600 text-lg">
                         Bienvenido de nuevo, aquí está el resumen de tu actividad
                     </p>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-xl shadow modern-shadow">
-                    <Calendar className="h-5 w-5 text-blue-400" />
-                    <span className="text-base text-gray-700 font-medium">
+                <div className="flex items-center gap-3 px-6 py-3 bg-white rounded-2xl
+                              shadow-lg shadow-indigo-100/50 transform hover:scale-105
+                              transition-all duration-300">
+                    <Calendar className="h-6 w-6 text-indigo-500" />
+                    <span className="text-lg text-gray-700 font-medium">
                         {new Date().toLocaleDateString('es-ES', { 
                             day: 'numeric', 
                             month: 'long', 
@@ -89,36 +92,77 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Stats - Tarjetas modernas */}
-            <div className="flex w-full gap-8 animate-fadeIn animate-fadeIn-2">
+            {/* Stats Cards con nueva disposición y animaciones */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {statsConfig.map((stat, index) => (
                     <div
                         key={index}
-                        className={`flex-1 modern-card modern-shadow ${stat.bg} p-7 flex items-center gap-5 relative overflow-hidden`}
-                        style={{ minWidth: 0 }}
+                        onClick={stat.onClick}
+                        className={`group relative overflow-hidden rounded-2xl ${stat.bg} p-8
+                                  border border-gray-100 shadow-xl shadow-gray-200/50
+                                  hover:shadow-2xl hover:shadow-indigo-200/50
+                                  transform transition-all duration-300 ease-out
+                                  animate-fade-in-up cursor-pointer
+                                  hover:scale-[1.02]`}
+                        style={{ animationDelay: `${index * 150}ms` }}
                     >
-                        <div className={`rounded-xl ${stat.iconBg} p-4 shadow-lg`}>
-                            <stat.icon className="h-7 w-7 text-white" />
+                        <div className="flex items-start justify-between">
+                            <div className={`rounded-2xl ${stat.iconBg} p-4 
+                                          group-hover:scale-110 transition-transform duration-300`}>
+                                <stat.icon className="h-8 w-8 text-white" />
+                            </div>
+                            <span className="text-sm font-medium px-3 py-1 rounded-full
+                                         bg-white/80 text-gray-700 backdrop-blur-sm">
+                                Actualizado hoy
+                            </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-base font-medium text-gray-500">{stat.label}</p>
-                            {statsLoading ? (
-                                <div className="h-7 w-20 bg-gray-200 rounded animate-pulse mt-2"></div>
-                            ) : (
-                                <h3 className="text-3xl font-extrabold text-gray-900 mt-1">{stat.value}</h3>
-                            )}
+                        <div className="mt-6 space-y-1">
+                            <h3 className={`text-5xl font-bold ${stat.valueColor}`}>
+                                {statsLoading ? (
+                                    <div className="h-12 w-24 bg-gray-200/50 rounded-lg animate-pulse" />
+                                ) : (
+                                    stat.value
+                                )}
+                            </h3>
+                            <p className="text-base font-medium text-gray-600">{stat.label}</p>
                         </div>
-                        <div className="absolute right-0 top-0 opacity-10 pointer-events-none select-none">
-                            <stat.icon className="h-20 w-20" />
-                        </div>
+                        <div className={`absolute -right-6 -bottom-6 w-32 h-32 rounded-full
+                                      bg-gradient-to-br ${stat.color} opacity-10
+                                      group-hover:scale-150 transition-transform duration-500`} />
                     </div>
                 ))}
             </div>
 
-            {/* Resumen de Clases ocupa todo el ancho, se muestra siempre */}
-            <div className="animate-fadeIn animate-fadeIn-3">
+            {/* Clases Section con nueva presentación */}
+            <div ref={clasesRef} className="bg-white rounded-2xl p-8 shadow-xl shadow-indigo-100/10
+                          animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                 <ClasesProfesor onClaseCreated={() => {}} />
             </div>
+
+            <style>{`
+                @keyframes gradient-x {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                .animate-gradient-x {
+                    background-size: 200% 200%;
+                    animation: gradient-x 15s ease infinite;
+                }
+                @keyframes fade-in-up {
+                    0% {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .animate-fade-in-up {
+                    animation: fade-in-up 0.6s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
-import { BookOpen, Calendar, Users, Clock, MoreVertical, Trash, Plus, AlertTriangle } from 'lucide-react';
+import { Plus, BookOpen, Users, Calendar, ChevronRight, Trash, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { GlobalContext } from '../../App';
@@ -89,129 +89,101 @@ const Clases = () => {
 
     return (
         <div className="space-y-8 p-6">
-            <style>{`
-                .animate-fadeIn { animation: fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards; opacity: 0; }
-                .animate-fadeIn-1 { animation-delay: 100ms; }
-                .animate-fadeIn-2 { animation-delay: 300ms; }
-                .animate-fadeIn-3 { animation-delay: 500ms; }
-                .animate-fadeIn-4 { animation-delay: 700ms; }
-                .modern-shadow {
-                    box-shadow: 0 4px 24px 0 rgba(30, 64, 175, 0.07), 0 1.5px 6px 0 rgba(30, 64, 175, 0.03);
-                }
-                .modern-card {
-                    border-radius: 1.25rem;
-                    background: white;
-                    transition: box-shadow 0.2s, transform 0.2s;
-                }
-                .modern-card:hover {
-                    box-shadow: 0 8px 32px 0 rgba(30, 64, 175, 0.13), 0 3px 12px 0 rgba(30, 64, 175, 0.06);
-                    transform: translateY(-2px) scale(1.01);
-                }
-            `}</style>
-
-            {/* Header Section */}
+            {/* Header con estilo consistente */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fadeIn animate-fadeIn-1">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent 
+                                 bg-gradient-to-r from-indigo-500 to-blue-600
+                                 animate-gradient-x">
                         Mis Clases
                     </h1>
-                    <p className="mt-1 text-gray-500 text-lg">
+                    <p className="mt-1 text-gray-600 text-lg">
                         Gestiona todas tus clases y sus detalles
                     </p>
                 </div>
                 <button
                     onClick={() => setMostrarFormulario(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl shadow modern-shadow hover:bg-blue-700 transition-colors text-base font-semibold"
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl 
+                              hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20"
                 >
                     <Plus className="h-5 w-5" />
-                    Nueva Clase
+                    <span className="font-medium">Nueva Clase</span>
                 </button>
             </div>
 
+            {/* Grid de clases con nuevo diseño */}
             {isLoading ? (
                 <div className="flex justify-center items-center h-64">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 </div>
             ) : (
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 animate-fadeIn animate-fadeIn-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {clases.map((clase, index) => (
                         <Link
                             key={clase.id}
                             to={`/profesor/clase/${clase.id}`}
-                            className="modern-card modern-shadow group transition-all duration-200 hover:scale-[1.02] relative overflow-hidden opacity-0 animate-fadeIn"
-                            style={{ animationDelay: `${300 + index * 100}ms` }}
+                            className="group relative overflow-hidden bg-white rounded-2xl border border-gray-100 
+                                     p-6 hover:border-blue-200 transition-all duration-300 hover:shadow-xl
+                                     animate-fadeIn"
+                            style={{ animationDelay: `${index * 100}ms` }}
                         >
-                            <div className="p-7">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-blue-100 p-3 rounded-xl">
-                                            <BookOpen className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <h2 className="text-xl font-semibold text-gray-900 truncate">{clase.nombre}</h2>
+                            {/* Fondo decorativo */}
+                            <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-blue-500/5 
+                                          to-indigo-500/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                            
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-3 rounded-xl
+                                                  group-hover:scale-110 transition-transform duration-300">
+                                        <BookOpen className="h-6 w-6 text-blue-600" />
                                     </div>
-                                    <div className="relative">
-                                        <button
-                                            onClick={e => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
-                                            }}
-                                            className="menu-button p-1 hover:bg-gray-100 rounded-full transition-colors"
-                                        >
-                                            <MoreVertical className="h-5 w-5 text-gray-500" />
-                                        </button>
-                                        {menuAbierto === clase.id && (
-                                            <div className="absolute right-0 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                                <div className="py-1">
-                                                    <button
-                                                        onClick={e => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            handleEliminarClase(clase.id);
-                                                        }}
-                                                        className="flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50 w-full"
-                                                    >
-                                                        <Trash className="h-4 w-4 mr-2" />
-                                                        Eliminar clase
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <h3 className="font-semibold text-xl text-gray-900 group-hover:text-blue-600 
+                                                 transition-colors">
+                                        {clase.nombre}
+                                    </h3>
                                 </div>
-                                <div className="space-y-3">
+
+                                <div className="space-y-2 mb-6">
                                     <div className="flex items-center text-gray-600 gap-2">
-                                        <BookOpen className="h-5 w-5" />
-                                        <span className="text-sm font-medium">Código: {clase.codigoClase}</span>
+                                        <span className="text-sm font-medium">
+                                            Código: {clase.codigoClase}
+                                        </span>
                                     </div>
                                     <div className="flex items-center text-gray-600 gap-2">
-                                        <Users className="h-5 w-5" />
-                                        <span className="text-sm font-medium">{clase.numEstudiantes} estudiantes</span>
+                                        <Users className="h-4 w-4" />
+                                        <span className="text-sm">{clase.numEstudiantes} estudiantes</span>
                                     </div>
                                     <div className="flex items-center text-gray-600 gap-2">
-                                        <Calendar className="h-5 w-5" />
-                                        <span className="text-sm font-medium">Creada: {new Date(clase.createdAt).toLocaleDateString('es-ES')}</span>
-                                    </div>
-                                    <div className="flex items-center text-gray-600 gap-2">
-                                        <Clock className="h-5 w-5" />
-                                        <span className="text-sm font-medium">Última actividad: {clase.ultimaActividad}</span>
-                                    </div>
-                                </div>
-                                <div className="mt-6 pt-4 border-t">
-                                    <div className="flex items-center justify-between">
-                                        <div className="text-sm text-gray-500">
-                                            <p>Profesor: <span className="font-medium">{clase.profesor.nombre}</span></p>
-                                            <p>Especialidad: <span className="font-medium">{clase.profesor.especialidad || 'No especificada'}</span></p>
-                                        </div>
-                                        <span className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap transition-colors">
-                                            Ver detalles →
+                                        <Calendar className="h-4 w-4" />
+                                        <span className="text-sm">
+                                            Creada: {new Date(clase.createdAt).toLocaleDateString('es-ES')}
                                         </span>
                                     </div>
                                 </div>
-                                {/* Fondo decorativo */}
-                                <div className="absolute right-0 top-0 opacity-10 pointer-events-none select-none">
-                                    <BookOpen className="h-24 w-24" />
+
+                                <div className="border-t pt-4 flex items-center justify-between">
+                                    <div className="text-sm text-gray-600">
+                                        <p className="font-medium text-gray-900">{clase.profesor.nombre}</p>
+                                        <p>Especialidad: {clase.profesor.especialidad || 'No especificada'}</p>
+                                    </div>
+                                    <span className="text-blue-600 flex items-center gap-1 font-medium">
+                                        Ver detalles
+                                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                    </span>
                                 </div>
+
+                                {/* Botón eliminar */}
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleEliminarClase(clase.id);
+                                    }}
+                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-red-50 
+                                             text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <Trash className="h-5 w-5" />
+                                </button>
                             </div>
                         </Link>
                     ))}
@@ -292,6 +264,25 @@ const Clases = () => {
                     </div>
                 </div>
             )}
+
+            <style>{`
+                @keyframes gradient-x {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                .animate-gradient-x {
+                    background-size: 200% 200%;
+                    animation: gradient-x 15s ease infinite;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                    animation: fadeIn 0.6s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 };
