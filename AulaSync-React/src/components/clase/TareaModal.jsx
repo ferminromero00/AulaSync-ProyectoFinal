@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock } from 'lucide-react';
+import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock, Users } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
 import { toast } from 'react-hot-toast'; // Añadir este import
@@ -158,52 +158,63 @@ const TareaModal = ({
 
                 {/* Panel izquierdo - Detalles de la tarea */}
                 <div className="p-8 flex-1 modal-content-left overflow-y-auto">
-                    <div className="modal-item-stagger space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="bg-blue-100 p-3 rounded-xl">
-                                <BookOpen className="h-6 w-6 text-blue-600" />
+                    {/* Animaciones locales solo para este panel */}
+                    <style>{`
+                        @keyframes tareaDetalleFadeIn {
+                            0% { opacity: 0; transform: translateY(24px);}
+                            100% { opacity: 1; transform: none;}
+                        }
+                        .tarea-detalle-anim { animation: tareaDetalleFadeIn 0.5s both; }
+                        .tarea-detalle-stagger > * { opacity: 0; }
+                        .tarea-detalle-stagger > *:nth-child(1) { animation-delay: 80ms; }
+                        .tarea-detalle-stagger > *:nth-child(2) { animation-delay: 180ms; }
+                        .tarea-detalle-stagger > *:nth-child(3) { animation-delay: 280ms; }
+                        .tarea-detalle-stagger > *:nth-child(4) { animation-delay: 380ms; }
+                    `}</style>
+                    <div className="tarea-detalle-stagger space-y-6">
+                        {/* Cabecera moderna */}
+                        <div className="flex items-center gap-4 tarea-detalle-anim">
+                            <div className="bg-blue-100 p-4 rounded-2xl shadow-lg flex items-center justify-center">
+                                <BookOpen className="h-7 w-7 text-blue-600" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900">{tarea.titulo}</h3>
-                                <div className="text-sm text-gray-500 mt-1">
-                                    {/* Mostrar correctamente el nombre de la clase */}
-                                    Publicado por {tarea.clase?.nombre || claseData?.nombre || 'Clase sin nombre'}
-                                </div>
+                                <h3 className="text-2xl font-bold text-blue-900">{tarea.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
+                                {/* Eliminado el nombre de la clase debajo del título */}
                             </div>
                         </div>
-
-                        <div className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/50 
-                                    rounded-xl px-4 py-3 flex items-center gap-3">
-                            <div className="bg-amber-200/50 p-2 rounded-lg">
+                        {/* Fecha de entrega */}
+                        <div className="tarea-detalle-anim">
+                            <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-amber-100/60 border border-amber-200/60 rounded-xl px-5 py-4">
                                 <Calendar className="h-5 w-5 text-amber-700" />
-                            </div>
-                            <div>
-                                <div className="font-medium text-amber-900">Fecha de entrega</div>
-                                <div className="text-sm text-amber-800">
-                                    {tarea.fechaEntrega
-                                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
-                                            dateStyle: 'long',
-                                            timeStyle: 'short'
-                                        })
-                                        : "Sin fecha límite"}
+                                <div>
+                                    <div className="font-medium text-amber-900">Fecha de entrega</div>
+                                    <div className="text-sm text-amber-800">
+                                        {tarea.fechaEntrega
+                                            ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                                                dateStyle: 'long',
+                                                timeStyle: 'short'
+                                            })
+                                            : <span className="italic text-gray-400">Sin fecha límite</span>}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div>
-                            <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                        {/* Descripción */}
+                        <div className="tarea-detalle-anim">
+                            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
                                 <FileText className="h-5 w-5 text-gray-500" />
                                 Descripción de la tarea
                             </h4>
-                            <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[200px]
-                                        border border-gray-100">
-                                {tarea.contenido || "Sin descripción"}
+                            <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[120px] border border-gray-100">
+                                {tarea.contenido
+                                    ? tarea.contenido
+                                    : <span className="italic text-gray-400">Sin descripción</span>}
                             </div>
                         </div>
-
+                        {/* Material adjunto */}
                         {downloadUrl && (
-                            <div className="pt-4">
-                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                            <div className="tarea-detalle-anim pt-2">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
                                     <Paperclip className="h-5 w-5 text-gray-500" />
                                     Material de la tarea
                                 </h4>
@@ -225,89 +236,108 @@ const TareaModal = ({
 
                 {/* Panel derecho - Vista de profesor o alumno */}
                 {role === 'profesor' ? (
-                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
-                        <div>
-                            <div className="flex items-center justify-between mb-8">
-                                <h4 className="text-lg font-semibold text-gray-900">Entregas de la tarea</h4>
-                                <span className="bg-amber-100 text-amber-700 text-sm font-medium px-2.5 py-0.5 rounded">
-                                    {/* Estado de las entregas */}
-                                    {tarea.entregas?.length || 0} / {claseData?.estudiantes?.length || 0}
-                                </span>
+                    <div className="relative bg-gradient-to-b from-gray-50 to-white p-0 w-full md:w-[420px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
+                        {/* Animaciones locales solo para este modal */}
+                        <style>{`
+                            @keyframes tareaFadeIn {
+                                0% { opacity: 0; transform: translateY(24px);}
+                                100% { opacity: 1; transform: none;}
+                            }
+                            @keyframes tareaSlideUp {
+                                0% { opacity: 0; transform: translateY(32px);}
+                                100% { opacity: 1; transform: none;}
+                            }
+                            .tarea-anim-fadeIn { animation: tareaFadeIn 0.5s both; }
+                            .tarea-anim-slideUp { animation: tareaSlideUp 0.5s both; }
+                            .tarea-stagger > * { opacity: 0; }
+                            .tarea-stagger > *:nth-child(1) { animation-delay: 120ms; }
+                            .tarea-stagger > *:nth-child(2) { animation-delay: 220ms; }
+                            .tarea-stagger > *:nth-child(3) { animation-delay: 320ms; }
+                        `}</style>
+                        <div className="p-0 tarea-stagger">
+                            {/* Cabecera */}
+                            <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-tr-2xl tarea-anim-fadeIn">
+                                <BookOpen className="h-7 w-7 text-blue-500" />
+                                <span className="text-xl font-bold text-blue-900">Entregas de la tarea</span>
                             </div>
-                            <div className="space-y-4">
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="text-center">
-                                            <p className="text-sm text-gray-500">Entregadas</p>
-                                            <p className="text-2xl font-semibold text-gray-900">{tarea.entregas?.length || 0}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-sm text-gray-500">Pendientes</p>
-                                            <p className="text-2xl font-semibold text-gray-900">
-                                                {claseData?.estudiantes?.length
-                                                    ? claseData.estudiantes.length - (tarea.entregas?.length || 0)
-                                                    : 0}
-                                            </p>
-                                        </div>
-                                    </div>
+                            {/* Estadísticas de entregas */}
+                            <div className="flex gap-4 px-8 pt-8 tarea-anim-slideUp">
+                                <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col items-center">
+                                    <span className="text-xs text-gray-500 mb-1">Entregadas</span>
+                                    <span className="text-2xl font-bold text-emerald-600">
+                                        {tarea.entregas?.length || 0}
+                                    </span>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200">
-                                    <div className="p-4 border-b border-gray-200">
-                                        <h5 className="font-medium text-gray-900">Estado por estudiante</h5>
-                                    </div>
-                                    <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
-                                        {claseData?.estudiantes?.map((estudiante) => {
-                                            // Buscar la entrega de este estudiante
-                                            const entrega = tarea.entregas?.find(e =>
-                                                (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
-                                            );
-                                            // Estado de carga
-                                            if (loadingEntregas && loadingEntregas[estudiante.id]) {
-                                                return (
-                                                    <div key={estudiante.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{estudiante.nombre}</p>
-                                                        </div>
-                                                        <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 flex items-center gap-1">
-                                                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
-                                                            <span>Comprobando...</span>
-                                                        </span>
-                                                    </div>
-                                                );
-                                            }
+                                <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col items-center">
+                                    <span className="text-xs text-gray-500 mb-1">Pendientes</span>
+                                    <span className="text-2xl font-bold text-amber-600">
+                                        {claseData?.estudiantes?.length
+                                            ? claseData.estudiantes.length - (tarea.entregas?.length || 0)
+                                            : 0}
+                                    </span>
+                                </div>
+                            </div>
+                            {/* Estado por estudiante */}
+                            <div className="mt-8 px-8 tarea-anim-slideUp">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Users className="h-5 w-5 text-blue-500" />
+                                    <span className="font-semibold text-blue-900 text-lg">Estado por estudiante</span>
+                                </div>
+                                <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                                    {claseData?.estudiantes?.map((estudiante, idx) => {
+                                        // Buscar la entrega de este estudiante
+                                        const entrega = tarea.entregas?.find(e =>
+                                            (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
+                                        );
+                                        // Estado de carga
+                                        if (loadingEntregas && loadingEntregas[estudiante.id]) {
                                             return (
-                                                <div
-                                                    key={estudiante.id}
-                                                    className={`p-4 flex items-center justify-between hover:bg-gray-50 transition cursor-pointer ${entrega ? "hover:bg-emerald-50" : ""}`}
-                                                    onClick={() => entrega && onOpenEntrega(entrega)}
-                                                    style={entrega ? { cursor: "pointer" } : { cursor: "default" }}
-                                                    title={entrega ? "Ver entrega" : undefined}
-                                                >
+                                                <div key={estudiante.id} className="p-4 flex items-center justify-between tarea-anim-fadeIn" style={{ animationDelay: `${180 + idx * 40}ms` }}>
                                                     <div>
                                                         <p className="font-medium text-gray-900">{estudiante.nombre}</p>
                                                     </div>
-                                                    {entrega ? (
-                                                        entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '' ? (
-                                                            <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full border border-emerald-300 flex items-center gap-1">
-                                                                <CheckCircle className="h-3.5 w-3.5" />
-                                                                Calificado: <span className="ml-1 font-bold">{entrega.nota}</span>
-                                                            </span>
-                                                        ) : (
-                                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
-                                                                <CheckCircle className="h-3.5 w-3.5" />
-                                                                Entregado
-                                                            </span>
-                                                        )
-                                                    ) : (
-                                                        <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
-                                                            <Clock className="h-3.5 w-3.5" />
-                                                            Pendiente
-                                                        </span>
-                                                    )}
+                                                    <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 flex items-center gap-1">
+                                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                                                        <span>Comprobando...</span>
+                                                    </span>
                                                 </div>
                                             );
-                                        })}
-                                    </div>
+                                        }
+                                        return (
+                                            <div
+                                                key={estudiante.id}
+                                                className={`p-4 flex items-center justify-between tarea-anim-fadeIn transition cursor-pointer ${entrega ? "hover:bg-emerald-50" : ""}`}
+                                                style={{ animationDelay: `${180 + idx * 40}ms`, cursor: entrega ? "pointer" : "default" }}
+                                                onClick={() => entrega && onOpenEntrega(entrega)}
+                                                title={entrega ? "Ver entrega" : undefined}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
+                                                        {estudiante.nombre?.[0] || "?"}
+                                                    </div>
+                                                    <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                </div>
+                                                {entrega ? (
+                                                    entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '' ? (
+                                                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200 flex items-center gap-1">
+                                                            <CheckCircle className="h-3.5 w-3.5" />
+                                                            Calificado: <span className="ml-1 font-bold">{entrega.nota}</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 hover:text-emerald-900 transition">
+                                                            <CheckCircle className="h-3.5 w-3.5" />
+                                                            Entregado
+                                                        </span>
+                                                    )
+                                                ) : (
+                                                    <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1">
+                                                        <Clock className="h-3.5 w-3.5" />
+                                                        Pendiente
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
