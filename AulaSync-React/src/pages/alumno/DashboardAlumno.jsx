@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useContext } from "react"
-import { BookOpen, Plus, X, Users, ChevronRight, AlertTriangle } from "lucide-react"
+import { BookOpen, Plus, X, Users, ChevronRight, AlertTriangle, Loader2, GraduationCap } from "lucide-react"
 import { buscarClasePorCodigo, unirseAClase, salirDeClase, getClasesAlumno } from "../../services/clases"
 import { responderInvitacion } from '../../services/invitaciones';
 import { Link, useNavigate } from "react-router-dom"
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast'; // Modificar esta línea
 import NotificationButton from '../../components/NotificationButton';
 import { GlobalContext } from "../../App"
 
@@ -27,39 +27,46 @@ const DashboardAlumno = () => {
     const notifMenuRef = useRef(null);
     const navigate = useNavigate();
     const [localLoading, setLocalLoading] = useState(false);
+    const [isSearching, setIsSearching] = useState(false); // Nuevo estado para la animación de búsqueda
+    const [isJoining, setIsJoining] = useState(false); // Añadir nuevo estado para controlar la animación de unirse
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
+        setError("")
         try {
+            setIsSearching(true)
             const data = await buscarClasePorCodigo(codigo)
             setClaseParaUnirse(data)
             setShowJoinConfirmModal(true)
-            setError("")
         } catch (error) {
             setError("Clase no encontrada")
+            toast.error('No se encontró ninguna clase con ese código', {
+                position: 'top-right'
+            });
             console.error('Error:', error)
+        } finally {
+            setIsSearching(false)
         }
     }
 
     const handleConfirmJoin = async () => {
         try {
+            setIsJoining(true);
             const response = await unirseAClase(claseParaUnirse.codigoClase)
             navigate(`/alumno/clase/${response.claseId}`);
             setMostrarModal(false)
             setShowJoinConfirmModal(false)
             setCodigo("")
             setClaseParaUnirse(null)
-            setNotification({
-                show: true,
-                message: 'Te has unido a la clase exitosamente',
-                type: 'success'
+            toast.success('Te has unido a la clase exitosamente', {
+                position: 'top-right'
             });
         } catch (error) {
-            setNotification({
-                show: true,
-                message: error.message || 'Error al unirse a la clase',
-                type: 'error'
+            toast.error(error.message || 'Error al unirse a la clase', {
+                position: 'top-right'
             });
+        } finally {
+            setIsJoining(false);
         }
     }
 
@@ -172,16 +179,49 @@ const DashboardAlumno = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showNotifMenu]);
 
-    if (loading || localLoading) {
+    // Panel de carga inicial más bonito
+    if (loading && (!clases || clases.length === 0)) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500"></div>
+            <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-green-50 via-white to-emerald-50">
+                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-green-100 animate-fade-in-up">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Loader2 className="h-12 w-12 text-green-500 animate-spin" />
+                        <span className="text-2xl font-bold text-green-900">AulaSync</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <BookOpen className="h-6 w-6 text-green-400 animate-pulse" />
+                            <span className="text-green-800 font-medium">Cargando tus clases...</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <GraduationCap className="h-6 w-6 text-green-400 animate-pulse" />
+                            <span className="text-green-800 font-medium">Cargando tu perfil...</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Users className="h-6 w-6 text-green-400 animate-pulse" />
+                            <span className="text-green-800 font-medium">Cargando notificaciones...</span>
+                        </div>
+                    </div>
+                    <div className="mt-8 text-green-700 text-sm opacity-70">
+                        ¡Bienvenido a AulaSync! Preparando tu espacio...
+                    </div>
+                </div>
+                <style>{`
+                    @keyframes fade-in-up {
+                        0% { opacity: 0; transform: translateY(20px);}
+                        100% { opacity: 1; transform: translateY(0);}
+                    }
+                    .animate-fade-in-up {
+                        animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                    }
+                `}</style>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 p-6">
+        <div className="space-y-3 p-6 bg-gradient-to-br from-green-50 via-white to-emerald-50 h-full">
+            <Toaster position="top-right" /> {/* Añadir esta línea */}
             <style>{`
                 @keyframes fadeSlideIn {
                     0% { opacity: 0; transform: translateY(20px); }
@@ -192,79 +232,117 @@ const DashboardAlumno = () => {
                 }
             `}</style>
 
-            {/* Header Section con animación */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 opacity-0 animate-fadeIn" 
-                 style={{ animationDelay: '200ms' }}>
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                        Dashboard del Alumno
-                    </h1>
-                    <p className="mt-1 text-gray-500">
-                        Bienvenido de nuevo, aquí está el resumen de tu actividad
-                    </p>
+            {/* Header moderno */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 animate-fade-in-up">
+                <div className="flex items-center gap-4">
+                    {/* Avatar con icono de carga propio */}
+                    <div className="relative">
+                        {userData?.user?.fotoPerfilUrl === undefined ? (
+                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gray-200 border-4 border-green-100 shadow-lg">
+                                <Loader2 className="h-8 w-8 text-green-400 animate-spin" />
+                            </div>
+                        ) : (
+                            <img
+                                src={userData?.user?.fotoPerfilUrl ? userData.user.fotoPerfilUrl : "/default-avatar.png"}
+                                alt="Foto de perfil"
+                                className="h-16 w-16 rounded-full object-cover border-4 border-green-100 shadow-lg"
+                                onError={e => { e.target.src = '/default-avatar.png'; }}
+                            />
+                        )}
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-green-900">Dashboard del Alumno</h1>
+                        <p className="text-gray-600 text-lg">
+                            Bienvenido de nuevo, aquí está el resumen de tu actividad
+                        </p>
+                    </div>
                 </div>
                 <button
                     onClick={() => setMostrarModal(true)}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl 
+                        hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-500/20"
                 >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Unirse a clase
+                    <Plus className="h-5 w-5" />
+                    <span className="font-medium">Unirse a clase</span>
                 </button>
             </div>
 
-            {/* Contenedor principal con animación */}
-            <div className="w-full h-[calc(100vh-8rem)] opacity-0 animate-fadeIn"
-                 style={{ animationDelay: '400ms' }}>
-                <div className="bg-white h-full rounded-xl shadow-sm overflow-hidden flex flex-col">
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <h2 className="text-lg font-semibold">Mis Clases</h2>
-                        <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
+            {/* Panel de clases con icono de carga individual */}
+            <div className="w-full opacity-0 animate-fadeIn" style={{ animationDelay: '400ms' }}>
+                <div className="bg-white rounded-2xl shadow-xl border border-green-100 flex flex-col overflow-hidden">
+                    <div className="px-8 py-6 border-b border-green-50 bg-gradient-to-r from-green-100/80 to-emerald-100/80 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <BookOpen className="h-7 w-7 text-green-500" />
+                            <h2 className="text-xl font-bold text-green-900">Mis Clases</h2>
+                        </div>
+                        <span className="text-sm text-green-700 bg-green-50 px-3 py-1 rounded-full font-medium">
+                            Vista rápida de tus clases activas
+                        </span>
                     </div>
-                    <div className="flex-1 p-4 overflow-y-auto">
+                    {/* Cambiado: limitar la altura y quitar el scroll */}
+                    <div className="flex-1 p-8"
+                        style={{
+                            maxHeight: '420px',
+                            overflow: 'visible'
+                        }}
+                    >
                         {loading ? (
-                            <div className="flex justify-center items-center h-64">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                            <div className="flex flex-col items-center justify-center py-16">
+                                <Loader2 className="h-10 w-10 text-green-500 animate-spin mb-4" />
+                                <span className="text-green-700 font-medium">Cargando clases...</span>
                             </div>
-                        ) : (
-                            <div className="grid gap-3">
-                                {clases && clases.length > 0 ? clases.map((clase, index) => (
+                        ) : clases && clases.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {clases.map((clase, index) => (
                                     <Link
                                         key={clase.id}
                                         to={`/alumno/clase/${clase.id}`}
-                                        className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors group border border-gray-100 hover:border-gray-200 opacity-0 animate-fadeIn"
-                                        style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                        className="group relative overflow-hidden bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-100 
+                                            p-6 hover:border-green-300 transition-all duration-300 hover:shadow-xl animate-fade-in-up"
+                                        style={{ animationDelay: `${index * 100}ms` }}
                                     >
-                                        <div className="bg-blue-100 p-3 rounded-xl">
-                                            <BookOpen className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 flex items-center gap-6">
-                                            <div className="flex-1">
-                                                <h3 className="text-lg font-medium text-gray-900">{clase.nombre}</h3>
-                                                <div className="flex items-center gap-6 mt-1">
-                                                    <span className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Users className="h-4 w-4 text-gray-500" />
-                                                        {clase.numEstudiantes} estudiantes
-                                                    </span>
-                                                    <span className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
-                                                            Código: {clase.codigoClase}
-                                                        </span>
+                                        {/* Fondo decorativo */}
+                                        <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-green-500/5 
+                                            to-emerald-500/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
+                                        <div className="relative">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-3 rounded-xl
+                                                    group-hover:scale-110 transition-transform duration-300">
+                                                    <BookOpen className="h-6 w-6 text-green-600" />
+                                                </div>
+                                                <h3 className="font-semibold text-xl text-gray-900 group-hover:text-green-700 transition-colors">
+                                                    {clase.nombre}
+                                                </h3>
+                                            </div>
+                                            <div className="space-y-2 mb-6">
+                                                <div className="flex items-center text-gray-600 gap-2">
+                                                    <span className="text-sm font-medium">
+                                                        Código: {clase.codigoClase}
                                                     </span>
                                                 </div>
+                                                <div className="flex items-center text-gray-600 gap-2">
+                                                    <Users className="h-4 w-4" />
+                                                    <span className="text-sm">{clase.numEstudiantes} estudiantes</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-3 text-sm text-gray-500">
-                                                <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
+                                            <div className="border-t pt-4 flex items-center justify-between">
+                                                <div className="text-sm text-gray-600">
+                                                    <p className="font-medium text-gray-900">{clase.profesor || "Profesor"}</p>
+                                                </div>
+                                                <span className="text-green-600 flex items-center gap-1 font-medium group-hover:underline group-hover:text-green-800 transition-colors">
+                                                    Ver detalles
+                                                    <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                </span>
                                             </div>
                                         </div>
                                     </Link>
-                                )) : (
-                                    <div className="text-center py-12 opacity-0 animate-fadeIn"
-                                         style={{ animationDelay: '600ms' }}>
-                                        <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                                        <p className="text-lg text-gray-600 mb-2">No estás inscrito en ninguna clase</p>
-                                        <p className="text-sm text-gray-500">Usa el botón "Unirse a clase" para empezar</p>
-                                    </div>
-                                )}
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-16">
+                                <BookOpen className="h-16 w-16 text-gray-300 mb-4" />
+                                <p className="text-lg text-gray-600 mb-2">No estás inscrito en ninguna clase</p>
+                                <p className="text-sm text-gray-500 mb-4">Usa el botón "Unirse a clase" para empezar</p>
                             </div>
                         )}
                     </div>
@@ -277,50 +355,85 @@ const DashboardAlumno = () => {
                     className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
                     style={{ margin: 0, padding: 0 }}
                 >
-                    <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">Unirse a una clase</h3>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-0 overflow-hidden animate-fadeInUpModal">
+                        {/* Header moderno */}
+                        <div className="flex items-center gap-3 px-8 py-6 border-b border-green-100 bg-gradient-to-r from-green-100/80 to-emerald-100/80 rounded-t-2xl">
+                            <BookOpen className="h-7 w-7 text-green-500 animate-fadeIn" />
+                            <span className="text-xl font-bold text-green-900 animate-fadeIn" style={{ animationDelay: '80ms' }}>
+                                Unirse a una clase
+                            </span>
                             <button
                                 onClick={() => setMostrarModal(false)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="ml-auto text-gray-400 hover:text-green-600 rounded-full p-2 transition-colors"
                             >
-                                <X className="h-5 w-5" />
+                                <X className="h-6 w-6" />
                             </button>
                         </div>
-                        <form onSubmit={handleBuscarClase} className="space-y-4">
+                        <form onSubmit={handleBuscarClase} className="space-y-6 px-8 py-8 bg-white rounded-b-2xl">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Código de la clase
                                 </label>
-                                <input
-                                    type="text"
-                                    value={codigo}
-                                    onChange={(e) => setCodigo(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                    placeholder="Introduce el código"
-                                    required
-                                />
-                                {error && (
-                                    <p className="mt-1 text-sm text-red-600">{error}</p>
-                                )}
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={codigo}
+                                        onChange={(e) => setCodigo(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-green-200 bg-green-50 focus:border-green-500 focus:ring-2 focus:ring-green-200 text-gray-900 text-base placeholder:text-gray-400 transition-shadow"
+                                        placeholder="Introduce el código"
+                                        required
+                                        autoFocus
+                                        disabled={isSearching}
+                                    />
+                                    {isSearching && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex justify-end gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setMostrarModal(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                    className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition"
+                                    disabled={isSearching}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                                    className="min-w-[120px] px-5 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold transition flex items-center justify-center gap-2"
+                                    disabled={isSearching}
                                 >
-                                    Buscar clase
+                                    {isSearching ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
+                                            <span>Buscando</span>
+                                        </>
+                                    ) : (
+                                        'Buscar clase'
+                                    )}
                                 </button>
                             </div>
                         </form>
                     </div>
+                    <style>{`
+                        @keyframes fadeInUpModal {
+                            0% { opacity: 0; transform: translateY(40px);}
+                            100% { opacity: 1; transform: translateY(0);}
+                        }
+                        .animate-fadeInUpModal {
+                            animation: fadeInUpModal 0.5s cubic-bezier(.4,1.4,.6,1) both;
+                        }
+                        .animate-fadeIn {
+                            animation: fadeIn 0.4s both;
+                        }
+                        @keyframes fadeIn {
+                            from { opacity: 0; transform: translateY(16px);}
+                            to { opacity: 1; transform: none;}
+                        }
+                    `}</style>
                 </div>
             )}
 
@@ -357,61 +470,71 @@ const DashboardAlumno = () => {
 
             {/* Modal de confirmación para unirse */}
             {showJoinConfirmModal && claseParaUnirse && (
-                <div
-                    className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    style={{ margin: 0, padding: 0 }}
-                >
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-                        <div className="flex items-center justify-center mb-4 text-green-500">
-                            <BookOpen className="h-12 w-12" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-center mb-2">
-                            ¿Unirse a la clase?
-                        </h3>
-                        <p className="text-gray-600 text-center mb-2">
-                            ¿Quieres unirte a la clase "{claseParaUnirse.nombre}"?
-                        </p>
-                        <p className="text-gray-500 text-sm text-center mb-6">
-                            Profesor: {claseParaUnirse.profesor}
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowJoinConfirmModal(false)
-                                    setClaseParaUnirse(null)
-                                }}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleConfirmJoin}
-                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                            >
-                                Confirmar
-                            </button>
+                <div className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 animate-confirmModal">
+                        <div className="flex flex-col items-center space-y-6">
+                            {/* Animación del icono */}
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-green-200 rounded-full animate-ping opacity-25"></div>
+                                <div className="relative bg-gradient-to-br from-green-100 to-emerald-100 p-4 rounded-full shadow-lg animate-bounce">
+                                    <BookOpen className="h-10 w-10 text-green-600" />
+                                </div>
+                            </div>
+                            
+                            {/* Título con animación de entrada */}
+                            <div className="text-center space-y-2 animate-fadeInUp">
+                                <h3 className="text-2xl font-bold text-gray-900">¡Clase encontrada!</h3>
+                                <p className="text-lg font-medium text-green-700">{claseParaUnirse.nombre}</p>
+                            </div>
+
+                            {/* Detalles con animación de entrada retrasada */}
+                            <div className="w-full space-y-3 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+                                <div className="flex items-center justify-center gap-2 text-gray-600">
+                                    <Users className="h-5 w-5 text-green-500" />
+                                    <span className="font-medium">Profesor:</span>
+                                    <span>{claseParaUnirse.profesor}</span>
+                                </div>
+                                <div className="flex items-center justify-center">
+                                    <span className="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200">
+                                        Código: {claseParaUnirse.codigoClase}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Botones con animación de entrada */}
+                            <div className="flex gap-3 w-full mt-4 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+                                <button
+                                    onClick={() => {
+                                        setShowJoinConfirmModal(false);
+                                        setClaseParaUnirse(null);
+                                    }}
+                                    className="flex-1 px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all"
+                                    disabled={isJoining}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleConfirmJoin}
+                                    className="flex-1 px-6 py-3 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+                                    disabled={isJoining}
+                                >
+                                    {isJoining ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
+                                            <span>Uniendo</span>
+                                        </>
+                                    ) : (
+                                        'Unirse a la clase'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Notificación tipo toast */}
-            {notification.show && (
-                <div className={`fixed bottom-4 right-4 z-50 ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                    } text-white px-6 py-3 rounded-lg shadow-lg transition-all transform translate-y-0`}>
-                    <div className="flex items-center space-x-2">
-                        <span>{notification.message}</span>
-                        <button
-                            onClick={() => setNotification({ show: false, message: '', type: '' })}
-                            className="ml-2 hover:text-gray-200"
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }
 
-export default DashboardAlumno;
+export default DashboardAlumno

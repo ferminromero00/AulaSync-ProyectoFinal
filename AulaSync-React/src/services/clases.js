@@ -133,12 +133,18 @@ export const getClaseById = async (id) => {
 
 export const buscarClasePorCodigo = async (codigo) => {
     try {
-        console.log("buscarClasePorCodigo - Llamando a la API con código:", codigo); // Log 1
         const response = await handleRequest(`/alumno/clases/buscar/${codigo}`, {
             method: 'GET'
         });
-        console.log("buscarClasePorCodigo - Respuesta de la API:", response); // Log 2
-        return response;
+        const data = response;
+        // Añadimos validación y transformación de datos
+        if (!data || typeof data !== 'object') {
+            throw new Error('Datos de clase inválidos');
+        }
+        return {
+            ...data,
+            numEstudiantes: data.numEstudiantes || '...' // Si no hay dato, mostramos puntos suspensivos
+        };
     } catch (error) {
         console.error('Error en buscarClasePorCodigo:', error);
         throw error;
