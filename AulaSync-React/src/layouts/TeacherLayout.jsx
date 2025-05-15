@@ -54,8 +54,8 @@ const TeacherLayout = () => {
                         />
                     </nav>
 
-                    {/* Footer navigation */}
-                    <div className="border-t border-blue-700/50 p-4 space-y-2">
+                    {/* Footer navigation - ajustado para coincidir con el estilo del alumno */}
+                    <div className="border-t border-blue-700/50 p-4">
                         <SidebarLink
                             to="/profesor/configuracion"
                             icon={<Settings className="h-5 w-5" />}
@@ -63,20 +63,29 @@ const TeacherLayout = () => {
                         />
                         <button
                             onClick={handleLogout}
-                            className="flex w-full items-center gap-3 px-4 py-3 text-red-100 rounded-xl border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 hover:text-white hover:shadow-md hover:shadow-red-500/20 transition-all duration-200 group"
+                            className="flex w-full items-center gap-3 px-4 py-2 text-red-100 rounded-lg 
+                                     border border-red-700/20 bg-red-900/10 hover:bg-red-500/20 hover:border-red-400 
+                                     hover:text-white transition-all duration-200 group mt-2"
                         >
                             <LogOut className="h-5 w-5 text-red-400 group-hover:text-white transition-colors" />
-                            <span className="font-medium">Cerrar Sesión</span>
+                            <span className="font-medium text-sm">Cerrar Sesión</span>
                         </button>
                     </div>
                 </div>
-                {/* Animaciones CSS */}
+
                 <style>{`
                     .sidebar-link {
-                        transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        padding: 0.5rem 1rem;
                         border-radius: 0.75rem;
-                        border-width: 2px;
-                        border-color: transparent;
+                        font-weight: 500;
+                        font-size: 0.875rem;
+                        color: #dbeafe;
+                        background: transparent;
+                        border: 2px solid transparent;
+                        transition: all 0.2s;
                     }
                     .sidebar-link-active, .sidebar-link:hover {
                         background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
@@ -85,26 +94,10 @@ const TeacherLayout = () => {
                         box-shadow: 0 4px 24px 0 rgba(59,130,246,0.10);
                     }
                     .sidebar-link .sidebar-icon {
-                        transition: color 0.18s, transform 0.18s;
+                        transition: transform 0.2s;
                     }
                     .sidebar-link:hover .sidebar-icon, .sidebar-link-active .sidebar-icon {
-                        color: #fff !important;
-                        transform: scale(1.1) rotate(-6deg);
-                    }
-                    @keyframes sidebarIconPop {
-                        0% { transform: scale(0.8);}
-                        80% { transform: scale(1.08);}
-                        100% { transform: scale(1);}
-                    }
-                    .animate-sidebarIcon {
-                        animation: sidebarIconPop 0.5s both;
-                    }
-                    @keyframes sidebarTitleFade {
-                        from { opacity: 0; transform: translateY(-10px);}
-                        to { opacity: 1; transform: none;}
-                    }
-                    .animate-sidebarTitle {
-                        animation: sidebarTitleFade 0.6s 0.1s both;
+                        transform: scale(1.1);
                     }
                 `}</style>
             </aside>

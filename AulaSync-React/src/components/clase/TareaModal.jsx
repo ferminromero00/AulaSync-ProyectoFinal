@@ -138,8 +138,8 @@ const TareaModal = ({
     return (
         <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
             ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
-            <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
-                shadow-2xl modal-content max-h-[90vh] overflow-hidden
+            <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
+                shadow-2xl modal-content max-h-[96vh] overflow-hidden
                 ${isClosing ? 'modal-content-closing' : ''}`}>
                 {/* Botón de cerrar */}
                 <button
@@ -150,59 +150,59 @@ const TareaModal = ({
                             onClose();
                         }, 200);
                     }}
-                    className="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow-lg transition-all"
+                    className="absolute top-5 right-5 z-50 bg-red-500 hover:bg-red-400 text-white p-2.5 rounded-full shadow-lg transition-all"
                     style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
                 >
-                    <X className="h-6 w-6" />
+                    <X className="h-5 w-5" />
                 </button>
 
                 {/* Panel izquierdo - Detalles de la tarea */}
-                <div className="p-0 flex-1 modal-content-left overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
+                <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[300px] max-w-[60%]">
                     <div className="flex flex-col gap-0 h-full flex-1">
-                        {/* Cabecera moderna y compacta */}
-                        <div className="flex items-center gap-4 px-10 py-8 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
+                        {/* Cabecera */}
+                        <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
                             <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
                                 <BookOpen className="h-7 w-7 text-blue-700" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold text-blue-900">{tarea.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
+                                <h3 className="text-xl font-bold text-blue-900">{tareaToShow.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
                             </div>
                         </div>
                         {/* Fecha de entrega */}
-                        <div className="px-10 py-6 border-b border-blue-50 bg-white">
-                            <div className="flex items-center gap-3">
+                        <div className="px-8 py-3 border-b border-blue-50 bg-white flex items-center gap-4">
+                            <div className="bg-amber-100 p-2 rounded-xl flex items-center justify-center">
                                 <Calendar className="h-5 w-5 text-amber-700" />
-                                <div>
-                                    <div className="font-medium text-amber-900">Fecha de entrega</div>
-                                    <div className="text-sm text-amber-800">
-                                        {tarea.fechaEntrega
-                                            ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
-                                                dateStyle: 'long',
-                                                timeStyle: 'short'
-                                            })
-                                            : <span className="italic text-gray-400">Sin fecha límite</span>}
-                                    </div>
+                            </div>
+                            <div>
+                                <div className="font-semibold text-amber-900 text-base">Fecha de entrega</div>
+                                <div className="text-sm text-amber-800">
+                                    {tareaToShow.fechaEntrega
+                                        ? new Date(tareaToShow.fechaEntrega).toLocaleString('es-ES', {
+                                            dateStyle: 'long',
+                                            timeStyle: 'short'
+                                        })
+                                        : <span className="italic text-gray-400">Sin fecha límite</span>}
                                 </div>
                             </div>
                         </div>
-                        {/* Descripción ocupa todo el espacio restante */}
-                        <div className="flex-1 flex flex-col px-10 py-6 border-b border-blue-50 bg-white min-h-0">
-                            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                        {/* Descripción */}
+                        <div className="flex-1 flex flex-col px-8 py-5 border-b border-blue-50 bg-white min-h-0">
+                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                 <FileText className="h-5 w-5 text-blue-400" />
                                 Descripción de la tarea
                             </h4>
                             <div className="flex-1 min-h-0">
-                                <div className="bg-blue-50 rounded-xl p-6 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[80px]">
-                                    {tarea.contenido
-                                        ? tarea.contenido
+                                <div className="bg-blue-50 rounded-xl p-4 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[50px] text-sm">
+                                    {tareaToShow.contenido
+                                        ? tareaToShow.contenido
                                         : <span className="italic text-gray-400">Sin descripción</span>}
                                 </div>
                             </div>
                         </div>
                         {/* Material adjunto */}
                         {downloadUrl && (
-                            <div className="px-10 py-6 bg-white">
-                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                            <div className="px-8 py-4 bg-white">
+                                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                     <Paperclip className="h-5 w-5 text-blue-400" />
                                     Material de la tarea
                                 </h4>
@@ -210,11 +210,11 @@ const TareaModal = ({
                                     href={downloadUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-blue-100 
-                                             text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
-                                             shadow-sm hover:shadow group"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-blue-100 
+                                         text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
+                                         shadow-sm hover:shadow group font-medium text-sm"
                                 >
-                                    <FileText className="h-5 w-5 text-blue-400 group-hover:text-blue-600" />
+                                    <FileText className="h-4 w-4 text-blue-400 group-hover:text-blue-600" />
                                     Descargar material
                                 </a>
                             </div>
@@ -332,144 +332,110 @@ const TareaModal = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
-                                 md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
-                        <div className="modal-item-stagger">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
-                            <div className="space-y-6">
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    {entregada ? (
-                                        // NUEVO: Mostrar "Calificada" si hay nota
-                                        (tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== '') ? (
-                                            <div className="flex items-center gap-2 text-blue-600 mb-2">
-                                                <CheckCircle className="h-5 w-5" />
-                                                <span className="font-medium">¡Tarea calificada!</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                                                <CheckCircle className="h-5 w-5" />
-                                                <span className="font-medium">¡Tarea entregada!</span>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <div className="flex items-center gap-2 text-amber-600 mb-2">
-                                            <Calendar className="h-5 w-5" />
-                                            <span className="font-medium">Pendiente de entrega</span>
-                                        </div>
-                                    )}
-                                </div>
+                    <div className="flex-[0.85] bg-gradient-to-b from-gray-50 to-white px-7 py-7 w-full md:w-[300px] border-t 
+                                 md:border-t-0 md:border-l border-gray-200 flex flex-col gap-4 overflow-y-auto max-h-[96vh] min-w-[220px]">
+                        <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                            Tu entrega
+                        </h4>
+                        <div className="space-y-3">
+                            {/* Estado de la entrega */}
+                            <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold
+                                ${entregada
+                                    ? (tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                        ? 'bg-blue-50 border border-blue-200 text-blue-800'
+                                        : 'bg-emerald-50 border border-emerald-200 text-emerald-800')
+                                    : 'bg-amber-50 border border-amber-200 text-amber-800'
+                                }`
+                            }>
                                 {entregada ? (
-                                    <div className="space-y-4">
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Paperclip className="h-5 w-5 text-green-600" />
-                                                <span className="font-medium text-green-800">Archivo entregado:</span>
-                                            </div>
-                                            {archivoEntregaUrl ? (
-                                                <a
-                                                    href={archivoEntregaUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                >
-                                                    <FileText className="h-5 w-5" />
-                                                    Descargar entrega
-                                                </a>
-                                            ) : (
-                                                <span className="text-gray-500">No se adjuntó archivo</span>
-                                            )}
-                                        </div>
-                                        <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                            <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
-                                            <div className="text-gray-700 whitespace-pre-line">
-                                                {tareaToShow.comentarioEntrega
-                                                    ? tareaToShow.comentarioEntrega
-                                                    : <span className="italic text-gray-400">Sin comentario</span>}
-                                            </div>
-                                        </div>
-                                        {/* Nota y comentario del profesor */}
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <CheckCircle className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-blue-800">Nota:</span>
-                                                <span className="ml-2 text-blue-900 font-bold">
-                                                    {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
-                                                        ? tareaToShow.nota
-                                                        : <span className="italic text-blue-400">Sin calificar</span>
-                                                    }
-                                                </span>
-                                            </div>
-                                            <div className="text-blue-700 mt-2">
-                                                <span className="font-medium">Comentario del profesor:</span>
-                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[40px]">
-                                                    {tareaToShow.comentarioCorreccion
-                                                        ? tareaToShow.comentarioCorreccion
-                                                        : <span className="italic text-blue-400">Sin comentario</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-gray-700">Fecha de entrega:</span>
-                                                <span className="text-gray-700">
-                                                    {tareaToShow.fechaEntregada
-                                                        ? new Date(tareaToShow.fechaEntregada).toLocaleString()
-                                                        : 'Desconocida'}
-                                                </span>
-                                            </div>
-                                            {/* Eliminar el bloque de Título */}
-                                            {/* <div className="flex items-center gap-2">
-                                                <BookOpen className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-gray-700">Título:</span>
-                                                <span className="text-gray-700">{tareaToShow.titulo || tareaToShow.contenido}</span>
-                                            </div> */}
-                                        </div>
-                                    </div>
+                                    tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== '' ? (
+                                        <>
+                                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                                            ¡Tarea calificada!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                            ¡Tarea entregada!
+                                        </>
+                                    )
                                 ) : (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Comentarios (opcional)
-                                            </label>
-                                            <textarea
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                rows="4"
-                                                placeholder="Añade comentarios sobre tu entrega..."
-                                                value={comentarioEntrega}
-                                                onChange={e => setComentarioEntrega(e.target.value)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Archivo de entrega
-                                            </label>
-                                            <div className="flex items-center justify-center w-full">
-                                                <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
-                                                    <FileText className="h-8 w-8 mb-2" />
-                                                    <span className="text-sm text-center">
-                                                        {archivoEntrega ? archivoEntrega.name : 'Arrastra tu archivo aquí o haz clic para seleccionar'}
-                                                    </span>
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        onChange={e => setArchivoEntrega(e.target.files[0])}
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                            onClick={handleEntregaTarea}
-                                            disabled={isEntregando || localIsEntregando}
-                                        >
-                                            <FileText className="h-5 w-5" />
-                                            {(isEntregando || localIsEntregando) ? "Entregando..." : "Entregar tarea"}
-                                        </button>
-                                    </div>
+                                    <>
+                                        <Clock className="h-5 w-5 text-amber-600" />
+                                        Pendiente de entrega
+                                    </>
                                 )}
+                            </div>
+                            {/* Archivo entregado */}
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                    <Paperclip className="h-5 w-5 text-green-600" />
+                                    Archivo entregado:
+                                </div>
+                                {archivoEntregaUrl ? (
+                                    <a
+                                        href={archivoEntregaUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
+                                    >
+                                        <FileText className="h-4 w-4" />
+                                        Descargar entrega
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
+                                )}
+                            </div>
+                            {/* Comentario enviado */}
+                            <div className="bg-white border border-gray-100 rounded-xl p-3">
+                                <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                                    <FileText className="h-5 w-5 text-blue-400" />
+                                    Comentario enviado:
+                                </div>
+                                <div className="text-gray-700 whitespace-pre-line text-sm">
+                                    {tareaToShow.comentarioEntrega ? tareaToShow.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                </div>
+                            </div>
+                            {/* Nota y comentario del profesor */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                                    Nota:
+                                    <span className="ml-2 text-blue-900 font-bold text-base">
+                                        {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                            ? tareaToShow.nota
+                                            : <span className="italic text-blue-400 text-base">Sin calificar</span>
+                                        }
+                                    </span>
+                                </div>
+                                <div className="text-blue-700 mt-1">
+                                    <span className="font-medium text-xs">Comentario del profesor:</span>
+                                    <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
+                                        {tareaToShow.comentarioCorreccion
+                                            ? tareaToShow.comentarioCorreccion
+                                            : <span className="italic text-blue-400">Sin comentario</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Fecha de entrega */}
+                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="h-5 w-5 text-blue-600" />
+                                    <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
+                                    <span className="text-gray-700 text-xs">
+                                        {tareaToShow.fechaEntregada
+                                            ? new Date(tareaToShow.fechaEntregada).toLocaleString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })
+                                            : 'Desconocida'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

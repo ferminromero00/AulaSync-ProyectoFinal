@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { BookOpen, Users, ChevronRight, UserPlus, Search, X, MoreVertical, Calendar, FileText, Paperclip } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -249,8 +249,16 @@ const ClaseDashboard = () => {
                         {clase.estudiantes && clase.estudiantes.length > 0 ? (
                             <ul className="space-y-2">
                                 {clase.estudiantes.slice(0, 5).map((estudiante) => (
-                                    <li key={estudiante.id} className="text-gray-700">
-                                        {estudiante.nombre}
+                                    <li key={estudiante.id} className="flex items-center gap-3">
+                                        <img
+                                            src={estudiante.fotoPerfilUrl ? estudiante.fotoPerfilUrl : '/default-avatar.png'}
+                                            alt={`Foto de ${estudiante.nombre}`}
+                                            className="h-9 w-9 rounded-full object-cover border border-gray-200"
+                                            onError={(e) => {
+                                                e.target.src = '/default-avatar.png';
+                                            }}
+                                        />
+                                        <span className="font-medium text-gray-900 truncate">{estudiante.nombre}</span>
                                     </li>
                                 ))}
                                 {clase.estudiantes.length > 5 && (
@@ -267,25 +275,71 @@ const ClaseDashboard = () => {
                         )}
                     </div>
 
-                    {/* Contenido central */}
+                    {/* Contenido central - tareas con nuevo diseño */}
                     <div className="lg:col-span-3 space-y-6 opacity-0 animate-slideRight"
                          style={{ animationDelay: '400ms' }}>
                         <div className="space-y-4">
-                            {tareas?.map((tarea, index) => (
-                                <div key={tarea.id}
-                                     className="opacity-0 animate-bounceIn"
-                                     style={{ animationDelay: `${600 + (index * 100)}ms` }}>
-                                    <div
-                                        className="cursor-pointer"
-                                        onClick={() => handleAbrirTarea(tarea.id)}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <BookOpen className="h-5 w-5 text-blue-600" />
-                                            <span className="font-semibold">{tarea.titulo}</span>
+                            <h2 className="text-xl font-bold text-blue-900 mb-2">Tablón de tareas</h2>
+                            {tareas?.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {tareas.map((tarea, index) => (
+                                        <div key={tarea.id}
+                                             className="opacity-0 animate-bounceIn"
+                                             style={{ animationDelay: `${600 + (index * 100)}ms` }}>
+                                            <div
+                                                className="cursor-pointer group bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow hover:shadow-xl transition-all duration-300 hover:border-blue-300"
+                                                onClick={() => handleAbrirTarea(tarea.id)}
+                                            >
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="bg-blue-100 p-3 rounded-xl">
+                                                        <BookOpen className="h-6 w-6 text-blue-600" />
+                                                    </div>
+                                                    <h3 className="font-semibold text-blue-900 text-lg truncate">{tarea.titulo}</h3>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                                    <Calendar className="h-4 w-4" />
+                                                    {tarea.fechaEntrega
+                                                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })
+                                                        : "Sin fecha límite"}
+                                                </div>
+                                                {tarea.archivoUrl && (
+                                                    <div className="flex items-center gap-1 text-blue-600 mb-2">
+                                                        <Paperclip className="h-4 w-4" />
+                                                        <span className="text-xs">Adjunto</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center justify-between mt-4">
+                                                    <span className="text-sm text-gray-500">
+                                                        {tarea.clase?.nombre || 'Sin clase'}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        {tarea.archivoUrl && (
+                                                            <span className="flex items-center gap-1 text-blue-600">
+                                                                <Paperclip className="h-4 w-4" />
+                                                                <span className="text-xs">Adjunto</span>
+                                                            </span>
+                                                        )}
+                                                        <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                            Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="text-gray-500 text-center py-8">
+                                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                                    <p>No hay tareas publicadas</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

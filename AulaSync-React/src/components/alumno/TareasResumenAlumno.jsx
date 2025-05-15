@@ -215,58 +215,59 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}` : null;
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
+        // MODAL GRANDE PERO MÁS MODERADO
         return (
             <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
                 ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
-                <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
-                    shadow-2xl modal-content max-h-[90vh] overflow-hidden
+                <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
+                    shadow-2xl modal-content max-h-[96vh] overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
-                    {/* Botón de cerrar dentro del modal, arriba a la derecha */}
+                    {/* Botón de cerrar */}
                     <button
                         onClick={handleCloseModal}
-                        className="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-400 text-white p-2 rounded-full shadow-lg transition-all"
+                        className="absolute top-5 right-5 z-50 bg-red-500 hover:bg-red-400 text-white p-2.5 rounded-full shadow-lg transition-all"
                         style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
                     >
-                        <X className="h-6 w-6" />
+                        <X className="h-5 w-5" />
                     </button>
 
-                    {/* Panel izquierdo - NUEVO DISEÑO */}
-                    <div className="p-0 flex-1 modal-content-left overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
+                    {/* Panel izquierdo - Detalles de la tarea */}
+                    <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[300px] max-w-[60%]">
                         <div className="flex flex-col gap-0 h-full flex-1">
-                            {/* Cabecera moderna y compacta */}
-                            <div className="flex items-center gap-4 px-10 py-8 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
+                            {/* Cabecera */}
+                            <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
                                 <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
                                     <BookOpen className="h-7 w-7 text-blue-700" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-blue-900">{tareaSeleccionada.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
+                                    <h3 className="text-xl font-bold text-blue-900">{tareaSeleccionada.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
                                 </div>
                             </div>
                             {/* Fecha de entrega */}
-                            <div className="px-10 py-6 border-b border-blue-50 bg-white">
-                                <div className="flex items-center gap-3">
+                            <div className="px-8 py-3 border-b border-blue-50 bg-white flex items-center gap-4">
+                                <div className="bg-amber-100 p-2 rounded-xl flex items-center justify-center">
                                     <Calendar className="h-5 w-5 text-amber-700" />
-                                    <div>
-                                        <div className="font-medium text-amber-900">Fecha de entrega</div>
-                                        <div className="text-sm text-amber-800">
-                                            {tareaSeleccionada.fechaEntrega
-                                                ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
-                                                    dateStyle: 'long',
-                                                    timeStyle: 'short'
-                                                })
-                                                : <span className="italic text-gray-400">Sin fecha límite</span>}
-                                        </div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-amber-900 text-base">Fecha de entrega</div>
+                                    <div className="text-sm text-amber-800">
+                                        {tareaSeleccionada.fechaEntrega
+                                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
+                                                dateStyle: 'long',
+                                                timeStyle: 'short'
+                                            })
+                                            : <span className="italic text-gray-400">Sin fecha límite</span>}
                                     </div>
                                 </div>
                             </div>
-                            {/* Descripción ocupa todo el espacio restante */}
-                            <div className="flex-1 flex flex-col px-10 py-6 border-b border-blue-50 bg-white min-h-0">
-                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                            {/* Descripción */}
+                            <div className="flex-1 flex flex-col px-8 py-5 border-b border-blue-50 bg-white min-h-0">
+                                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                     <FileText className="h-5 w-5 text-blue-400" />
                                     Descripción de la tarea
                                 </h4>
                                 <div className="flex-1 min-h-0">
-                                    <div className="bg-blue-50 rounded-xl p-6 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[80px]">
+                                    <div className="bg-blue-50 rounded-xl p-4 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[50px] text-sm">
                                         {tareaSeleccionada.contenido
                                             ? tareaSeleccionada.contenido
                                             : <span className="italic text-gray-400">Sin descripción</span>}
@@ -275,8 +276,8 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                             </div>
                             {/* Material adjunto */}
                             {downloadUrl && (
-                                <div className="px-10 py-6 bg-white">
-                                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                <div className="px-8 py-4 bg-white">
+                                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                         <Paperclip className="h-5 w-5 text-blue-400" />
                                         Material de la tarea
                                     </h4>
@@ -284,145 +285,122 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                         href={downloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-blue-100 
-                                                 text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
-                                                 shadow-sm hover:shadow group"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-blue-100 
+                                             text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
+                                             shadow-sm hover:shadow group font-medium text-sm"
                                     >
-                                        <FileText className="h-5 w-5 text-blue-400 group-hover:text-blue-600" />
+                                        <FileText className="h-4 w-4 text-blue-400 group-hover:text-blue-600" />
                                         Descargar material
                                     </a>
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
-                                 md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
-                        <div className="modal-item-stagger">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-6">Tu entrega</h4>
-                            <div className="space-y-6">
-                                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                    {entregada ? (
-                                        <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                                            <CheckCircle className="h-5 w-5" />
-                                            <span className="font-medium">¡Tarea entregada!</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-2 text-amber-600 mb-2">
-                                            <Calendar className="h-5 w-5" />
-                                            <span className="font-medium">Pendiente de entrega</span>
-                                        </div>
-                                    )}
-                                </div>
+                    {/* Panel derecho - Entrega del alumno */}
+                    <div className="flex-[0.85] bg-gradient-to-b from-gray-50 to-white px-7 py-7 w-full md:w-[300px] border-t 
+                                 md:border-t-0 md:border-l border-gray-200 flex flex-col gap-4 overflow-y-auto max-h-[96vh] min-w-[220px]">
+                        <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                            Tu entrega
+                        </h4>
+                        <div className="space-y-3">
+                            {/* Estado de la entrega */}
+                            <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold
+                                ${entregada
+                                    ? (tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
+                                        ? 'bg-blue-50 border border-blue-200 text-blue-800'
+                                        : 'bg-emerald-50 border border-emerald-200 text-emerald-800')
+                                    : 'bg-amber-50 border border-amber-200 text-amber-800'
+                                }`
+                            }>
                                 {entregada ? (
-                                    <div className="space-y-4">
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Paperclip className="h-5 w-5 text-green-600" />
-                                                <span className="font-medium text-green-800">Archivo entregado:</span>
-                                            </div>
-                                            {archivoEntregaUrl ? (
-                                                <a
-                                                    href={archivoEntregaUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                                                >
-                                                    <FileText className="h-5 w-5" />
-                                                    Descargar entrega
-                                                </a>
-                                            ) : (
-                                                <span className="text-gray-500">No se adjuntó archivo</span>
-                                            )}
-                                        </div>
-                                        <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                            <div className="font-medium text-gray-900 mb-1">Comentario enviado:</div>
-                                            <div className="text-gray-700 whitespace-pre-line">
-                                                {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
-                                            </div>
-                                        </div>
-                                        {/* Mostrar solo la nota y comentario del profesor, sin permitir editar */}
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <CheckCircle className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-blue-800">Nota:</span>
-                                                <span className="ml-2 text-blue-900 font-bold">
-                                                    {tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
-                                                        ? tareaSeleccionada.nota
-                                                        : <span className="italic text-blue-400">Sin calificar</span>
-                                                    }
-                                                </span>
-                                            </div>
-                                            <div className="text-blue-700 mt-2">
-                                                <span className="font-medium">Comentario del profesor:</span>
-                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[40px]">
-                                                    {tareaSeleccionada.comentarioCorreccion
-                                                        ? tareaSeleccionada.comentarioCorreccion
-                                                        : <span className="italic text-blue-400">Sin comentario</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-gray-700">Fecha de entrega:</span>
-                                                <span className="text-gray-700">
-                                                    {tareaSeleccionada.fechaEntregada
-                                                        ? new Date(tareaSeleccionada.fechaEntregada).toLocaleString()
-                                                        : 'Desconocida'}
-                                                </span>
-                                            </div>
-                                            {/* Eliminar el bloque de Título */}
-                                            {/* <div className="flex items-center gap-2">
-                                                <BookOpen className="h-5 w-5 text-blue-600" />
-                                                <span className="font-medium text-gray-700">Título:</span>
-                                                <span className="text-gray-700">{tareaSeleccionada.titulo || tareaSeleccionada.contenido}</span>
-                                            </div> */}
-                                        </div>
-                                    </div>
+                                    tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== '' ? (
+                                        <>
+                                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                                            ¡Tarea calificada!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                            ¡Tarea entregada!
+                                        </>
+                                    )
                                 ) : (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Comentarios (opcional)
-                                            </label>
-                                            <textarea
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                rows="4"
-                                                placeholder="Añade comentarios sobre tu entrega..."
-                                                value={comentarioEntrega}
-                                                onChange={e => setComentarioEntrega(e.target.value)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Archivo de entrega
-                                            </label>
-                                            <div className="flex items-center justify-center w-full">
-                                                <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-gray-500 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
-                                                    <FileText className="h-8 w-8 mb-2" />
-                                                    <span className="text-sm text-center">
-                                                        {archivoEntrega ? archivoEntrega.name : 'Arrastra tu archivo aquí o haz clic para seleccionar'}
-                                                    </span>
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        onChange={e => setArchivoEntrega(e.target.files[0])}
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                                            onClick={handleEntregaTarea}
-                                            disabled={isEntregando}
-                                        >
-                                            <FileText className="h-5 w-5" />
-                                            {isEntregando ? "Entregando..." : "Entregar tarea"}
-                                        </button>
-                                    </div>
+                                    <>
+                                        <Clock className="h-5 w-5 text-amber-600" />
+                                        Pendiente de entrega
+                                    </>
                                 )}
+                            </div>
+                            {/* Archivo entregado */}
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                    <Paperclip className="h-5 w-5 text-green-600" />
+                                    Archivo entregado:
+                                </div>
+                                {archivoEntregaUrl ? (
+                                    <a
+                                        href={archivoEntregaUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
+                                    >
+                                        <FileText className="h-4 w-4" />
+                                        Descargar entrega
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
+                                )}
+                            </div>
+                            {/* Comentario enviado */}
+                            <div className="bg-white border border-gray-100 rounded-xl p-3">
+                                <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                                    <FileText className="h-5 w-5 text-blue-400" />
+                                    Comentario enviado:
+                                </div>
+                                <div className="text-gray-700 whitespace-pre-line text-sm">
+                                    {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
+                                </div>
+                            </div>
+                            {/* Nota y comentario del profesor */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                                    Nota:
+                                    <span className="ml-2 text-blue-900 font-bold text-base">
+                                        {tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
+                                            ? tareaSeleccionada.nota
+                                            : <span className="italic text-blue-400 text-base">Sin calificar</span>
+                                        }
+                                    </span>
+                                </div>
+                                <div className="text-blue-700 mt-1">
+                                    <span className="font-medium text-xs">Comentario del profesor:</span>
+                                    <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
+                                        {tareaSeleccionada.comentarioCorreccion
+                                            ? tareaSeleccionada.comentarioCorreccion
+                                            : <span className="italic text-blue-400">Sin comentario</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Fecha de entrega */}
+                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="h-5 w-5 text-blue-600" />
+                                    <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
+                                    <span className="text-gray-700 text-xs">
+                                        {tareaSeleccionada.fechaEntregada
+                                            ? new Date(tareaSeleccionada.fechaEntregada).toLocaleString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })
+                                            : 'Desconocida'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -431,222 +409,186 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
         );
     };
 
-    const renderTarea = (tarea) => {
-        // Determinar si está expirada
-        let isExpirada = false;
-        if (!tarea.entregada && tarea.fechaEntrega) {
-            const fecha = new Date(tarea.fechaEntrega);
-            const hoy = new Date();
-            isExpirada = fecha < hoy;
+    // Nuevo: iconos y colores por sección
+    const seccionConfig = {
+        calificadas: {
+            icon: <CheckCircle className="h-6 w-6 text-blue-600" />,
+            bg: "from-blue-100 via-blue-50 to-white",
+            border: "border-blue-200"
+        },
+        entregadas: {
+            icon: <FileText className="h-6 w-6 text-emerald-600" />,
+            bg: "from-emerald-100 via-emerald-50 to-white",
+            border: "border-emerald-200"
+        },
+        expiradas: {
+            icon: <AlertCircle className="h-6 w-6 text-red-600" />,
+            bg: "from-red-100 via-red-50 to-white",
+            border: "border-red-200"
+        },
+        estaSemana: {
+            icon: <Clock className="h-6 w-6 text-orange-600" />,
+            bg: "from-orange-100 via-orange-50 to-white",
+            border: "border-orange-200"
+        },
+        esteMes: {
+            icon: <Calendar className="h-6 w-6 text-blue-600" />,
+            bg: "from-blue-100 via-blue-50 to-white",
+            border: "border-blue-200"
+        },
+        proximamente: {
+            icon: <Hourglass className="h-6 w-6 text-green-600" />,
+            bg: "from-green-100 via-green-50 to-white",
+            border: "border-green-200"
+        },
+        sinFecha: {
+            icon: <AlertCircle className="h-6 w-6 text-gray-600" />,
+            bg: "from-gray-100 via-gray-50 to-white",
+            border: "border-gray-200"
         }
-
-        // MODIFICADO: Determinar si está calificada
-        const isCalificada = tarea.entregada && tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '';
-        // LOGS para depuración
-        console.log('[TareasResumenAlumno][renderTarea] tarea:', tarea);
-        console.log('[TareasResumenAlumno][renderTarea] isCalificada:', isCalificada, 'nota:', tarea.nota, 'entregada:', tarea.entregada);
-
-        return (
-            <div
-                key={tarea.id}
-                onClick={() => handleClickTarea(tarea)}
-                className="group bg-gradient-to-r from-blue-50 to-blue-50/50 border-l-4 border-blue-400 
-                         p-4 rounded-xl relative cursor-pointer transition-all duration-300
-                         hover:shadow-xl hover:z-20"
-                style={{
-                    outline: "none"
-                }}
-            >
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
-                            <BookOpen className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <h3 className="font-semibold text-blue-700">{tarea.titulo}</h3>
-                    </div>
-                    {/* MODIFICADO: Añadir estado "Calificada" */}
-                    {isCalificada ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 
-                                    text-xs font-medium rounded-full border border-blue-200">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                            Calificada ({tarea.nota})
-                        </div>
-                    ) : tarea.entregada ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 
-                                    text-xs font-medium rounded-full border border-emerald-200">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                            Entregada
-                        </div>
-                    ) : isExpirada ? (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 
-                                    text-xs font-medium rounded-full border border-red-200">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                            Expirada
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 
-                                    text-xs font-medium rounded-full border border-amber-200">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                            Pendiente
-                        </div>
-                    )}
-                </div>
-                <div className="text-sm text-gray-600">
-                    <Calendar className="h-4 w-4 inline mr-1" />
-                    {tarea.fechaEntrega
-                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                        : "Sin fecha límite"}
-                </div>
-                <div className="mt-2 flex justify-between items-center">
-                    <span className="text-sm text-gray-500">
-                        {tarea.clase?.nombre || 'Sin clase'}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        {tarea.archivoUrl && (
-                            <span className="flex items-center gap-1 text-blue-600">
-                                <Paperclip className="h-4 w-4" />
-                                <span className="text-xs">Adjunto</span>
-                            </span>
-                        )}
-                        <span className="text-xs text-gray-500">
-                            Ver detalles →
-                        </span>
-                    </div>
-                </div>
-                {/* Mejorar el hover: outline y z-index, sin scale */}
-                <style>{`
-                    .group:hover {
-                        outline: 2px solid #3b82f6; /* azul-500 */
-                        outline-offset: 2px;
-                        background: linear-gradient(to right, #e0e7ff, #f0f9ff 50%);
-                    }
-                `}</style>
-            </div>
-        );
     };
 
-    const renderSeccion = (titulo, tareas, seccionId, icon, bgColor) => (
-        <div
-            ref={seccionRefs[seccionId]}
-            className="space-y-3"
-        >
-            <button
-                onClick={() => toggleSeccion(seccionId)}
-                className={`w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm 
-                hover:shadow-md hover:border-gray-200 transition-all duration-300 ease-in-out
-                ${seccionesAbiertas[seccionId] ? 'ring-2 ring-blue-100 border-blue-200' : ''}`}
+    // Nuevo: render sección rediseñada
+    const renderSeccion = (titulo, tareas, seccionId) => {
+        const config = seccionConfig[seccionId];
+        const abierto = seccionesAbiertas[seccionId];
+        return (
+            <div
+                ref={seccionRefs[seccionId]}
+                className={`mb-5 transition-all duration-300`}
             >
-                <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-lg ${bgColor} transform transition-transform duration-200 
-                        ${seccionesAbiertas[seccionId] ? 'scale-110' : 'scale-100'}`}>
-                        {icon}
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-900 text-lg">{titulo}</span>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300
-                            ${seccionesAbiertas[seccionId]
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-700'}`}
-                        >
+                <button
+                    onClick={() => toggleSeccion(seccionId)}
+                    className={`
+                        w-full flex items-center justify-between px-6 py-4 rounded-2xl shadow border ${config?.border}
+                        bg-gradient-to-r ${config?.bg}
+                        hover:shadow-lg transition-all duration-300
+                        ${abierto ? 'ring-2 ring-blue-200' : ''}
+                    `}
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                            {config?.icon}
+                        </div>
+                        <span className="font-bold text-lg text-gray-900">{titulo}</span>
+                        <span className={`ml-2 px-3 py-1 rounded-full text-base font-semibold bg-white text-blue-700 border border-blue-100`}>
                             {tareas.length}
                         </span>
                     </div>
-                </div>
-                <div className={`transform transition-transform duration-300 ${seccionesAbiertas[seccionId] ? 'rotate-180' : 'rotate-0'
-                    }`}>
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
-                </div>
-            </button>
-
-            <div className={`grid transition-all duration-300 ease-in-out
-                ${seccionesAbiertas[seccionId]
-                    ? 'grid-rows-[1fr] opacity-100 translate-y-0'
-                    : 'grid-rows-[0fr] opacity-0 -translate-y-4'}
-            `}>
-                <div className="overflow-hidden">
-                    <div className="space-y-3 pt-2">
-                        {tareas.length > 0 ? (
-                            tareas.map((tarea, index) => (
-                                <div
-                                    key={tarea.id}
-                                    style={{
-                                        animationDelay: `${index * 50}ms`
-                                    }}
-                                    className="animate-slideIn"
-                                >
-                                    {renderTarea(tarea)}
+                    <ChevronDown className={`h-6 w-6 text-gray-400 transition-transform duration-300 ${abierto ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`grid transition-all duration-300 ${abierto ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden">
+                        <div className="space-y-3 pt-3">
+                            {tareas.length > 0 ? (
+                                tareas.map((tarea, idx) => (
+                                    <div
+                                        key={tarea.id}
+                                        className={`
+                                            group bg-white border border-blue-50 rounded-xl p-5 shadow-sm hover:shadow-xl
+                                            transition-all duration-300 cursor-pointer
+                                            hover:border-blue-300
+                                        `}
+                                        onClick={() => handleClickTarea(tarea)}
+                                        style={{ animationDelay: `${idx * 60}ms` }}
+                                    >
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="bg-blue-100 p-2 rounded-lg">
+                                                <BookOpen className="h-5 w-5 text-blue-600" />
+                                            </div>
+                                            <h3 className="font-semibold text-blue-900 text-base truncate">{tarea.titulo}</h3>
+                                            {tarea.archivoUrl && (
+                                                <span className="flex items-center gap-1 text-blue-600 ml-2">
+                                                    <Paperclip className="h-4 w-4" />
+                                                    <span className="text-xs">Adjunto</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-1">
+                                            <span>
+                                                <Calendar className="h-4 w-4 inline mr-1" />
+                                                {tarea.fechaEntrega
+                                                    ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })
+                                                    : "Sin fecha límite"}
+                                            </span>
+                                            <span>
+                                                {tarea.clase?.nombre || 'Sin clase'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            {/* Estado de la tarea */}
+                                            {(() => {
+                                                let isExpirada = false;
+                                                if (!tarea.entregada && tarea.fechaEntrega) {
+                                                    const fecha = new Date(tarea.fechaEntrega);
+                                                    const hoy = new Date();
+                                                    isExpirada = fecha < hoy;
+                                                }
+                                                const isCalificada = tarea.entregada && tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '';
+                                                if (isCalificada) {
+                                                    return (
+                                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                                            Calificada ({tarea.nota})
+                                                        </span>
+                                                    );
+                                                } else if (tarea.entregada) {
+                                                    return (
+                                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                            Entregada
+                                                        </span>
+                                                    );
+                                                } else if (isExpirada) {
+                                                    return (
+                                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                            Expirada
+                                                        </span>
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                            Pendiente
+                                                        </span>
+                                                    );
+                                                }
+                                            })()}
+                                            <span className="ml-auto text-xs text-blue-600 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                Ver detalles →
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8 bg-gradient-to-r from-blue-50 to-white rounded-xl border border-blue-100 animate-fadeIn">
+                                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3 animate-bounce" />
+                                    <p className="text-gray-500">No hay tareas en este período</p>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100
-                                animate-fadeIn">
-                                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3 animate-bounce" />
-                                <p className="text-gray-500">No hay tareas en este período</p>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
-        <div className="space-y-4">
-            {renderSeccion(
-                "Calificadas",
-                tareasCalificadas,
-                "calificadas",
-                <CheckCircle className="h-5 w-5 text-blue-600" />,
-                "bg-blue-50"
-            )}
-            {renderSeccion(
-                "Entregadas",
-                tareasEntregadas,
-                "entregadas",
-                <FileText className="h-5 w-5 text-emerald-600" />,
-                "bg-emerald-50"
-            )}
-            {renderSeccion(
-                "Expiradas",
-                tareasExpiradas,
-                "expiradas",
-                <AlertCircle className="h-5 w-5 text-red-600" />,
-                "bg-red-50"
-            )}
-            {renderSeccion(
-                "Esta semana",
-                tareasEstaSemana,
-                "estaSemana",
-                <Clock className="h-5 w-5 text-orange-600" />,
-                "bg-orange-50"
-            )}
-            {renderSeccion(
-                "Este mes",
-                tareasEsteMes,
-                "esteMes",
-                <Calendar className="h-5 w-5 text-blue-600" />,
-                "bg-blue-50"
-            )}
-            {renderSeccion(
-                "Próximamente",
-                tareasProximamente,
-                "proximamente",
-                <Hourglass className="h-5 w-5 text-green-600" />,
-                "bg-green-50"
-            )}
-            {renderSeccion(
-                "Sin fecha de entrega",
-                tareasSinFecha,
-                "sinFecha",
-                <AlertCircle className="h-5 w-5 text-gray-600" />,
-                "bg-gray-50"
-            )}
+        <div className="space-y-6">
+            {renderSeccion("Calificadas", tareasCalificadas, "calificadas")}
+            {renderSeccion("Entregadas", tareasEntregadas, "entregadas")}
+            {renderSeccion("Expiradas", tareasExpiradas, "expiradas")}
+            {renderSeccion("Esta semana", tareasEstaSemana, "estaSemana")}
+            {renderSeccion("Este mes", tareasEsteMes, "esteMes")}
+            {renderSeccion("Próximamente", tareasProximamente, "proximamente")}
+            {renderSeccion("Sin fecha de entrega", tareasSinFecha, "sinFecha")}
             {renderTareaModal()}
         </div>
     );

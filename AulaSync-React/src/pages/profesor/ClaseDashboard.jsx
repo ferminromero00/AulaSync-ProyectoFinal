@@ -890,14 +890,16 @@ const ClaseDashboard = () => {
                                                     </div>
                                                     <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
                                                     {/* Estado de entregas solo para profesor */}
-                                                    <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-20">
-                                                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
-                                                            Entregadas: {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)}
-                                                        </span>
-                                                        <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                                                            Pendientes: {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))}
-                                                        </span>
-                                                    </div>
+                                                    {role === 'profesor' && (
+                                                        <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-20">
+                                                            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
+                                                                Entregadas: {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
+                                                                Pendientes: {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-3 mb-2 z-20 relative">
                                                         <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
                                                             <BookOpen className="h-5 w-5 text-blue-600" />
