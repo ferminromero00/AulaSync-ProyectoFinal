@@ -1072,6 +1072,7 @@ const ClaseDashboard = () => {
                 onOpenEntrega={handleOpenEntregaModal}
                 entregaAlumno={role === 'alumno' ? getEntregaAlumnoActual() : null}
                 onTareaEntregada={handleTareaEntregada}
+                // ...existing code...
             />
 
             <EntregaModal

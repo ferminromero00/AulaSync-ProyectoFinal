@@ -230,72 +230,71 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                         <X className="h-6 w-6" />
                     </button>
 
-                    <div className="p-8 flex-1 modal-content-left overflow-y-auto">
-                        <div className="modal-item-stagger space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="bg-blue-100 p-3 rounded-xl">
-                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                    {/* Panel izquierdo - NUEVO DISEÑO */}
+                    <div className="p-0 flex-1 modal-content-left overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
+                        <div className="flex flex-col gap-0 h-full flex-1">
+                            {/* Cabecera moderna y compacta */}
+                            <div className="flex items-center gap-4 px-10 py-8 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
+                                <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
+                                    <BookOpen className="h-7 w-7 text-blue-700" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-gray-900">{tareaSeleccionada.titulo}</h3>
-                                    <div className="text-sm text-gray-500 mt-1">
-                                        {/* Mostrar correctamente el nombre de la clase */}
-                                        Publicado por {tareaSeleccionada.clase?.nombre || 'Clase sin nombre'}
-                                    </div>
+                                    <h3 className="text-2xl font-bold text-blue-900">{tareaSeleccionada.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
                                 </div>
                             </div>
-
-                            <div className="bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/50 
-                                        rounded-xl px-4 py-3 flex items-center gap-3">
-                                <div className="bg-amber-200/50 p-2 rounded-lg">
+                            {/* Fecha de entrega */}
+                            <div className="px-10 py-6 border-b border-blue-50 bg-white">
+                                <div className="flex items-center gap-3">
                                     <Calendar className="h-5 w-5 text-amber-700" />
-                                </div>
-                                <div>
-                                    <div className="font-medium text-amber-900">Fecha de entrega</div>
-                                    <div className="text-sm text-amber-800">
-                                        {tareaSeleccionada.fechaEntrega
-                                            ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
-                                                dateStyle: 'long',
-                                                timeStyle: 'short'
-                                              })
-                                            : "Sin fecha límite"}
+                                    <div>
+                                        <div className="font-medium text-amber-900">Fecha de entrega</div>
+                                        <div className="text-sm text-amber-800">
+                                            {tareaSeleccionada.fechaEntrega
+                                                ? new Date(tareaSeleccionada.fechaEntrega).toLocaleString('es-ES', {
+                                                    dateStyle: 'long',
+                                                    timeStyle: 'short'
+                                                })
+                                                : <span className="italic text-gray-400">Sin fecha límite</span>}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div>
-                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                    <FileText className="h-5 w-5 text-gray-500" />
+                            {/* Descripción ocupa todo el espacio restante */}
+                            <div className="flex-1 flex flex-col px-10 py-6 border-b border-blue-50 bg-white min-h-0">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-blue-400" />
                                     Descripción de la tarea
                                 </h4>
-                                <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[200px]
-                                            border border-gray-100">
-                                    {tareaSeleccionada.contenido || "Sin descripción"}
+                                <div className="flex-1 min-h-0">
+                                    <div className="bg-blue-50 rounded-xl p-6 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[80px]">
+                                        {tareaSeleccionada.contenido
+                                            ? tareaSeleccionada.contenido
+                                            : <span className="italic text-gray-400">Sin descripción</span>}
+                                    </div>
                                 </div>
                             </div>
-
+                            {/* Material adjunto */}
                             {downloadUrl && (
-                                <div className="pt-4">
-                                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                        <Paperclip className="h-5 w-5 text-gray-500" />
+                                <div className="px-10 py-6 bg-white">
+                                    <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                        <Paperclip className="h-5 w-5 text-blue-400" />
                                         Material de la tarea
                                     </h4>
                                     <a
                                         href={downloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 
-                                                 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-blue-100 
+                                                 text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
                                                  shadow-sm hover:shadow group"
                                     >
-                                        <FileText className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
+                                        <FileText className="h-5 w-5 text-blue-400 group-hover:text-blue-600" />
                                         Descargar material
                                     </a>
                                 </div>
                             )}
                         </div>
                     </div>
-
                     <div className="bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
                                  md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto">
                         <div className="modal-item-stagger">

@@ -157,34 +157,20 @@ const TareaModal = ({
                 </button>
 
                 {/* Panel izquierdo - Detalles de la tarea */}
-                <div className="p-8 flex-1 modal-content-left overflow-y-auto">
-                    {/* Animaciones locales solo para este panel */}
-                    <style>{`
-                        @keyframes tareaDetalleFadeIn {
-                            0% { opacity: 0; transform: translateY(24px);}
-                            100% { opacity: 1; transform: none;}
-                        }
-                        .tarea-detalle-anim { animation: tareaDetalleFadeIn 0.5s both; }
-                        .tarea-detalle-stagger > * { opacity: 0; }
-                        .tarea-detalle-stagger > *:nth-child(1) { animation-delay: 80ms; }
-                        .tarea-detalle-stagger > *:nth-child(2) { animation-delay: 180ms; }
-                        .tarea-detalle-stagger > *:nth-child(3) { animation-delay: 280ms; }
-                        .tarea-detalle-stagger > *:nth-child(4) { animation-delay: 380ms; }
-                    `}</style>
-                    <div className="tarea-detalle-stagger space-y-6">
-                        {/* Cabecera moderna */}
-                        <div className="flex items-center gap-4 tarea-detalle-anim">
-                            <div className="bg-blue-100 p-4 rounded-2xl shadow-lg flex items-center justify-center">
-                                <BookOpen className="h-7 w-7 text-blue-600" />
+                <div className="p-0 flex-1 modal-content-left overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
+                    <div className="flex flex-col gap-0 h-full flex-1">
+                        {/* Cabecera moderna y compacta */}
+                        <div className="flex items-center gap-4 px-10 py-8 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
+                            <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
+                                <BookOpen className="h-7 w-7 text-blue-700" />
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-blue-900">{tarea.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
-                                {/* Eliminado el nombre de la clase debajo del título */}
                             </div>
                         </div>
                         {/* Fecha de entrega */}
-                        <div className="tarea-detalle-anim">
-                            <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-amber-100/60 border border-amber-200/60 rounded-xl px-5 py-4">
+                        <div className="px-10 py-6 border-b border-blue-50 bg-white">
+                            <div className="flex items-center gap-3">
                                 <Calendar className="h-5 w-5 text-amber-700" />
                                 <div>
                                     <div className="font-medium text-amber-900">Fecha de entrega</div>
@@ -199,34 +185,36 @@ const TareaModal = ({
                                 </div>
                             </div>
                         </div>
-                        {/* Descripción */}
-                        <div className="tarea-detalle-anim">
+                        {/* Descripción ocupa todo el espacio restante */}
+                        <div className="flex-1 flex flex-col px-10 py-6 border-b border-blue-50 bg-white min-h-0">
                             <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-gray-500" />
+                                <FileText className="h-5 w-5 text-blue-400" />
                                 Descripción de la tarea
                             </h4>
-                            <div className="bg-gray-50 rounded-xl p-6 text-gray-700 whitespace-pre-line min-h-[120px] border border-gray-100">
-                                {tarea.contenido
-                                    ? tarea.contenido
-                                    : <span className="italic text-gray-400">Sin descripción</span>}
+                            <div className="flex-1 min-h-0">
+                                <div className="bg-blue-50 rounded-xl p-6 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[80px]">
+                                    {tarea.contenido
+                                        ? tarea.contenido
+                                        : <span className="italic text-gray-400">Sin descripción</span>}
+                                </div>
                             </div>
                         </div>
                         {/* Material adjunto */}
                         {downloadUrl && (
-                            <div className="tarea-detalle-anim pt-2">
+                            <div className="px-10 py-6 bg-white">
                                 <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                                    <Paperclip className="h-5 w-5 text-gray-500" />
+                                    <Paperclip className="h-5 w-5 text-blue-400" />
                                     Material de la tarea
                                 </h4>
                                 <a
                                     href={downloadUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 
-                                             text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-blue-100 
+                                             text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all
                                              shadow-sm hover:shadow group"
                                 >
-                                    <FileText className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
+                                    <FileText className="h-5 w-5 text-blue-400 group-hover:text-blue-600" />
                                     Descargar material
                                 </a>
                             </div>
@@ -283,7 +271,8 @@ const TareaModal = ({
                                     <Users className="h-5 w-5 text-blue-500" />
                                     <span className="font-semibold text-blue-900 text-lg">Estado por estudiante</span>
                                 </div>
-                                <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                                {/* Cambia aquí: max-h-64 y overflow-y-auto */}
+                                <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100 max-h-64 overflow-y-auto">
                                     {claseData?.estudiantes?.map((estudiante, idx) => {
                                         // Buscar la entrega de este estudiante
                                         const entrega = tarea.entregas?.find(e =>

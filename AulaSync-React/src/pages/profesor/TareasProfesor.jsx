@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { getTareasByProfesor } from "../../services/stats";
-import { BookOpen, CheckCircle, FileText, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { BookOpen, CheckCircle, FileText, ChevronDown, Calendar, ChevronRight } from "lucide-react";
 import { GlobalContext } from "../../App";
 import { TareaModal, EntregaModal } from "../../components/clase";
 import { API_BASE_URL } from "../../config/config";
@@ -136,41 +136,73 @@ const TareasProfesor = () => {
         }
     };
 
-    const tareasPendientes = tareas.filter(t =>
-        t.tipo === "tarea" &&
-        Array.isArray(t.entregas) &&
-        (
-            t.entregas.length < (t.numEstudiantes || 0) ||
-            t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === "")
-        )
-    );
-    const tareasFinalizadas = tareas.filter(t =>
-        t.tipo === "tarea" &&
-        Array.isArray(t.entregas) &&
-        t.entregas.length === (t.numEstudiantes || 0) &&
-        t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== "")
-    );
-
     const renderTarea = (tarea) => (
         <div
             key={tarea.id}
-            className="p-4 bg-white rounded-lg border border-gray-100 hover:border-blue-500 transition-colors mb-2 cursor-pointer"
             onClick={() => handleAbrirTarea(tarea)}
+            className="group p-5 border border-gray-100 rounded-xl cursor-pointer
+                bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
+                transition-all duration-300
+                overflow-hidden
+                hover:shadow-2xl hover:border-blue-400 hover:bg-white
+                hover:scale-[1.01] hover:z-10"
         >
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-blue-600" />
-                    <h4 className="font-medium text-gray-900">{tarea.titulo || tarea.contenido}</h4>
-                </div>
-                <span className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
-                    {tarea.entregas?.length || 0}/{tarea.numEstudiantes || 0} entregas
-                </span>
+            {/* Fondo decorativo animado */}
+            <div className="pointer-events-none absolute inset-0 z-0">
+                <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
             </div>
-            <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">{tarea.clase?.nombre || "Clase"}</span>
-                <span className="text-gray-500">
-                    Límite: {tarea.fechaEntrega ? new Date(tarea.fechaEntrega).toLocaleDateString() : "Sin fecha"}
-                </span>
+            <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
+            {/* Contenido principal */}
+            <div className="relative z-20">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h4 className="font-medium text-gray-900 text-lg group-hover:text-blue-700 transition-colors">{tarea.titulo}</h4>
+                    </div>
+                    <span className="px-3 py-1.5 text-xs font-medium rounded-full border 
+                        bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1.5">
+                        <CheckCircle className="h-4 w-4" />
+                        {tarea.entregas?.length || 0}/{tarea.numEstudiantes || 0} entregas
+                    </span>
+                </div>
+                <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
+                    <span className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {tarea.fechaEntrega ? 
+                            `Límite: ${new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric', year: 'numeric' })}` 
+                            : "Sin fecha límite"}
+                    </span>
+                    <span className="flex items-center gap-2">
+                        {tarea.clase?.nombre || "Clase"}
+                    </span>
+                </div>
+                {/* Barra de progreso */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-1.5 text-sm">
+                        <span className="text-gray-600">Progreso de entregas</span>
+                        <span className="text-blue-600 font-medium">
+                            {Math.round(((tarea.entregas?.length || 0) / (tarea.numEstudiantes || 1)) * 100)}%
+                        </span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-out" 
+                            style={{ 
+                                width: `${((tarea.entregas?.length || 0) / (tarea.numEstudiantes || 1)) * 100}%`,
+                            }}
+                        />
+                    </div>
+                </div>
+                {/* Indicador de acción */}
+                <div className="mt-4 flex justify-end">
+                    <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                        Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                </div>
             </div>
         </div>
     );
@@ -207,8 +239,8 @@ const TareasProfesor = () => {
             <div className={`grid transition-all duration-300 ease-in-out
                 ${seccionesAbiertas[seccion]
                     ? 'grid-rows-[1fr] opacity-100 translate-y-0'
-                    : 'grid-rows-[0fr] opacity-0 -translate-y-4'}
-            `}>
+                    : 'grid-rows-[0fr] opacity-0 -translate-y-4'}`}
+            >
                 <div className="overflow-hidden">
                     <div className="space-y-3 pt-2">
                         {tareasFiltradas.length > 0 ? (
@@ -242,8 +274,6 @@ const TareasProfesor = () => {
             </div>
             <div className="space-y-6">
                 {renderSeccion("Todas las tareas", tareas, "todas", <BookOpen className="h-5 w-5 text-blue-600" />, "bg-blue-50")}
-                {renderSeccion("Pendientes de calificar", tareasPendientes, "pendientes", <AlertCircle className="h-5 w-5 text-amber-600" />, "bg-amber-50")}
-                {renderSeccion("Finalizadas", tareasFinalizadas, "finalizadas", <CheckCircle className="h-5 w-5 text-green-600" />, "bg-green-50")}
             </div>
             <TareaModal
                 showModal={showTareaModal}
