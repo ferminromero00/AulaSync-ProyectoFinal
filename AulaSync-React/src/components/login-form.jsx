@@ -33,10 +33,20 @@ export default function LoginForm({ role }) {
             const perfilData = await getPerfil();
             localStorage.setItem('userId', perfilData.id); // Guardar el ID del usuario
 
+            // NUEVO: Cargar invitaciones/notificaciones si es alumno
+            let invitaciones = [];
+            if (role === 'alumno') {
+                try {
+                    invitaciones = await obtenerInvitacionesPendientes();
+                } catch (e) {
+                    invitaciones = [];
+                }
+            }
+
             setUserData({ 
                 user: perfilData, 
                 clases: [], 
-                invitaciones: [], 
+                invitaciones, // <-- aquí ya tienes las notificaciones
                 loading: true 
             });
 

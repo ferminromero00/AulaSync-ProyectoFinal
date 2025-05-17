@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { Bell, Check, X } from "lucide-react";
+import { Bell, Check, X, FileText, ChevronRight } from "lucide-react";
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../services/invitaciones';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -213,52 +213,77 @@ const NotificationButton = () => {
                                 ))}
                                 {/* Notificaciones de tarea */}
                                 {!loading && notificacionesVisibles.filter(n => n.tipo === 'nueva_tarea').map((notif) => (
-                                    <div key={notif.id} className="bg-yellow-50 rounded p-3">
-                                        <div className="flex flex-col gap-2">
-                                            <div className="font-medium text-yellow-800">
-                                                {notif.datos?.tareaTitulo
-                                                    ? <>Nueva tarea: <span className="font-bold">{notif.datos.tareaTitulo}</span></>
-                                                    : notif.mensaje
-                                                }
+                                    <div
+                                        key={notif.id}
+                                        className="relative bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-xl p-4 shadow group transition-all duration-300 hover:shadow-lg"
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        {/* Fondo decorativo animado */}
+                                        <div className="pointer-events-none absolute -top-8 -left-8 w-24 h-24 bg-blue-100 opacity-40 rounded-full blur-2xl group-hover:scale-110 transition-all duration-500" />
+                                        <div className="pointer-events-none absolute -bottom-8 -right-8 w-24 h-24 bg-indigo-100 opacity-30 rounded-full blur-2xl group-hover:scale-110 transition-all duration-500" />
+                                        <div className="flex items-center gap-3 mb-2 z-10 relative">
+                                            <div className="bg-blue-200 p-2 rounded-lg flex items-center justify-center shadow">
+                                                <FileText className="h-6 w-6 text-blue-600" />
                                             </div>
-                                            <div className="text-xs text-gray-600">
-                                                Profesor: {notif.datos?.profesor}
+                                            <div>
+                                                <div className="font-semibold text-blue-900 text-base flex items-center gap-2">
+                                                    <span className="inline-block px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider border border-blue-200 mr-1">
+                                                        Nueva tarea
+                                                    </span>
+                                                    {notif.datos?.tareaTitulo
+                                                        ? <span className="font-bold">{notif.datos.tareaTitulo}</span>
+                                                        : notif.mensaje
+                                                    }
+                                                </div>
+                                                <div className="text-xs text-blue-500 font-medium">
+                                                    Profesor: {notif.datos?.profesor}
+                                                </div>
                                             </div>
-                                            <div className="text-xs text-gray-500">
-                                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
-                                                <br /><br />
-                                                {!notif.datos?.tareaTitulo && 'Nueva tarea creada'}
-                                            </div>
-                                            <div className="flex justify-end mt-2">
-                                                <button
-                                                    className="bg-yellow-600 hover:bg-yellow-700 text-white rounded px-3 py-1 text-xs"
-                                                    onClick={async () => {
-                                                        setShowNotifMenu(false);
-                                                        // Eliminar notificación antes de navegar
-                                                        const token = localStorage.getItem('token');
-                                                        try {
-                                                            await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
-                                                                method: 'POST',
-                                                                headers: { 'Authorization': `Bearer ${token}` }
-                                                            });
-                                                            setUserData(prev => ({
-                                                                ...prev,
-                                                                invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
-                                                            }));
-                                                        } catch (e) {
-                                                            // Si falla, navega igual
-                                                        }
-                                                        // Navegar a la clase y abrir el modal de la tarea si hay tareaId
-                                                        if (notif.datos?.claseId && notif.datos?.tareaId) {
-                                                            navigate(`/alumno/clase/${notif.datos.claseId}?tareaId=${notif.datos.tareaId}`);
-                                                        } else if (notif.datos?.claseId) {
-                                                            navigate(`/alumno/clase/${notif.datos.claseId}`);
-                                                        }
-                                                    }}
-                                                >
-                                                    Ir a clase
-                                                </button>
-                                            </div>
+                                        </div>
+                                        <div className="text-xs text-gray-500 mb-2 z-10 relative">
+                                            {notif.createdAt ? new Date(notif.createdAt).toLocaleString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) : ''}
+                                        </div>
+                                        <div className="z-10 relative text-sm text-blue-900 mb-2">
+                                            <span className="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-medium">
+                                                ¡Ya puedes consultar y entregar esta tarea!
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-end mt-2 z-10 relative">
+                                            <button
+                                                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition text-sm"
+                                                onClick={async () => {
+                                                    setShowNotifMenu(false);
+                                                    // Eliminar notificación antes de navegar
+                                                    const token = localStorage.getItem('token');
+                                                    try {
+                                                        await fetch(`${API_BASE_URL}/api/notificaciones/${notif.id}/leer`, {
+                                                            method: 'POST',
+                                                            headers: { 'Authorization': `Bearer ${token}` }
+                                                        });
+                                                        setUserData(prev => ({
+                                                            ...prev,
+                                                            invitaciones: prev.invitaciones.filter(n => n.id !== notif.id)
+                                                        }));
+                                                    } catch (e) {
+                                                        // Si falla, navega igual
+                                                    }
+                                                    // Navegar a la clase y abrir el modal de la tarea si hay tareaId
+                                                    if (notif.datos?.claseId && notif.datos?.tareaId) {
+                                                        navigate(`/alumno/clase/${notif.datos.claseId}?tareaId=${notif.datos.tareaId}`);
+                                                    } else if (notif.datos?.claseId) {
+                                                        navigate(`/alumno/clase/${notif.datos.claseId}`);
+                                                    }
+                                                }}
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                                Ir a clase
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
