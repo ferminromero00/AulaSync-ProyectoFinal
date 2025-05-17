@@ -353,80 +353,127 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                     )}
                                 </div>
                             </div>
-                            <div className="tarea-anim-fadeIn">
-                                <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                        <Paperclip className="h-5 w-5 text-green-600" />
-                                        Archivo entregado:
-                                    </div>
-                                    {archivoEntregaUrl ? (
-                                        <a
-                                            href={archivoEntregaUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
-                                        >
-                                            <FileText className="h-4 w-4" />
-                                            Descargar entrega
-                                        </a>
-                                    ) : (
-                                        <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="tarea-anim-fadeIn">
-                                <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
-                                    <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
-                                        <FileText className="h-5 w-5 text-blue-400" />
-                                        Comentario enviado:
-                                    </div>
-                                    <div className="text-gray-700 whitespace-pre-line text-sm">
-                                        {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="tarea-anim-fadeIn">
-                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
-                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                                        Nota:
-                                        <span className="ml-2 text-blue-900 font-bold text-base">
-                                            {tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
-                                                ? tareaSeleccionada.nota
-                                                : <span className="italic text-blue-400 text-base">Sin calificar</span>
-                                            }
-                                        </span>
-                                    </div>
-                                    <div className="text-blue-700 mt-1">
-                                        <span className="font-medium text-xs">Comentario del profesor:</span>
-                                        <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
-                                            {tareaSeleccionada.comentarioCorreccion
-                                                ? tareaSeleccionada.comentarioCorreccion
-                                                : <span className="italic text-blue-400">Sin comentario</span>
-                                            }
+                            {/* SOLO mostrar detalles de entrega si está entregada */}
+                            {entregada ? (
+                                <>
+                                    <div className="tarea-anim-fadeIn">
+                                        <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                            <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                                <Paperclip className="h-5 w-5 text-green-600" />
+                                                Archivo entregado:
+                                            </div>
+                                            {archivoEntregaUrl ? (
+                                                <a
+                                                    href={archivoEntregaUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
+                                                >
+                                                    <FileText className="h-4 w-4" />
+                                                    Descargar entrega
+                                                </a>
+                                            ) : (
+                                                <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="tarea-anim-fadeIn">
-                                <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="h-5 w-5 text-blue-600" />
-                                        <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
-                                        <span className="text-gray-700 text-xs">
-                                            {tareaSeleccionada.fechaEntregada
-                                                ? new Date(tareaSeleccionada.fechaEntregada).toLocaleString('es-ES', {
-                                                    day: 'numeric',
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })
-                                                : 'Desconocida'}
-                                        </span>
+                                    <div className="tarea-anim-fadeIn">
+                                        <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
+                                            <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                                                <FileText className="h-5 w-5 text-blue-400" />
+                                                Comentario enviado:
+                                            </div>
+                                            <div className="text-gray-700 whitespace-pre-line text-sm">
+                                                {comentarioMostrado ? comentarioMostrado : <span className="italic text-gray-400">Sin comentario</span>}
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div className="tarea-anim-fadeIn">
+                                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
+                                            <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                                <CheckCircle className="h-5 w-5 text-blue-600" />
+                                                Nota:
+                                                <span className="ml-2 text-blue-900 font-bold text-base">
+                                                    {tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
+                                                        ? tareaSeleccionada.nota
+                                                        : <span className="italic text-blue-400 text-base">Sin calificar</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div className="text-blue-700 mt-1">
+                                                <span className="font-medium text-xs">Comentario del profesor:</span>
+                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
+                                                    {tareaSeleccionada.comentarioCorreccion
+                                                        ? tareaSeleccionada.comentarioCorreccion
+                                                        : <span className="italic text-blue-400">Sin comentario</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="tarea-anim-fadeIn">
+                                        <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="h-5 w-5 text-blue-600" />
+                                                <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
+                                                <span className="text-gray-700 text-xs">
+                                                    {tareaSeleccionada.fechaEntregada
+                                                        ? new Date(tareaSeleccionada.fechaEntregada).toLocaleString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })
+                                                        : 'Desconocida'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                // FORMULARIO DE ENTREGA SOLO SI NO está entregada
+                                <div className="tarea-anim-fadeIn">
+                                    <form
+                                        className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col gap-4 tarea-anim-slideUp"
+                                        onSubmit={e => {
+                                            e.preventDefault();
+                                            handleEntregaTarea();
+                                        }}
+                                    >
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-900 mb-1">
+                                                Adjuntar archivo
+                                            </label>
+                                            <input
+                                                type="file"
+                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar"
+                                                onChange={e => setArchivoEntrega(e.target.files[0])}
+                                                className="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-900 mb-1">
+                                                Comentario (opcional)
+                                            </label>
+                                            <textarea
+                                                value={comentarioEntrega}
+                                                onChange={e => setComentarioEntrega(e.target.value)}
+                                                rows={3}
+                                                className="block w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                                placeholder="Escribe un comentario para el profesor..."
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/10 transition-all text-lg"
+                                            disabled={isEntregando}
+                                        >
+                                            {isEntregando ? 'Entregando...' : 'Entregar tarea'}
+                                        </button>
+                                    </form>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

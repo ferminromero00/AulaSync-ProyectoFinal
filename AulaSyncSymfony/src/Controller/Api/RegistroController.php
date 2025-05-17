@@ -32,12 +32,20 @@ class RegistroController extends AbstractController
     public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $email = $data['email'] ?? null;
+        $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
 
         // Validar email y que no exista ya
         if (!$email || $em->getRepository(Alumno::class)->findOneBy(['email' => $email]) || $em->getRepository(Profesor::class)->findOneBy(['email' => $email])) {
             return new JsonResponse(['error' => 'Email inválido o ya registrado'], 400);
         }
+
+        // Eliminar registros pendientes previos para ese email
+        $repoPendiente = $em->getRepository(RegistroPendiente::class);
+        $pendientesPrevios = $repoPendiente->findBy(['email' => $email]);
+        foreach ($pendientesPrevios as $pendiente) {
+            $em->remove($pendiente);
+        }
+        $em->flush();
 
         // Generar código y guardar datos en RegistroPendiente
         $codigo = random_int(100000, 999999);
@@ -65,7 +73,7 @@ class RegistroController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         error_log('DEBUG: Datos recibidos en verificarRegistro: ' . json_encode($data));
-        $email = $data['email'] ?? null;
+        $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
         $codigo = $data['codigo'] ?? null;
 
         $this->logger->debug('Datos recibidos para verificación', [

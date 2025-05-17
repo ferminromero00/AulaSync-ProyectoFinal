@@ -2,11 +2,13 @@ import { API_BASE_URL } from '../config/config';
 
 export const login = async (credentials) => {
     try {
-        if (!credentials.role) {
+        // Asegura que credentials.role existe
+        const role = credentials.role;
+        if (!role) {
             throw new Error('Role no especificado');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/${credentials.role}/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/${role}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,11 +28,11 @@ export const login = async (credentials) => {
         // Guardar el token y otros datos
         localStorage.setItem('token', data.token);
         localStorage.setItem('tokenTimestamp', Date.now().toString());
-        localStorage.setItem('role', credentials.role);
+        localStorage.setItem('role', role);
         
         return {
             ...data,
-            role: credentials.role
+            role
         };
     } catch (error) {
         console.error('Error en login:', error);

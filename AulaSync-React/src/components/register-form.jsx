@@ -51,13 +51,11 @@ function RegisterForm() {
         });
 
         // Iniciar sesión automáticamente después de verificar
-        await login(
-            { 
-                email: pendingEmail, 
-                password: pendingData.password 
-            }, 
-            role
-        );
+        await login({
+            email: pendingEmail,
+            password: pendingData.password,
+            role // <-- Asegura que el role se pasa aquí
+        });
 
         // Redirigir al dashboard correspondiente
         navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard', {
