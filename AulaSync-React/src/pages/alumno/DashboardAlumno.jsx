@@ -327,7 +327,11 @@ const DashboardAlumno = () => {
                                             </div>
                                             <div className="border-t pt-4 flex items-center justify-between">
                                                 <div className="text-sm text-gray-600">
-                                                    <p className="font-medium text-gray-900">{clase.profesor || "Profesor"}</p>
+                                                    <p className="font-medium text-gray-900">
+                                                        {typeof clase.profesor === 'string' 
+                                                            ? clase.profesor 
+                                                            : clase.profesor?.nombre || "Profesor"}
+                                                    </p>
                                                 </div>
                                                 <span className="text-green-600 flex items-center gap-1 font-medium group-hover:underline group-hover:text-green-800 transition-colors">
                                                     Ver detalles

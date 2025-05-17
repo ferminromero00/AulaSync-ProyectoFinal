@@ -24,9 +24,9 @@ export const GlobalContext = createContext();
 export function GlobalProvider({ children }) {
     const [userData, setUserData] = useState({
         user: null,
-        clases: null, // Cambiado de [] a null para mejor control del estado inicial
+        clases: null,
         invitaciones: [],
-        loading: true
+        loading: true // Asegurarse que inicie como true
     });
 
     useEffect(() => {
@@ -35,9 +35,10 @@ export function GlobalProvider({ children }) {
                 setUserData({ user: null, clases: [], invitaciones: [], loading: false });
                 return;
             }
+            
             const role = localStorage.getItem('role');
             try {
-                // Retrasar intencionalmente la carga para mostrar la animación (opcional)
+                // Añadir pequeño delay intencional para mostrar la animación
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 if (role === 'profesor') {
@@ -45,19 +46,29 @@ export function GlobalProvider({ children }) {
                         getPerfil(),
                         getClasesProfesor()
                     ]);
-                    setUserData({ user, clases: clases || [], invitaciones: [], loading: false }); // <-- aquí
+                    setUserData({ 
+                        user, 
+                        clases: clases || [], 
+                        invitaciones: [], 
+                        loading: false 
+                    });
                 } else if (role === 'alumno') {
                     const [user, clases, invitaciones] = await Promise.all([
                         getPerfil(),
                         getClasesAlumno(),
                         obtenerInvitacionesPendientes()
                     ]);
-                    setUserData({ user, clases: clases || [], invitaciones: invitaciones || [], loading: false }); // <-- aquí
+                    setUserData({ 
+                        user, 
+                        clases: clases || [], 
+                        invitaciones: invitaciones || [], 
+                        loading: false 
+                    });
                 } else {
                     setUserData({ user: null, clases: [], invitaciones: [], loading: false });
                 }
             } catch (error) {
-                console.error('Error cargando datos:', error); // Añadir este log
+                console.error('Error cargando datos:', error);
                 setUserData({ user: null, clases: [], invitaciones: [], loading: false });
             }
         };

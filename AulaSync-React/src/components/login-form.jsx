@@ -22,29 +22,24 @@ export default function LoginForm({ role }) {
         try {
             const loginData = {
                 ...data,
-                role: role || 'alumno' // Aseguramos que siempre haya un role por defecto
+                role: role || 'alumno'
             };
             
-            console.log('Intentando login con:', loginData); // Debug
             const response = await login(loginData);
-            console.log('Login exitoso:', response);
             localStorage.setItem('token', response.token);
             localStorage.setItem('role', role);
 
-            if (role === 'profesor') {
-                // Para profesor, carga datos antes de navegar (opcional)
-                const [user, clases] = await Promise.all([
-                    getPerfil(),
-                    getClasesProfesor()
-                ]);
-                setUserData({ user, clases, invitaciones: [], loading: false });
-                navigate('/profesor/dashboard');
-            } else {
-                // Para alumno, navega primero y mantén loading=true
-                setUserData(prev => ({ ...prev, loading: true }));
-                navigate('/alumno/dashboard');
-                // Los datos se cargarán en el dashboard
-            }
+            // Establecer estado de carga antes de navegar
+            setUserData({ 
+                user: null, 
+                clases: null, 
+                invitaciones: [], 
+                loading: true 
+            });
+
+            // Navegar inmediatamente - la carga se mostrará en el dashboard
+            navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard');
+            
         } catch (error) {
             console.error('Error en login:', error);
             setError('root', {

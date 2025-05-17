@@ -1,13 +1,16 @@
 import { BookOpen, Calendar, FileText } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { getProfesorStats, getTareasStats } from "../../services/stats";
 import ClasesProfesor from "../../components/profesor/ClasesProfesor";
 import { useNavigate } from "react-router-dom";
 import "../../styles/animations.css";
+import { GlobalContext } from '../../App';
+import { Loader2, Users, BarChart2 } from 'lucide-react';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const clasesRef = useRef(null);
+    const { userData, setUserData } = useContext(GlobalContext);
     const [stats, setStats] = useState({
         totalClases: 0,
         totalEstudiantes: 0
@@ -15,25 +18,37 @@ const Dashboard = () => {
     const [tareasCount, setTareasCount] = useState(0);
     const [statsLoading, setStatsLoading] = useState(true);
 
-    // Cargar estadísticas en paralelo, pero no bloquear el resto del dashboard
     useEffect(() => {
         let mounted = true;
-        setStatsLoading(true);
-        Promise.all([
-            getProfesorStats(),
-            getTareasStats()
-        ]).then(([statsData, tareasData]) => {
-            if (mounted) {
-                setStats(statsData);
-                setTareasCount(tareasData.totalTareas || 0);
+        
+        const loadInitialData = async () => {
+            if (!mounted) return;
+            
+            try {
+                setStatsLoading(true);
+                const [statsData, tareasData] = await Promise.all([
+                    getProfesorStats(),
+                    getTareasStats()
+                ]);
+                
+                if (!mounted) return;
+                
+                setStats(statsData || { totalClases: 0, totalEstudiantes: 0 });
+                setTareasCount(tareasData?.totalTareas || 0);
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            } finally {
+                if (mounted) {
+                    setStatsLoading(false);
+                    // También actualizar el estado global de loading
+                    setUserData(prev => ({ ...prev, loading: false }));
+                }
             }
-        }).catch((error) => {
-            console.error('Error al cargar estadísticas:', error);
-        }).finally(() => {
-            if (mounted) setStatsLoading(false);
-        });
+        };
+
+        loadInitialData();
         return () => { mounted = false; };
-    }, []);
+    }, [setUserData]);
 
     const statsConfig = [
         { 
@@ -62,6 +77,45 @@ const Dashboard = () => {
             onClick: () => navigate('/profesor/tareas')
         }
     ];
+
+    if (userData?.loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+                        <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <BookOpen className="h-6 w-6 text-blue-400 animate-pulse" />
+                            <span className="text-blue-800 font-medium">Cargando tus clases...</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Users className="h-6 w-6 text-blue-400 animate-pulse" />
+                            <span className="text-blue-800 font-medium">Cargando estudiantes...</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <BarChart2 className="h-6 w-6 text-blue-400 animate-pulse" />
+                            <span className="text-blue-800 font-medium">Cargando estadísticas...</span>
+                        </div>
+                    </div>
+                    <div className="mt-8 text-blue-700 text-sm opacity-70">
+                        ¡Bienvenido a AulaSync! Preparando tu espacio...
+                    </div>
+                </div>
+                <style>{`
+                    @keyframes fade-in-up {
+                        0% { opacity: 0; transform: translateY(20px);}
+                        100% { opacity: 1; transform: translateY(0);}
+                    }
+                    .animate-fade-in-up {
+                        animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 p-6">

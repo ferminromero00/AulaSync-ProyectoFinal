@@ -122,6 +122,18 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                                                         })}
                                                     </span>
                                                 </div>
+                                                <div className="text-sm text-gray-500">
+                                                    <span className="font-medium text-gray-900">
+                                                        {typeof clase.profesor === 'string' 
+                                                            ? clase.profesor 
+                                                            : clase.profesor?.nombre || 'Profesor'}
+                                                    </span>
+                                                    <p>
+                                                        {typeof clase.profesor === 'string' 
+                                                            ? '' 
+                                                            : clase.profesor?.especialidad || 'No especificada'}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
