@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
-import { BookOpen, Users, ChevronRight, UserPlus, Search, X, MoreVertical, Calendar, FileText, Paperclip } from 'lucide-react';
+import { BookOpen, Users, ChevronRight, UserPlus, Search, X, MoreVertical, Calendar, FileText, Paperclip, Bell } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { searchAlumnos } from '../../services/alumnos';
 import { enviarInvitacion } from '../../services/invitaciones';
@@ -348,6 +348,45 @@ const ClaseDashboard = () => {
                                                             Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                                         </span>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {/* Añadir anuncios tipo "anuncio" con el mismo diseño */}
+                                    {clase?.anuncios?.filter(a => a.tipo === 'anuncio').map((anuncio, idx) => (
+                                        <div key={anuncio.id}
+                                             className="opacity-0 animate-bounceIn"
+                                             style={{ animationDelay: `${600 + ((tareas.length + idx) * 100)}ms` }}>
+                                            <div
+                                                className="cursor-pointer group bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow hover:shadow-xl transition-all duration-300 hover:border-blue-300"
+                                            >
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="bg-blue-100 p-3 rounded-xl">
+                                                        <Bell className="h-6 w-6 text-blue-600" />
+                                                    </div>
+                                                    <h3 className="font-semibold text-blue-900 text-lg truncate">{anuncio.titulo || "Anuncio"}</h3>
+                                                </div>
+                                                <div className="mb-2 text-gray-700 text-base whitespace-pre-line">
+                                                    {anuncio.contenido}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                                    <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(anuncio.fechaCreacion).toLocaleString('es-ES', {
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between mt-4">
+                                                    <span className="text-sm text-gray-500">
+                                                        {anuncio.clase?.nombre || clase?.nombre || 'Sin clase'}
+                                                    </span>
+                                                    <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                        Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

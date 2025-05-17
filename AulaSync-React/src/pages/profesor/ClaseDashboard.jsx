@@ -1002,26 +1002,74 @@ const ClaseDashboard = () => {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                // ...existing code for anuncios normales...
-                                                <div key={anuncio.id} className="bg-gray-50 p-4 rounded-lg relative opacity-0 animate-slideRight"
-                                                     style={{ animationDelay: `${600 + (index * 100)}ms` }}>
+                                                <div
+                                                    key={anuncio.id}
+                                                    className="group p-5 border border-gray-100 rounded-xl cursor-pointer
+                                                        bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
+                                                        transition-all duration-300
+                                                        overflow-hidden
+                                                        hover:shadow-2xl hover:border-blue-400 hover:bg-white
+                                                        hover:scale-[1.01] hover:z-10"
+                                                    style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                >
+                                                    {/* Fondo decorativo animado */}
+                                                    <div className="pointer-events-none absolute inset-0 z-0">
+                                                        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
+                                                    </div>
+                                                    <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
+                                                    {/* Botón eliminar solo para profesor */}
                                                     {role === 'profesor' && (
                                                         <button
                                                             onClick={e => {
                                                                 e.stopPropagation();
                                                                 handleDeleteAnuncio(anuncio.id);
                                                             }}
-                                                            className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-200 transition-colors z-10"
+                                                            className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white shadow hover:bg-red-100 border border-red-200 transition-colors flex items-center justify-center"
                                                             title="Eliminar anuncio"
+                                                            style={{ boxShadow: '0 2px 8px 0 rgba(255,0,0,0.04)' }}
                                                         >
-                                                            <X className="h-5 w-5 text-gray-600" />
+                                                            {/* Icono de papelera */}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10" />
+                                                            </svg>
                                                         </button>
                                                     )}
-                                                    <p className="text-gray-600 mb-2">{anuncio.contenido}</p>
-                                                    <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                        <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
-                                                        <span>•</span>
-                                                        <span>{new Date(anuncio.fechaCreacion).toLocaleString()}</span>
+                                                    {/* Contenido principal */}
+                                                    <div className="relative z-20">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                                <Bell className="h-5 w-5 text-blue-600" />
+                                                            </div>
+                                                            <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors">
+                                                                {anuncio.titulo || "Anuncio"}
+                                                            </h3>
+                                                        </div>
+                                                        <div className="mb-2 text-gray-700 text-base whitespace-pre-line">
+                                                            {anuncio.contenido}
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                                                            <span className="flex items-center gap-2">
+                                                                <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                                <span>•</span>
+                                                                <span>{new Date(anuncio.fechaCreacion).toLocaleString('es-ES', {
+                                                                    day: 'numeric',
+                                                                    month: 'short',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}</span>
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between mt-2">
+                                                            <span className="text-sm text-gray-500">
+                                                                {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
+                                                            </span>
+                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )
