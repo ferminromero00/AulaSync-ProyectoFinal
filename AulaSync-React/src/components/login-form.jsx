@@ -29,15 +29,17 @@ export default function LoginForm({ role }) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('role', role);
 
-            // Establecer estado de carga antes de navegar
+            // Cargar datos del perfil inmediatamente después del login
+            const perfilData = await getPerfil();
+            localStorage.setItem('userId', perfilData.id); // Guardar el ID del usuario
+
             setUserData({ 
-                user: null, 
-                clases: null, 
+                user: perfilData, 
+                clases: [], 
                 invitaciones: [], 
                 loading: true 
             });
 
-            // Navegar inmediatamente - la carga se mostrará en el dashboard
             navigate(role === 'profesor' ? '/profesor/dashboard' : '/alumno/dashboard');
             
         } catch (error) {

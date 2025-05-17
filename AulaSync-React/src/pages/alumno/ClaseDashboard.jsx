@@ -25,28 +25,36 @@ const ClaseDashboard = () => {
     const [tareaIdToOpen, setTareaIdToOpen] = useState(null);
     const [tareaEstadoPreview, setTareaEstadoPreview] = useState(null); // { tarea, estado }
 
-    // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
-    const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
+    // Obtener userId del localStorage si no está en userData
+    const alumnoId = userData?.user?.id || localStorage.getItem('userId');
+    const role = localStorage.getItem('role');
 
     useEffect(() => {
-        // Solo cargar datos de la clase, no perfil ni clases globales aquí
+        if (!alumnoId) {
+            console.error('No se encontró el ID del alumno');
+            navigate('/');
+            return;
+        }
+
         const fetchClase = async () => {
             try {
+                setIsLoading(true);
                 const data = await getClaseById(id);
                 setClase(data);
-                // Ajusta aquí si tus tareas vienen en otro campo
                 setTareas(data.tareas || data.anuncios?.filter(a => a.tipo === 'tarea') || []);
             } catch (error) {
                 console.error('Error al cargar la clase:', error);
+                toast.error('Error al cargar la clase');
                 if (error.message.includes('No autorizado')) {
-                    navigate('/'); // Redirigir al login si el token no es válido
+                    navigate('/');
                 }
             } finally {
                 setIsLoading(false);
             }
         };
+
         fetchClase();
-    }, [id, navigate]);
+    }, [id, navigate, alumnoId]);
 
     const handleSearchAlumnos = async (query) => {
         if (!query.trim()) {

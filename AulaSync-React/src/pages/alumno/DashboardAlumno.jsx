@@ -50,21 +50,39 @@ const DashboardAlumno = () => {
     }
 
     const handleConfirmJoin = async () => {
+        if (!claseParaUnirse) {
+            toast.error('No hay clase seleccionada');
+            return;
+        }
+
         try {
             setIsJoining(true);
-            const response = await unirseAClase(claseParaUnirse.codigoClase)
-            navigate(`/alumno/clase/${response.claseId}`);
-            setMostrarModal(false)
-            setShowJoinConfirmModal(false)
-            setCodigo("")
-            setClaseParaUnirse(null)
-            toast.success('Te has unido a la clase exitosamente', {
-                position: 'top-right'
-            });
+            console.log('Intentando unirse a la clase:', claseParaUnirse.codigoClase);
+            
+            const response = await unirseAClase(claseParaUnirse.codigoClase);
+            console.log('Respuesta de unirse:', response);
+
+            setMostrarModal(false);
+            setShowJoinConfirmModal(false);
+            setCodigo("");
+            setClaseParaUnirse(null);
+
+            // Actualizar las clases después de unirse
+            const nuevasClases = await getClasesAlumno();
+            setUserData(prev => ({
+                ...prev,
+                clases: nuevasClases
+            }));
+
+            toast.success('Te has unido a la clase exitosamente');
+
+            // Navegar a la clase después de actualizar los datos
+            if (response && response.claseId) {
+                navigate(`/alumno/clase/${response.claseId}`);
+            }
         } catch (error) {
-            toast.error(error.message || 'Error al unirse a la clase', {
-                position: 'top-right'
-            });
+            console.error('Error al unirse:', error);
+            toast.error(error.message || 'Error al unirse a la clase');
         } finally {
             setIsJoining(false);
         }

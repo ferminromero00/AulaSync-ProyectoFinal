@@ -766,7 +766,7 @@ const ClaseDashboard = () => {
         if (!isLoading) return;
         intervalRef.current = setInterval(() => {
             setStep(prev => (prev < steps.length ? prev + 1 : prev));
-        }, 5000);
+        }, 1000);
         return () => clearInterval(intervalRef.current);
     // Solo depende de isLoading para evitar doble efecto
     }, [isLoading]);

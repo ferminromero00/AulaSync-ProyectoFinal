@@ -215,13 +215,32 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
             `${API_BASE_URL}${tareaSeleccionada.archivoEntregaUrl}` : null;
         const comentarioMostrado = tareaSeleccionada.comentarioEntrega || comentarioEntrega;
 
-        // MODAL GRANDE PERO MÁS MODERADO
+        // Animaciones para paneles
         return (
             <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
                 ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
                 <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
                     shadow-2xl modal-content max-h-[96vh] overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
+                    {/* Animaciones locales solo para este modal */}
+                    <style>{`
+                        @keyframes tareaFadeIn {
+                            0% { opacity: 0; transform: translateY(24px);}
+                            100% { opacity: 1; transform: none;}
+                        }
+                        @keyframes tareaSlideUp {
+                            0% { opacity: 0; transform: translateY(32px);}
+                            100% { opacity: 1; transform: none;}
+                        }
+                        .tarea-anim-fadeIn { animation: tareaFadeIn 0.5s both; }
+                        .tarea-anim-slideUp { animation: tareaSlideUp 0.5s both; }
+                        .tarea-stagger > * { opacity: 0; }
+                        .tarea-stagger > *:nth-child(1) { animation-delay: 120ms; }
+                        .tarea-stagger > *:nth-child(2) { animation-delay: 220ms; }
+                        .tarea-stagger > *:nth-child(3) { animation-delay: 320ms; }
+                        .tarea-stagger > *:nth-child(4) { animation-delay: 420ms; }
+                        .tarea-stagger > *:nth-child(5) { animation-delay: 520ms; }
+                    `}</style>
                     {/* Botón de cerrar */}
                     <button
                         onClick={handleCloseModal}
@@ -232,10 +251,10 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[300px] max-w-[60%]">
-                        <div className="flex flex-col gap-0 h-full flex-1">
+                    <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[300px] max-w-[60%] tarea-anim-fadeIn">
+                        <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                             {/* Cabecera */}
-                            <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
+                            <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
                                 <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
                                     <BookOpen className="h-7 w-7 text-blue-700" />
                                 </div>
@@ -244,7 +263,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 </div>
                             </div>
                             {/* Fecha de entrega */}
-                            <div className="px-8 py-3 border-b border-blue-50 bg-white flex items-center gap-4">
+                            <div className="px-8 py-3 border-b border-blue-50 bg-white flex items-center gap-4 tarea-anim-slideUp">
                                 <div className="bg-amber-100 p-2 rounded-xl flex items-center justify-center">
                                     <Calendar className="h-5 w-5 text-amber-700" />
                                 </div>
@@ -261,7 +280,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 </div>
                             </div>
                             {/* Descripción */}
-                            <div className="flex-1 flex flex-col px-8 py-5 border-b border-blue-50 bg-white min-h-0">
+                            <div className="flex-1 flex flex-col px-8 py-5 border-b border-blue-50 bg-white min-h-0 tarea-anim-slideUp">
                                 <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                     <FileText className="h-5 w-5 text-blue-400" />
                                     Descripción de la tarea
@@ -276,7 +295,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                             </div>
                             {/* Material adjunto */}
                             {downloadUrl && (
-                                <div className="px-8 py-4 bg-white">
+                                <div className="px-8 py-4 bg-white tarea-anim-slideUp">
                                     <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                         <Paperclip className="h-5 w-5 text-blue-400" />
                                         Material de la tarea
@@ -298,14 +317,14 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                     </div>
                     {/* Panel derecho - Entrega del alumno */}
                     <div className="flex-[0.85] bg-gradient-to-b from-gray-50 to-white px-7 py-7 w-full md:w-[300px] border-t 
-                                 md:border-t-0 md:border-l border-gray-200 flex flex-col gap-4 overflow-y-auto max-h-[96vh] min-w-[220px]">
-                        <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
-                            <CheckCircle className="h-5 w-5 text-blue-600" />
-                            Tu entrega
-                        </h4>
-                        <div className="space-y-3">
+                                 md:border-t-0 md:border-l border-gray-200 flex flex-col gap-4 overflow-y-auto max-h-[96vh] min-w-[220px] tarea-anim-fadeIn">
+                        <div className="tarea-stagger">
+                            <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2 tarea-anim-fadeIn">
+                                <CheckCircle className="h-5 w-5 text-blue-600" />
+                                Tu entrega
+                            </h4>
                             {/* Estado de la entrega */}
-                            <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold
+                            <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold tarea-anim-slideUp
                                 ${entregada
                                     ? (tareaSeleccionada.nota !== undefined && tareaSeleccionada.nota !== null && tareaSeleccionada.nota !== ''
                                         ? 'bg-blue-50 border border-blue-200 text-blue-800'
@@ -333,7 +352,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 )}
                             </div>
                             {/* Archivo entregado */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1">
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
                                 <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
                                     <Paperclip className="h-5 w-5 text-green-600" />
                                     Archivo entregado:
@@ -353,7 +372,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 )}
                             </div>
                             {/* Comentario enviado */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-3">
+                            <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
                                 <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
                                     <FileText className="h-5 w-5 text-blue-400" />
                                     Comentario enviado:
@@ -363,7 +382,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 </div>
                             </div>
                             {/* Nota y comentario del profesor */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
                                 <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
                                     <CheckCircle className="h-5 w-5 text-blue-600" />
                                     Nota:
@@ -385,7 +404,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                 </div>
                             </div>
                             {/* Fecha de entrega */}
-                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1">
+                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
                                 <div className="flex items-center gap-2">
                                     <Calendar className="h-5 w-5 text-blue-600" />
                                     <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
