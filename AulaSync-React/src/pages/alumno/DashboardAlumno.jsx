@@ -233,7 +233,7 @@ const DashboardAlumno = () => {
             `}</style>
 
             {/* Header moderno */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 animate-fade-in-up">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div className="flex items-center gap-4">
                     {/* Avatar con icono de carga propio */}
                     <div className="relative">
@@ -268,7 +268,7 @@ const DashboardAlumno = () => {
             </div>
 
             {/* Panel de clases con icono de carga individual */}
-            <div className="w-full opacity-0 animate-fadeIn" style={{ animationDelay: '400ms' }}>
+            <div className="w-full">
                 <div className="bg-white rounded-2xl shadow-xl border border-green-100 flex flex-col overflow-hidden">
                     <div className="px-8 py-6 border-b border-green-50 bg-gradient-to-r from-green-100/80 to-emerald-100/80 flex items-center justify-between">
                         <div className="flex items-center gap-3">

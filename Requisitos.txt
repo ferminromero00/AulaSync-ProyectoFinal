@@ -60,13 +60,6 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
 10. Integración con IA
     - ❌ openai-php/client → Consumir APIs de IA (como ChatGPT)
     - ❌ symfony/http-client → Para llamar a cualquier servicio IA externo
-
-
-
-
-
-
-
 ================================================================================================================================================
 ================================================================================================================================================
 DESARROLLO EN ENTORNO CLIENTE
