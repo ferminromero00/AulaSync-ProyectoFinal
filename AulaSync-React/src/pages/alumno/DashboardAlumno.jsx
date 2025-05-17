@@ -180,7 +180,7 @@ const DashboardAlumno = () => {
     }, [showNotifMenu]);
 
     // Panel de carga inicial más bonito
-    if (loading && (!clases || clases.length === 0)) {
+    if (userData?.loading || (!userData?.clases && !localLoading)) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-green-50 via-white to-emerald-50">
                 <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-green-100 animate-fade-in-up">

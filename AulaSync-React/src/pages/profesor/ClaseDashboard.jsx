@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { getClaseById } from '../../services/clases';
 import { BookOpen, Users, Bell, ChevronRight, UserPlus, Search, X, MoreVertical, AlertTriangle, Calendar, FileText, CheckCircle, Paperclip, Clock, AlertCircle } from 'lucide-react';
 import debounce from 'lodash/debounce';
@@ -753,10 +753,76 @@ const ClaseDashboard = () => {
         }
     };
 
+    // Mueve estos hooks fuera del if (isLoading)
+    const [step, setStep] = useState(0);
+    const steps = [
+        { label: "Cargando datos de la clase...", key: "clase" },
+        { label: "Obteniendo lista de estudiantes...", key: "alumnos" },
+        { label: "Cargando tareas y anuncios...", key: "tareas" }
+    ];
+    const intervalRef = useRef();
+
+    useEffect(() => {
+        if (!isLoading) return;
+        intervalRef.current = setInterval(() => {
+            setStep(prev => (prev < steps.length ? prev + 1 : prev));
+        }, 5000);
+        return () => clearInterval(intervalRef.current);
+    // Solo depende de isLoading para evitar doble efecto
+    }, [isLoading]);
+
+    const [dotCount, setDotCount] = useState(0);
+    useEffect(() => {
+        if (!isLoading) return;
+        const dotInterval = setInterval(() => {
+            setDotCount(prev => (prev + 1) % 4);
+        }, 400);
+        return () => clearInterval(dotInterval);
+    }, [isLoading]);
+
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500"></div>
+            <div className="flex justify-center items-center h-[80vh]">
+                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+                    <div className="flex items-center gap-4 mb-6">
+                        <BookOpen className="h-12 w-12 text-blue-500" />
+                        <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+                    </div>
+                    <div className="flex flex-col gap-4 min-w-[300px]">
+                        {steps.map((s, idx) => (
+                            <div className="flex items-center gap-3" key={s.key}>
+                                {step > idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <CheckCircle className="h-4 w-4 text-green-500 animate-pop" />
+                                    </span>
+                                ) : step === idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                                    </span>
+                                ) : (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                    </span>
+                                )}
+                                <span className={`text-gray-600 ${step > idx ? "line-through text-green-700" : ""}`}>{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-8 text-blue-700 text-sm flex items-center gap-2">
+                        Preparando clase
+                        <span className="inline-block w-6 text-blue-700 font-bold" style={{ letterSpacing: 1 }}>
+                            {".".repeat(dotCount + 1)}
+                        </span>
+                    </div>
+                    <style>{`
+                        @keyframes pop {
+                            0% { transform: scale(0.7); opacity: 0.5;}
+                            60% { transform: scale(1.2);}
+                            100% { transform: scale(1); opacity: 1;}
+                        }
+                        .animate-pop { animation: pop 0.4s; }
+                    `}</style>
+                </div>
             </div>
         );
     }

@@ -37,20 +37,22 @@ export function GlobalProvider({ children }) {
             }
             const role = localStorage.getItem('role');
             try {
+                // Retrasar intencionalmente la carga para mostrar la animación (opcional)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 if (role === 'profesor') {
                     const [user, clases] = await Promise.all([
                         getPerfil(),
                         getClasesProfesor()
                     ]);
-                    setUserData({ user, clases, invitaciones: [], loading: false });
+                    setUserData({ user, clases: clases || [], invitaciones: [], loading: false }); // <-- aquí
                 } else if (role === 'alumno') {
                     const [user, clases, invitaciones] = await Promise.all([
                         getPerfil(),
                         getClasesAlumno(),
                         obtenerInvitacionesPendientes()
                     ]);
-                    console.log('Datos cargados:', { user, clases, invitaciones }); // Añadir este log
-                    setUserData({ user, clases, invitaciones, loading: false });
+                    setUserData({ user, clases: clases || [], invitaciones: invitaciones || [], loading: false }); // <-- aquí
                 } else {
                     setUserData({ user: null, clases: [], invitaciones: [], loading: false });
                 }
