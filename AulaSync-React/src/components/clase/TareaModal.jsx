@@ -137,9 +137,9 @@ const TareaModal = ({
 
     return (
         <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
-            ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0 }}>
-            <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
-                shadow-2xl modal-content max-h-[96vh] overflow-hidden
+            ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0, zIndex: 1050 }}>
+            <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
+                shadow-2xl modal-content max-h-[90vh] overflow-hidden z-50
                 ${isClosing ? 'modal-content-closing' : ''}`}>
                 {/* Animaciones locales solo para este modal */}
                 <style>{`
@@ -176,7 +176,7 @@ const TareaModal = ({
                 </button>
 
                 {/* Panel izquierdo - Detalles de la tarea */}
-                <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[300px] max-w-[60%] tarea-anim-fadeIn">
+                <div className="flex-[1.4] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[320px] max-w-[65%] tarea-anim-fadeIn relative z-10">
                     <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                         {/* Cabecera */}
                         <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
@@ -243,7 +243,8 @@ const TareaModal = ({
 
                 {/* Panel derecho - Vista de profesor o alumno */}
                 {role === 'profesor' ? (
-                    <div className="relative bg-gradient-to-b from-gray-50 to-white p-0 w-full md:w-[420px] border-t md:border-t-0 md:border-l border-gray-200 modal-content-right overflow-y-auto tarea-anim-fadeIn">
+                    <div className="flex-1 bg-gradient-to-b from-gray-50 to-white w-full md:w-[420px] border-t 
+                        md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto tarea-anim-fadeIn relative z-20">
                         <div className="p-0 tarea-stagger">
                             {/* Cabecera */}
                             <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-tr-2xl tarea-anim-fadeIn">
@@ -331,110 +332,116 @@ const TareaModal = ({
                         </div>
                     </div>
                 ) : (
-                    // Panel derecho - Entrega del alumno con animaciones
-                    <div className="flex-[0.85] bg-gradient-to-b from-gray-50 to-white px-7 py-7 w-full md:w-[300px] border-t 
-                                 md:border-t-0 md:border-l border-gray-200 flex flex-col gap-4 overflow-y-auto max-h-[96vh] min-w-[220px] tarea-anim-fadeIn">
-                        <div className="tarea-stagger">
-                            <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2 tarea-anim-fadeIn">
-                                <CheckCircle className="h-5 w-5 text-blue-600" />
-                                Tu entrega
-                            </h4>
-                            {/* Estado de la entrega */}
-                            <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold tarea-anim-slideUp
-                                ${entregada
-                                    ? (tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
-                                        ? 'bg-blue-50 border border-blue-200 text-blue-800'
-                                        : 'bg-emerald-50 border border-emerald-200 text-emerald-800')
-                                    : 'bg-amber-50 border border-amber-200 text-amber-800'
-                                }`
-                            }>
-                                {entregada ? (
-                                    tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== '' ? (
-                                        <>
-                                            <CheckCircle className="h-5 w-5 text-blue-600" />
-                                            ¡Tarea calificada!
-                                        </>
+                    // Panel derecho - Entrega del alumno con animaciones y separación
+                    <div className="flex-1 bg-gradient-to-b from-gray-50 to-white p-8 w-full md:w-[400px] border-t 
+                        md:border-t-0 md:border-l border-gray-200 flex flex-col gap-6 overflow-y-auto relative z-20">
+                        <div className="flex flex-col gap-6">
+                            <div className="tarea-anim-fadeIn">
+                                <h4 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                    <CheckCircle className="h-5 w-5 text-blue-600" />
+                                    Tu entrega
+                                </h4>
+                                {/* Estado de la entrega */}
+                                <div className={`rounded-xl p-3 flex items-center gap-3 shadow-sm text-sm font-semibold tarea-anim-slideUp
+                                    ${entregada
+                                        ? (tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                            ? 'bg-blue-50 border border-blue-200 text-blue-800'
+                                            : 'bg-emerald-50 border border-emerald-200 text-emerald-800')
+                                        : 'bg-amber-50 border border-amber-200 text-amber-800'
+                                    }`
+                                }>
+                                    {entregada ? (
+                                        tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== '' ? (
+                                            <>
+                                                <CheckCircle className="h-5 w-5 text-blue-600" />
+                                                ¡Tarea calificada!
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                                ¡Tarea entregada!
+                                            </>
+                                        )
                                     ) : (
                                         <>
-                                            <CheckCircle className="h-5 w-5 text-emerald-600" />
-                                            ¡Tarea entregada!
+                                            <Clock className="h-5 w-5 text-amber-600" />
+                                            Pendiente de entrega
                                         </>
-                                    )
-                                ) : (
-                                    <>
-                                        <Clock className="h-5 w-5 text-amber-600" />
-                                        Pendiente de entrega
-                                    </>
-                                )}
-                            </div>
-                            {/* Archivo entregado */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                    <Paperclip className="h-5 w-5 text-green-600" />
-                                    Archivo entregado:
-                                </div>
-                                {archivoEntregaUrl ? (
-                                    <a
-                                        href={archivoEntregaUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
-                                    >
-                                        <FileText className="h-4 w-4" />
-                                        Descargar entrega
-                                    </a>
-                                ) : (
-                                    <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
-                                )}
-                            </div>
-                            {/* Comentario enviado */}
-                            <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
-                                <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
-                                    <FileText className="h-5 w-5 text-blue-400" />
-                                    Comentario enviado:
-                                </div>
-                                <div className="text-gray-700 whitespace-pre-line text-sm">
-                                    {tareaToShow.comentarioEntrega ? tareaToShow.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                    )}
                                 </div>
                             </div>
-                            {/* Nota y comentario del profesor */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
-                                <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                    <CheckCircle className="h-5 w-5 text-blue-600" />
-                                    Nota:
-                                    <span className="ml-2 text-blue-900 font-bold text-base">
-                                        {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
-                                            ? tareaToShow.nota
-                                            : <span className="italic text-blue-400 text-base">Sin calificar</span>
-                                        }
-                                    </span>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                        <Paperclip className="h-5 w-5 text-green-600" />
+                                        Archivo entregado:
+                                    </div>
+                                    {archivoEntregaUrl ? (
+                                        <a
+                                            href={archivoEntregaUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            Descargar entrega
+                                        </a>
+                                    ) : (
+                                        <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
+                                    )}
                                 </div>
-                                <div className="text-blue-700 mt-1">
-                                    <span className="font-medium text-xs">Comentario del profesor:</span>
-                                    <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
-                                        {tareaToShow.comentarioCorreccion
-                                            ? tareaToShow.comentarioCorreccion
-                                            : <span className="italic text-blue-400">Sin comentario</span>
-                                        }
+                            </div>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
+                                    <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                                        <FileText className="h-5 w-5 text-blue-400" />
+                                        Comentario enviado:
+                                    </div>
+                                    <div className="text-gray-700 whitespace-pre-line text-sm">
+                                        {tareaToShow.comentarioEntrega ? tareaToShow.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
                                     </div>
                                 </div>
                             </div>
-                            {/* Fecha de entrega */}
-                            <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-5 w-5 text-blue-600" />
-                                    <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
-                                    <span className="text-gray-700 text-xs">
-                                        {tareaToShow.fechaEntregada
-                                            ? new Date(tareaToShow.fechaEntregada).toLocaleString('es-ES', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })
-                                            : 'Desconocida'}
-                                    </span>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                                        Nota:
+                                        <span className="ml-2 text-blue-900 font-bold text-base">
+                                            {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                                ? tareaToShow.nota
+                                                : <span className="italic text-blue-400 text-base">Sin calificar</span>
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="text-blue-700 mt-1">
+                                        <span className="font-medium text-xs">Comentario del profesor:</span>
+                                        <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
+                                            {tareaToShow.comentarioCorreccion
+                                                ? tareaToShow.comentarioCorreccion
+                                                : <span className="italic text-blue-400">Sin comentario</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                        <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
+                                        <span className="text-gray-700 text-xs">
+                                            {tareaToShow.fechaEntregada
+                                                ? new Date(tareaToShow.fechaEntregada).toLocaleString('es-ES', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
+                                                : 'Desconocida'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
