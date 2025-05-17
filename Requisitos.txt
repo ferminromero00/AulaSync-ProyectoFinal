@@ -31,35 +31,33 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
    - ✅ api                       → API Platform para exponer endpoints REST/GraphQL
    - ✅ lexik/jwt-authentication-bundle → Autenticación mediante tokens JWT
    - ✅ symfony/security-bundle   → Protección de rutas y control de roles
+
 ================================================================================================================================================
-3. Consumir al menos un servicio web desde el servidor
-   - ❌ symfony/http-client → Cliente HTTP para consumir APIs externas
-================================================================================================================================================
-4. Generación de informes en PDF
+3. Generación de informes en PDF
    - ❌ knplabs/knp-snappy-bundle → Generación de PDFs desde HTML usando wkhtmltopdf
 ================================================================================================================================================
-5. Validación de cuentas por correo electrónico
+4. Validación de cuentas por correo electrónico
    - ✅ symfony/mailer            → Envío de correos de verificación
    - ✅ symfony/validator         → Validación de campos como email, tokens, etc.
 ================================================================================================================================================
-6. Subida de archivos al servidor
+5. Subida de archivos al servidor
    - ✅ vich/uploader-bundle      → Gestión de subida de archivos y vinculación a entidades
    - ✅ symfony/form              → Formularios de subida
    - ✅ symfony/validator         → Validación de archivos
 ================================================================================================================================================
-7. Importación y exportación de datos
+6. Importación y exportación de datos
    - ❌ league/csv                → Lectura y escritura de archivos CSV (importar/exportar datos)
 ================================================================================================================================================
-8. Descarga de archivos del servidor
+7. Descarga de archivos del servidor
    - ❌ Gestionado por Symfony   → Con controladores que devuelven archivos como respuesta
    - ❌ vich/uploader-bundle      → Organización de rutas de archivos
 ================================================================================================================================================
-9. Ficheros de Logs
+8. Ficheros de Logs
    - ✅ monolog/monolog           → Sistema de logs para registrar errores, acciones, etc.
 ================================================================================================================================================
-10. Integración con IA
-    - ❌ openai-php/client → Consumir APIs de IA (como ChatGPT)
-    - ❌ symfony/http-client → Para llamar a cualquier servicio IA externo
+9. Integración con IA
+    - ✅ openai-php/client → Consumir APIs de IA (como ChatGPT)
+    - ✅ symfony/http-client → Para llamar a cualquier servicio IA externo
 ================================================================================================================================================
 ================================================================================================================================================
 DESARROLLO EN ENTORNO CLIENTE
@@ -83,14 +81,6 @@ DISEÑO DE INTERFACES WEB
 
 INGLÉS EN AULA BILINGÜE
 - ❌ Selector de idioma para internacionalización.
-
-EMPRESA E INICIATIVA EMPRENDEDORA
-- ❌ Oportunidad de negocio detectada en el sector del Desarrollo Web.
-- ❌ Obligaciones fiscales, laborales y de prevención de riesgos.
-- ❌ Estudio de ayudas o subvenciones.
-- ❌ Estudio de viabilidad técnica y previsión de recursos.
-- ❌ Presupuesto económico y necesidades de financiación.
-- ❌ Constitución y puesta en marcha de una empresa.
 
 DESPLIEGUE WEB
 - ❌ Uso de nube + Kubernetes + contenedores.
