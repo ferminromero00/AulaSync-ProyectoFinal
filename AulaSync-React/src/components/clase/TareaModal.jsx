@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock, Users, Loader2 } from 'lucide-react';
+import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock, Users } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
 import { toast } from 'react-hot-toast'; // Añadir este import
@@ -24,7 +24,6 @@ const TareaModal = ({
     const [localIsEntregando, setLocalIsEntregando] = useState(false);
     const [entregada, setEntregada] = useState(!!(tarea && tarea.entregada));
     const [tareaEntregadaData, setTareaEntregadaData] = useState(tarea && tarea.entregada ? tarea : null);
-    const [isLoadingEntrega, setIsLoadingEntrega] = useState(false);
 
     useEffect(() => {
         console.log('[TareaModal] Iniciando useEffect');
@@ -51,26 +50,6 @@ const TareaModal = ({
         }
         console.log('[TareaModal] entrega encontrada:', entregaActual);
 
-        // --- CORRECCIÓN: obtener bien el archivo entregado del alumno ---
-        // El archivo entregado puede estar en:
-        // - entregaAlumno?.archivoEntregaUrl
-        // - entregaActual?.archivoEntregaUrl
-        // - entregaActual?.archivoUrl
-        // - tarea?.archivoEntregaUrl
-        // - entregaAlumno?.archivoUrl
-
-        const archivoEntregaUrl =
-            entregaAlumno?.archivoEntregaUrl ||
-            entregaActual?.archivoEntregaUrl ||
-            entregaActual?.archivoUrl ||
-            entregaAlumno?.archivoUrl ||
-            tarea?.archivoEntregaUrl;
-
-        const comentarioEntrega =
-            entregaAlumno?.comentarioEntrega ||
-            entregaActual?.comentario ||
-            tarea?.comentarioEntrega;
-
         // Determinar si está entregada basándonos en la entrega encontrada o en el estado de la tarea
         const tareaEntregada = !!(entregaActual || entregaAlumno || tarea?.entregada);
         console.log('[TareaModal] tareaEntregada:', tareaEntregada);
@@ -81,8 +60,8 @@ const TareaModal = ({
             const data = {
                 ...tarea,
                 entregada: true,
-                archivoEntregaUrl, // <-- usar la variable corregida
-                comentarioEntrega, // <-- usar la variable corregida
+                archivoEntregaUrl: entregaAlumno?.archivoEntregaUrl || entregaActual?.archivoUrl || tarea?.archivoEntregaUrl,
+                comentarioEntrega: entregaAlumno?.comentarioEntrega || entregaActual?.comentario || tarea?.comentarioEntrega,
                 // Tomar nota y comentario de la entrega encontrada
                 nota: entregaActual?.nota ?? entregaAlumno?.nota ?? tarea?.nota ?? '',
                 comentarioCorreccion: entregaActual?.comentarioCorreccion ?? entregaAlumno?.comentarioCorreccion ?? tarea?.comentarioCorreccion ?? '',
@@ -93,19 +72,9 @@ const TareaModal = ({
         }
     }, [tarea, entregaAlumno]);
 
-    useEffect(() => {
-        // Mostrar icono de carga si no hay datos de entrega y está entregada
-        if (entregada && !tareaEntregadaData) {
-            setIsLoadingEntrega(true);
-        } else {
-            setIsLoadingEntrega(false);
-        }
-    }, [entregada, tareaEntregadaData]);
-
     const handleEntregaTarea = async () => {
         if (!tarea) return;
         setLocalIsEntregando(true);
-        setIsLoadingEntrega(true);
         try {
             const formData = new FormData();
             formData.append('comentario', comentarioEntrega);
@@ -119,29 +88,31 @@ const TareaModal = ({
                 },
                 body: formData
             });
-            
             if (!response.ok) throw new Error('Error al entregar la tarea');
             const data = await response.json();
 
-            // Construir datos actualizados con toda la información
-            const datosEntregaCompletos = {
-                ...tarea,
-                entregada: true,
+            console.log('[TareaModal] Datos de entrega recibidos:', data);
+
+            // Crear objeto con los datos de la entrega
+            const datosEntrega = {
                 archivoEntregaUrl: data.archivoEntregaUrl || null,
-                archivoUrl: data.archivoUrl || null,
                 comentarioEntrega: comentarioEntrega,
-                fechaEntregada: data.fechaEntregada ?? new Date().toISOString(),
-                nota: data.nota ?? null,
-                comentarioCorreccion: data.comentarioCorreccion ?? null
+                fechaEntregada: data.fechaEntregada ?? new Date().toISOString()
             };
 
-            // Actualizar ambos estados con los datos completos
+            // Actualizar estado local
             setEntregada(true);
-            setTareaEntregadaData(datosEntregaCompletos);
+            setTareaEntregadaData({
+                ...tarea,
+                entregada: true,
+                ...datosEntrega,
+                nota: data.nota ?? null,
+                comentarioCorreccion: data.comentarioCorreccion ?? null
+            });
 
             // Notificar al componente padre
             if (onTareaEntregada) {
-                onTareaEntregada(tarea.id, datosEntregaCompletos);
+                onTareaEntregada(tarea.id, datosEntrega);
             }
 
             toast.success('Tarea entregada correctamente');
@@ -150,7 +121,6 @@ const TareaModal = ({
             toast.error('Error al entregar la tarea');
         } finally {
             setLocalIsEntregando(false);
-            setIsLoadingEntrega(false);
         }
     };
 
@@ -400,159 +370,80 @@ const TareaModal = ({
                                     )}
                                 </div>
                             </div>
-                            {/* SOLO mostrar detalles de entrega si está entregada */}
-                            {entregada ? (
-                                isLoadingEntrega || !tareaEntregadaData ? (
-                                    <div className="flex flex-col items-center justify-center py-12">
-                                        <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-4" />
-                                        <span className="text-blue-700 font-medium">Cargando entrega...</span>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                        <Paperclip className="h-5 w-5 text-green-600" />
+                                        Archivo entregado:
                                     </div>
-                                ) : (
-                                <>
-                                    <div className="tarea-anim-fadeIn">
-                                        <div className="bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                            <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                                <Paperclip className="h-5 w-5 text-green-600" />
-                                                Archivo entregado:
-                                            </div>
-                                            {archivoEntregaUrl ? (
-                                                <a
-                                                    href={archivoEntregaUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
-                                                >
-                                                    <FileText className="h-4 w-4" />
-                                                    Descargar entrega
-                                                </a>
-                                            ) : (
-                                                <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="tarea-anim-fadeIn">
-                                        <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
-                                            <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
-                                                <FileText className="h-5 w-5 text-blue-400" />
-                                                Comentario enviado:
-                                            </div>
-                                            <div className="text-gray-700 whitespace-pre-line text-sm">
-                                                {tareaToShow.comentarioEntrega ? tareaToShow.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="tarea-anim-fadeIn">
-                                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
-                                            <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
-                                                <CheckCircle className="h-5 w-5 text-blue-600" />
-                                                Nota:
-                                                <span className="ml-2 text-blue-900 font-bold text-base">
-                                                    {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
-                                                        ? tareaToShow.nota
-                                                        : <span className="italic text-blue-400 text-base">Sin calificar</span>
-                                                    }
-                                                </span>
-                                            </div>
-                                            <div className="text-blue-700 mt-1">
-                                                <span className="font-medium text-xs">Comentario del profesor:</span>
-                                                <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
-                                                    {tareaToShow.comentarioCorreccion
-                                                        ? tareaToShow.comentarioCorreccion
-                                                        : <span className="italic text-blue-400">Sin comentario</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="tarea-anim-fadeIn">
-                                        <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="h-5 w-5 text-blue-600" />
-                                                <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
-                                                <span className="text-gray-700 text-xs">
-                                                    {tareaToShow.fechaEntregada
-                                                        ? new Date(tareaToShow.fechaEntregada).toLocaleString('es-ES', {
-                                                            day: 'numeric',
-                                                            month: 'long',
-                                                            year: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })
-                                                        : 'Desconocida'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                                )
-                            ) : (
-                                // FORMULARIO DE ENTREGA SOLO SI NO está entregada
-                                <div className="tarea-anim-fadeIn">
-                                    <form
-                                        className="bg-white border border-gray-100 rounded-xl p-6 flex flex-col gap-5 tarea-anim-slideUp shadow-lg"
-                                        onSubmit={e => {
-                                            e.preventDefault();
-                                            handleEntregaTarea();
-                                        }}
-                                    >
-                                        {/* Campo de archivo con diseño moderno */}
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                                Adjuntar archivo
-                                            </label>
-                                            <div className="flex items-center gap-3">
-                                                <label
-                                                    htmlFor="archivo-tarea"
-                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition font-medium text-blue-700 shadow-sm"
-                                                >
-                                                    <FileText className="h-5 w-5 text-blue-500" />
-                                                    Seleccionar archivo
-                                                </label>
-                                                <span className="text-xs text-gray-500 truncate">
-                                                    {archivoEntrega?.name || "Ningún archivo seleccionado"}
-                                                </span>
-                                            </div>
-                                            <input
-                                                id="archivo-tarea"
-                                                type="file"
-                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar"
-                                                onChange={e => setArchivoEntrega(e.target.files[0])}
-                                                className="hidden"
-                                            />
-                                        </div>
-                                        {/* Campo de comentario */}
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                                Comentario <span className="text-gray-400 font-normal">(opcional)</span>
-                                            </label>
-                                            <textarea
-                                                value={comentarioEntrega}
-                                                onChange={e => setComentarioEntrega(e.target.value)}
-                                                rows={3}
-                                                className="block w-full border border-blue-100 rounded-lg px-4 py-2 text-sm bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
-                                                placeholder="Escribe un comentario para el profesor..."
-                                            />
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/10 transition-all text-lg flex items-center justify-center gap-2"
-                                            disabled={localIsEntregando}
+                                    {archivoEntregaUrl ? (
+                                        <a
+                                            href={archivoEntregaUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium text-sm"
                                         >
-                                            {localIsEntregando ? (
-                                                <>
-                                                    <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                                                    Entregando...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FileText className="h-5 w-5" />
-                                                    Entregar tarea
-                                                </>
-                                            )}
-                                        </button>
-                                    </form>
+                                            <FileText className="h-4 w-4" />
+                                            Descargar entrega
+                                        </a>
+                                    ) : (
+                                        <span className="text-gray-500 italic text-xs">No se adjuntó archivo</span>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-white border border-gray-100 rounded-xl p-3 tarea-anim-slideUp">
+                                    <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                                        <FileText className="h-5 w-5 text-blue-400" />
+                                        Comentario enviado:
+                                    </div>
+                                    <div className="text-gray-700 whitespace-pre-line text-sm">
+                                        {tareaToShow.comentarioEntrega ? tareaToShow.comentarioEntrega : <span className="italic text-gray-400">Sin comentario</span>}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2 mb-1 text-sm font-semibold">
+                                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                                        Nota:
+                                        <span className="ml-2 text-blue-900 font-bold text-base">
+                                            {tareaToShow.nota !== undefined && tareaToShow.nota !== null && tareaToShow.nota !== ''
+                                                ? tareaToShow.nota
+                                                : <span className="italic text-blue-400 text-base">Sin calificar</span>
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="text-blue-700 mt-1">
+                                        <span className="font-medium text-xs">Comentario del profesor:</span>
+                                        <div className="w-full mt-1 px-2 py-1 border border-blue-200 rounded bg-white min-h-[28px] text-xs">
+                                            {tareaToShow.comentarioCorreccion
+                                                ? tareaToShow.comentarioCorreccion
+                                                : <span className="italic text-blue-400">Sin comentario</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tarea-anim-fadeIn">
+                                <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 flex flex-col gap-1 tarea-anim-slideUp">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                        <span className="font-semibold text-gray-700 text-xs">Fecha de entrega:</span>
+                                        <span className="text-gray-700 text-xs">
+                                            {tareaToShow.fechaEntregada
+                                                ? new Date(tareaToShow.fechaEntregada).toLocaleString('es-ES', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
+                                                : 'Desconocida'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
