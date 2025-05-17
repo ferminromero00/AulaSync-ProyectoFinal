@@ -30,31 +30,42 @@ const ClaseDashboard = () => {
     const role = localStorage.getItem('role');
 
     useEffect(() => {
+        let mounted = true;
         if (!alumnoId) {
             console.error('No se encontró el ID del alumno');
             navigate('/');
             return;
         }
 
-        const fetchClase = async () => {
-            try {
-                setIsLoading(true);
-                const data = await getClaseById(id);
-                setClase(data);
-                setTareas(data.tareas || data.anuncios?.filter(a => a.tipo === 'tarea') || []);
-            } catch (error) {
-                console.error('Error al cargar la clase:', error);
-                toast.error('Error al cargar la clase');
-                if (error.message.includes('No autorizado')) {
-                    navigate('/');
+        // Solo recargar si no hay datos o el id de la clase cambia
+        if (!clase || clase.id !== id) {
+            const fetchClase = async () => {
+                try {
+                    if (mounted) setIsLoading(true);
+                    const data = await getClaseById(id);
+                    if (mounted) {
+                        setClase(data);
+                        setTareas(data.tareas || data.anuncios?.filter(a => a.tipo === 'tarea') || []);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar la clase:', error);
+                    toast.error('Error al cargar la clase');
+                    if (error.message.includes('No autorizado')) {
+                        navigate('/');
+                    }
+                } finally {
+                    if (mounted) setIsLoading(false);
                 }
-            } finally {
-                setIsLoading(false);
-            }
-        };
+            };
+            fetchClase();
+        } else {
+            // Si ya hay datos, no mostrar loading
+            setIsLoading(false);
+        }
 
-        fetchClase();
-    }, [id, navigate, alumnoId]);
+        return () => { mounted = false; };
+    // Solo depende de id y alumnoId
+    }, [id, alumnoId, navigate]);
 
     const handleSearchAlumnos = async (query) => {
         if (!query.trim()) {

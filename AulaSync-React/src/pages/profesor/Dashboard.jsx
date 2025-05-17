@@ -18,6 +18,33 @@ const Dashboard = () => {
     const [tareasCount, setTareasCount] = useState(0);
     const [statsLoading, setStatsLoading] = useState(true);
 
+    // Animación de ticks progresivos (hooks siempre arriba)
+    const steps = [
+        { label: "Cargando tus clases...", icon: <BookOpen className="h-6 w-6 text-violet-400" /> },
+        { label: "Cargando tu perfil...", icon: <Users className="h-6 w-6 text-violet-400" /> },
+        { label: "Cargando notificaciones...", icon: <BarChart2 className="h-6 w-6 text-violet-400" /> }
+    ];
+    const [step, setStep] = useState(0);
+    const [dotCount, setDotCount] = useState(0);
+    const intervalRef = useRef();
+    const dotIntervalRef = useRef();
+
+    useEffect(() => {
+        if (statsLoading) {
+            setStep(0);
+            intervalRef.current = setInterval(() => {
+                setStep(prev => (prev < steps.length ? prev + 1 : prev));
+            }, 500);
+            dotIntervalRef.current = setInterval(() => {
+                setDotCount(prev => (prev + 1) % 3);
+            }, 400);
+        }
+        return () => {
+            clearInterval(intervalRef.current);
+            clearInterval(dotIntervalRef.current);
+        };
+    }, [statsLoading]);
+
     useEffect(() => {
         let mounted = true;
         
@@ -77,6 +104,63 @@ const Dashboard = () => {
             onClick: () => navigate('/profesor/tareas')
         }
     ];
+
+    if (statsLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-violet-50 via-white to-purple-50">
+                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-violet-100 animate-fade-in-up">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Loader2 className="h-12 w-12 text-violet-500 animate-spin" />
+                        <span className="text-2xl font-bold text-violet-900">AulaSync</span>
+                    </div>
+                    <div className="flex flex-col gap-3 min-w-[300px]">
+                        {steps.map((s, idx) => (
+                            <div className="flex items-center gap-3" key={s.label}>
+                                {step > idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <svg className="text-violet-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" fill="#ddd6fe"/>
+                                            <path d="M7 13l3 3 7-7" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </span>
+                                ) : step === idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-violet-600 border-t-transparent animate-spin"></span>
+                                    </span>
+                                ) : (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                    </span>
+                                )}
+                                <span className={`text-violet-800 ${step > idx ? "line-through text-violet-700" : ""}`}>{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-8 text-violet-700 text-sm flex items-center gap-2">
+                        ¡Bienvenido a AulaSync! Preparando tu espacio
+                        <span className="inline-block w-6 text-violet-700 font-bold" style={{ letterSpacing: 1 }}>
+                            {".".repeat(dotCount + 1)}
+                        </span>
+                    </div>
+                    <style>{`
+                        @keyframes fade-in-up {
+                            0% { opacity: 0; transform: translateY(20px);}
+                            100% { opacity: 1; transform: translateY(0);}
+                        }
+                        .animate-fade-in-up {
+                            animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                        }
+                        @keyframes pop {
+                            0% { transform: scale(0.7); opacity: 0.5;}
+                            60% { transform: scale(1.2);}
+                            100% { transform: scale(1); opacity: 1;}
+                        }
+                        .animate-pop { animation: pop 0.4s; }
+                    `}</style>
+                </div>
+            </div>
+        );
+    }
 
     if (userData?.loading) {
         return (
