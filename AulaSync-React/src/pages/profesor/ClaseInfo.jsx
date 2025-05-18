@@ -1,26 +1,50 @@
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getClaseById } from '../../services/clases';
 import { obtenerAnuncios } from '../../services/anuncios';
-import { Users, BookOpen, CheckCircle, FileText } from 'lucide-react';
+import { Users, BookOpen, FileText, Calendar, AlertCircle } from 'lucide-react';
 
 const ClaseInfo = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [clase, setClase] = useState(null);
     const [tareas, setTareas] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [profesorNombre, setProfesorNombre] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
+                console.log('[ClaseInfo] Obteniendo datos de clase...');
                 const claseData = await getClaseById(id);
-                setClase(claseData);
+                console.log('[ClaseInfo] Datos de clase recibidos:', claseData);
+
+                console.log('[ClaseInfo] Obteniendo anuncios...');
                 const anuncios = await obtenerAnuncios(id);
+                console.log('[ClaseInfo] Anuncios recibidos:', anuncios);
+
+                setClase(claseData);
                 setTareas(anuncios.filter(a => a.tipo === 'tarea'));
+
+                // Buscar nombre del profesor en el primer autor de las tareas/anuncios
+                let nombreProfesor = null;
+                if (claseData.profesor && (claseData.profesor.nombre || claseData.profesor.firstName)) {
+                    nombreProfesor = claseData.profesor.nombre || `${claseData.profesor.firstName || ''} ${claseData.profesor.lastName || ''}`.trim();
+                } else {
+                    // Buscar en anuncios
+                    const primerAutor = anuncios.find(a => a.autor && a.autor.nombre)?.autor;
+                    if (primerAutor) {
+                        nombreProfesor = primerAutor.nombre;
+                    }
+                }
+                setProfesorNombre(nombreProfesor);
             } catch (e) {
+                console.error('[ClaseInfo] Error al cargar datos:', e);
                 setClase(null);
                 setTareas([]);
+                setProfesorNombre(null);
             } finally {
                 setLoading(false);
             }
@@ -41,52 +65,136 @@ const ClaseInfo = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4">
-            <h1 className="text-2xl font-bold mb-4">{clase.nombre}</h1>
-            <div className="mb-6">
-                <div className="flex items-center gap-2 text-gray-700">
-                    <Users className="h-5 w-5" />
-                    <span className="font-semibold">Alumnos unidos:</span>
-                    <span>{clase.estudiantes?.length || 0}</span>
+        <div className="max-w-5xl mx-auto py-10 px-4 animate-fadeInInfo">
+            {/* Cabecera moderna */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10 animate-slideDown">
+                <div className="flex items-center gap-4">
+                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 rounded-2xl shadow">
+                        <BookOpen className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold text-blue-900">{clase.nombre}</h1>
+                        <div className="flex items-center gap-4 mt-2 text-gray-600 text-base">
+                            <span className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-blue-400" />
+                                <span className="font-semibold">{clase.estudiantes?.length || 0}</span> alumnos unidos
+                            </span>
+                            <span className="flex items-center gap-2">
+                                <BookOpen className="h-5 w-5 text-blue-400" />
+                                Código: {clase.codigoClase}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {/* Profesor y especialidad */}
+                <div className="flex flex-col gap-2 items-end">
+                    <div className="text-sm text-gray-500">
+                        <span className="font-semibold text-blue-700">Profesor:</span>{" "}
+                        {profesorNombre
+                            ? profesorNombre
+                            : <span className="italic text-gray-400">No disponible</span>
+                        }
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        <span className="font-semibold text-blue-700">Especialidad:</span>{" "}
+                        {clase.profesor && clase.profesor.especialidad
+                            ? clase.profesor.especialidad
+                            : <span className="italic text-gray-400">No disponible</span>
+                        }
+                    </div>
                 </div>
             </div>
-            <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" /> Tareas publicadas
+
+            {/* Botón para ir a la clase */}
+            <div className="flex justify-end mb-8">
+                <button
+                    onClick={() => navigate(`/profesor/clase/${id}`)}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo"
+                    style={{ animationDelay: '200ms' }}
+                >
+                    <BookOpen className="h-5 w-5" />
+                    Ir a la clase
+                </button>
+            </div>
+
+            {/* Lista de tareas */}
+            <div className="mb-10">
+                <h2 className="text-2xl font-bold text-blue-900 flex items-center gap-3 mb-6 animate-fadeInInfo" style={{ animationDelay: '120ms' }}>
+                    <BookOpen className="h-7 w-7 text-blue-500" />
+                    Tareas publicadas
                 </h2>
                 {tareas.length === 0 ? (
-                    <div className="text-gray-500">No hay tareas publicadas.</div>
+                    <div className="flex flex-col items-center justify-center py-12 text-gray-400 animate-fadeInInfo" style={{ animationDelay: '200ms' }}>
+                        <FileText className="h-12 w-12 mb-3" />
+                        <p className="text-gray-500">No hay tareas publicadas.</p>
+                    </div>
                 ) : (
-                    tareas.map(tarea => (
-                        <div key={tarea.id} className="mb-6 border-b border-gray-100 pb-4">
-                            <div className="flex items-center gap-2 font-medium text-blue-900">
-                                <FileText className="h-4 w-4" />
-                                {tarea.titulo}
-                            </div>
-                            <div className="ml-6 mt-2">
-                                <div className="font-semibold text-gray-700 mb-1">Estado de entregas:</div>
-                                <ul className="space-y-1">
-                                    {clase.estudiantes?.map(alumno => {
-                                        const entrega = tarea.entregas?.find(e => e.alumno?.id === alumno.id);
-                                        return (
-                                            <li key={alumno.id} className="flex items-center gap-2 text-sm">
-                                                <span className="font-medium">{alumno.nombre}</span>
-                                                {entrega ? (
-                                                    <span className="flex items-center gap-1 text-emerald-700">
-                                                        <CheckCircle className="h-4 w-4" /> Entregado
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-amber-600">No entregado</span>
-                                                )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {tareas.map((tarea, idx) => (
+                            <div
+                                key={tarea.id}
+                                className="bg-white rounded-2xl shadow-xl border border-blue-100 p-6 animate-fadeInInfo"
+                                style={{ animationDelay: `${200 + idx * 80}ms` }}
+                            >
+                                <div className="flex items-center gap-3 mb-2">
+                                    <FileText className="h-6 w-6 text-blue-600" />
+                                    <h3 className="font-semibold text-lg text-blue-900">{tarea.titulo}</h3>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                                    <Calendar className="h-4 w-4" />
+                                    {tarea.fechaEntrega
+                                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })
+                                        : "Sin fecha límite"}
+                                </div>
+                                <div className="mb-3 text-gray-700 text-sm whitespace-pre-line">
+                                    {tarea.contenido || <span className="italic text-gray-400">Sin descripción</span>}
+                                </div>
+                                <div className="mt-4">
+                                    <div className="font-semibold text-blue-900 mb-2">Estado de entregas:</div>
+                                    <ul className="space-y-2">
+                                        {clase.estudiantes?.length === 0 && (
+                                            <li className="flex items-center gap-2 text-sm text-gray-400">
+                                                <AlertCircle className="h-4 w-4" />
+                                                No hay estudiantes inscritos.
                                             </li>
-                                        );
-                                    })}
-                                </ul>
+                                        )}
+                                        {clase.estudiantes?.map((alumno, i) => (
+                                            <li key={alumno.id} className="flex items-center gap-2 text-sm">
+                                                <span className="font-medium text-gray-900">{alumno.nombre}</span>
+                                                <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-1 rounded-full text-xs font-semibold border border-amber-200">
+                                                    <AlertCircle className="h-4 w-4" /> No entregado
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 )}
             </div>
+            <style>{`
+                @keyframes fadeInInfo {
+                    0% { opacity: 0; transform: translateY(32px);}
+                    100% { opacity: 1; transform: none;}
+                }
+                .animate-fadeInInfo {
+                    animation: fadeInInfo 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                }
+                @keyframes slideDown {
+                    0% { opacity: 0; transform: translateY(-32px);}
+                    100% { opacity: 1; transform: none;}
+                }
+                .animate-slideDown {
+                    animation: slideDown 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                }
+            `}</style>
         </div>
     );
 };

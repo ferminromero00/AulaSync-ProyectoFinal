@@ -535,40 +535,45 @@ class ClaseController extends AbstractController
         return new JsonResponse(['message' => 'Tarea entregada correctamente']);
     }
 
-    #[Route('/clases/{id}', name: 'get_clase', methods: ['GET'])]
-    public function getClase(int $id, EntityManagerInterface $em): JsonResponse
+    #[Route('/api/clases/{id}', name: 'api_get_clase', methods: ['GET'])]
+    public function getClase($id, EntityManagerInterface $em): JsonResponse
     {
         $clase = $em->getRepository(Clase::class)->find($id);
-        
+
         if (!$clase) {
-            return new JsonResponse(['error' => 'Clase no encontrada'], 404);
+            return $this->json(['error' => 'Clase no encontrada'], 404);
         }
 
-        // Actualizar el número de estudiantes
-        $clase->updateNumEstudiantes();
-        $em->flush();
+        // Obtener datos del profesor
+        $profesor = $clase->getProfesor();
+        $profesorData = $profesor ? [
+            'id' => $profesor->getId(),
+            'firstName' => $profesor->getFirstName(),
+            'lastName' => $profesor->getLastName(),
+            'email' => $profesor->getEmail(),
+            'especialidad' => $profesor->getEspecialidad(),
+            'departamento' => $profesor->getDepartamento(),
+        ] : null;
 
-        // Construir el array con la información necesaria
-        $data = [
+        // Obtener estudiantes
+        $estudiantes = [];
+        foreach ($clase->getEstudiantes() as $alumno) {
+            $estudiantes[] = [
+                'id' => $alumno->getId(),
+                'nombre' => $alumno->getFirstName() . ' ' . $alumno->getLastName(),
+                'email' => $alumno->getEmail(),
+                'fotoPerfilUrl' => $alumno->getProfileImage(),
+            ];
+        }
+
+        return $this->json([
             'id' => $clase->getId(),
             'nombre' => $clase->getNombre(),
             'codigoClase' => $clase->getCodigoClase(),
             'numEstudiantes' => $clase->getNumEstudiantes(),
-            'profesor' => [
-                'id' => $clase->getProfesor()->getId(),
-                'nombre' => $clase->getProfesor()->getFirstName() . ' ' . $clase->getProfesor()->getLastName()
-            ],
-            'estudiantes' => array_map(function($estudiante) {
-                return [
-                    'id' => $estudiante->getId(),
-                    'nombre' => $estudiante->getFirstName() . ' ' . $estudiante->getLastName(),
-                    'email' => $estudiante->getEmail(),
-                    'fotoPerfilUrl' => $estudiante->getProfileImage() ?? '/uploads/perfiles/default.png'
-                ];
-            }, $clase->getAlumnos()->toArray())
-        ];
-
-        return new JsonResponse($data);
+            'profesor' => $profesorData,
+            'estudiantes' => $estudiantes,
+        ]);
     }
 
     #[Route('/tareas/{id}/entregas', name: 'get_tarea_entregas', methods: ['GET', 'OPTIONS'])]

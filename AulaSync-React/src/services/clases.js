@@ -108,6 +108,9 @@ export const eliminarClase = async (claseId) => {
 export const getClaseById = async (id) => {
     try {
         const role = localStorage.getItem('role');
+        console.log('[getClaseById] Role:', role);
+        console.log('[getClaseById] ID:', id);
+
         if (!role) {
             throw new Error('NO_ROLE');
         }
@@ -121,12 +124,15 @@ export const getClaseById = async (id) => {
 
         if (!response.ok) {
             const error = await response.json();
+            console.error('[getClaseById] Error response:', error);
             throw new Error(error.message || 'Error al obtener la clase');
         }
 
-        return response.json();
+        const data = await response.json();
+        console.log('[getClaseById] Datos recibidos:', data);
+        return data;
     } catch (error) {
-        console.error('Error en getClaseById:', error);
+        console.error('[getClaseById] Error:', error);
         throw error;
     }
 };
