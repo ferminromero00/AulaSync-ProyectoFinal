@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
-import { Plus, BookOpen, Users, Calendar, ChevronRight, Trash, AlertTriangle, MoreVertical } from 'lucide-react';
+import { Plus, BookOpen, Users, Calendar, ChevronRight, Trash, AlertTriangle, MoreVertical, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { GlobalContext } from '../../App';
@@ -128,6 +128,45 @@ const Clases = () => {
                                      animate-fadeIn"
                             style={{ animationDelay: `${index * 100}ms` }}
                         >
+                            {/* Botón menú 3 puntitos - Reposicionado arriba a la derecha */}
+                            <button
+                                type="button"
+                                className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 z-20 menu-button transition-colors"
+                                onClick={e => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
+                                }}
+                            >
+                                <MoreVertical className="h-5 w-5" />
+                            </button>
+                            {/* Menú desplegable alineado a la derecha */}
+                            {menuAbierto === clase.id && (
+                                <div className="absolute top-14 right-4 bg-white border border-gray-100 rounded-xl shadow-lg z-30 min-w-[160px] animate-fadeIn">
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700 rounded-t-xl"
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setMenuAbierto(null);
+                                            navigate(`/profesor/clase/${clase.id}/info`);
+                                        }}
+                                    >
+                                        Ver info clase
+                                    </button>
+                                    <button
+                                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-xl"
+                                        onClick={e => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleEliminarClase(clase.id);
+                                        }}
+                                    >
+                                        Borrar clase
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Fondo decorativo */}
                             <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-blue-500/5 
                                           to-indigo-500/5 rounded-full group-hover:scale-150 transition-transform duration-500" />
@@ -172,47 +211,6 @@ const Clases = () => {
                                         <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                     </span>
                                 </div>
-
-                                {/* Botón menú 3 puntitos */}
-                                <button
-                                    type="button"
-                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-500 z-20 menu-button"
-                                    onClick={e => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
-                                    }}
-                                >
-                                    <MoreVertical className="h-5 w-5" />
-                                </button>
-                                {/* Menú desplegable alineado a la derecha */}
-                                {menuAbierto === clase.id && (
-                                    <div className="absolute top-12 right-4 bg-white border border-gray-100 rounded-xl shadow-lg z-30 min-w-[160px] animate-fadeIn"
-                                         style={{ transform: 'translateX(0)' }}>
-                                        <button
-                                            className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700 rounded-t-xl"
-                                            onClick={e => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setMenuAbierto(null);
-                                                navigate(`/profesor/clase/${clase.id}/info`);
-                                            }}
-                                        >
-                                            Ver info clase
-                                        </button>
-                                        <button
-                                            className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-xl"
-                                            onClick={e => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setMenuAbierto(null);
-                                                handleEliminarClase(clase.id);
-                                            }}
-                                        >
-                                            Borrar clase
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         </Link>
                     ))}
@@ -225,9 +223,22 @@ const Clases = () => {
                     className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
                     style={{ margin: 0, padding: 0 }}
                 >
-                    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-4">Crear Nueva Clase</h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-0 overflow-hidden animate-fadeInUpModal">
+                        {/* Header moderno */}
+                        <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl">
+                            <Plus className="h-7 w-7 text-blue-500 animate-fadeIn" />
+                            <span className="text-xl font-bold text-blue-900 animate-fadeIn" style={{ animationDelay: '80ms' }}>
+                                Crear Nueva Clase
+                            </span>
+                            <button
+                                onClick={() => setMostrarFormulario(false)}
+                                className="ml-auto text-gray-400 hover:text-blue-600 rounded-full p-2 transition-colors"
+                                disabled={isCreating}
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="space-y-6 px-8 py-8 bg-white rounded-b-2xl">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Nombre de la clase
@@ -236,61 +247,121 @@ const Clases = () => {
                                     type="text"
                                     value={nuevaClase.nombre}
                                     onChange={(e) => setNuevaClase({ ...nuevaClase, nombre: e.target.value })}
-                                    className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
+                                    className="w-full px-4 py-3 rounded-xl border border-blue-200 bg-blue-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900 text-base placeholder:text-gray-400 transition-shadow"
+                                    placeholder="Ej: Matemáticas 2ºA"
                                     required
+                                    autoFocus
+                                    disabled={isCreating}
                                 />
                             </div>
                             <div className="flex justify-end gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setMostrarFormulario(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                    className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition"
+                                    disabled={isCreating}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    className="min-w-[120px] px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition flex items-center justify-center gap-2"
+                                    disabled={isCreating}
                                 >
-                                    Crear Clase
+                                    {isCreating ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
+                                            <span>Creando</span>
+                                        </>
+                                    ) : (
+                                        'Crear Clase'
+                                    )}
                                 </button>
                             </div>
                         </form>
                     </div>
+                    <style>{`
+                        @keyframes fadeInUpModal {
+                            0% { opacity: 0; transform: translateY(40px);}
+                            100% { opacity: 1; transform: translateY(0);}
+                        }
+                        .animate-fadeInUpModal {
+                            animation: fadeInUpModal 0.5s cubic-bezier(.4,1.4,.6,1) both;
+                        }
+                        .animate-fadeIn {
+                            animation: fadeIn 0.4s both;
+                        }
+                        @keyframes fadeIn {
+                            from { opacity: 0; transform: translateY(16px);}
+                            to { opacity: 1; transform: none;}
+                        }
+                    `}</style>
                 </div>
             )}
 
             {/* Modal de confirmación */}
             {showConfirmModal && (
-                <div
-                    className="fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    style={{ margin: 0, padding: 0 }}
-                >
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-                        <div className="flex items-center justify-center mb-4 text-amber-500">
-                            <AlertTriangle className="h-12 w-12" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-center mb-2">
-                            ¿Eliminar clase?
-                        </h3>
-                        <p className="text-gray-600 text-center mb-6">
-                            ¿Estás seguro de que quieres eliminar la clase "{claseSeleccionada?.nombre}"? Esta acción no se puede deshacer.
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setShowConfirmModal(false)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={confirmarEliminacion}
-                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                            >
-                                Eliminar
-                            </button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-0 overflow-hidden animate-fadeInUpModal">
+                        <div className="flex flex-col items-center gap-4 px-8 py-8">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-amber-200 rounded-full animate-ping opacity-25"></div>
+                                <div className="relative bg-gradient-to-br from-amber-100 to-yellow-100 p-4 rounded-full shadow-lg animate-bounce">
+                                    <AlertTriangle className="h-10 w-10 text-amber-600" />
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 text-center">¿Eliminar clase?</h3>
+                            <p className="text-gray-600 text-center">
+                                ¿Estás seguro de que quieres eliminar la clase "<span className="font-semibold text-amber-700">{claseSeleccionada?.nombre}</span>"? Esta acción no se puede deshacer.
+                            </p>
+                            <div className="flex justify-end gap-3 w-full mt-4">
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="flex-1 px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-all"
+                                    disabled={isDeleting}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={confirmarEliminacion}
+                                    className="flex-1 px-6 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-all flex items-center justify-center gap-2"
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
+                                            <span>Eliminando</span>
+                                        </>
+                                    ) : (
+                                        'Eliminar'
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
+                    <style>{`
+                        @keyframes fadeInUpModal {
+                            0% { opacity: 0; transform: translateY(40px);}
+                            100% { opacity: 1; transform: translateY(0);}
+                        }
+                        .animate-fadeInUpModal {
+                            animation: fadeInUpModal 0.5s cubic-bezier(.4,1.4,.6,1) both;
+                        }
+                        .animate-bounce {
+                            animation: bounce 0.7s;
+                        }
+                        @keyframes bounce {
+                            0%, 100% { transform: translateY(0);}
+                            50% { transform: translateY(-10px);}
+                        }
+                        .animate-ping {
+                            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+                        }
+                        @keyframes ping {
+                            0% { transform: scale(1); opacity: 1;}
+                            75%, 100% { transform: scale(1.5); opacity: 0;}
+                        }
+                    `}</style>
                 </div>
             )}
 
