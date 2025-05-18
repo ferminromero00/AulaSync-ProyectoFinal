@@ -1,9 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getClaseById } from '../../services/clases';
 import { obtenerAnuncios } from '../../services/anuncios';
 import { Users, BookOpen, FileText, Calendar, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../../config/config';
 
 const ClaseInfo = () => {
     const { id } = useParams();
@@ -12,6 +13,8 @@ const ClaseInfo = () => {
     const [tareas, setTareas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [profesorNombre, setProfesorNombre] = useState(null);
+    const [exportingPdf, setExportingPdf] = useState(false);
+    const exportModalRef = useRef(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,6 +55,42 @@ const ClaseInfo = () => {
         fetchData();
     }, [id]);
 
+    // NUEVO: función para exportar a PDF con loading animado
+    const handleExportPDF = async () => {
+        setExportingPdf(true);
+        setTimeout(() => {
+            // Centrar el modal respecto al scroll actual, pero más arriba (1/3 de la pantalla)
+            if (exportModalRef.current) {
+                const scrollY = window.scrollY || window.pageYOffset;
+                exportModalRef.current.style.top = `${scrollY + window.innerHeight / 3 - 120}px`;
+            }
+        }, 10);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/clases/${id}/exportar-pdf`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) throw new Error('Error al generar el PDF');
+            const blob = await response.blob();
+            // Descargar el PDF
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clase_${id}_info.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            alert('Error al exportar el PDF');
+        } finally {
+            setExportingPdf(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-96">
@@ -67,7 +106,7 @@ const ClaseInfo = () => {
     return (
         <div className="max-w-5xl mx-auto py-10 px-4 animate-fadeInInfo">
             {/* Cabecera moderna */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10 animate-slideDown">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-4 animate-slideDown">
                 <div className="flex items-center gap-4">
                     <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 rounded-2xl shadow">
                         <BookOpen className="h-8 w-8 text-blue-600" />
@@ -105,8 +144,16 @@ const ClaseInfo = () => {
                 </div>
             </div>
 
-            {/* Botón para ir a la clase */}
-            <div className="flex justify-end mb-8">
+            {/* Botón para ir a la clase y exportar PDF */}
+            <div className="flex flex-wrap justify-end gap-3 mb-4 -mt-2">
+                <button
+                    onClick={handleExportPDF}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo"
+                    style={{ animationDelay: '180ms' }}
+                >
+                    <FileText className="h-5 w-5" />
+                    Exportar PDF
+                </button>
                 <button
                     onClick={() => navigate(`/profesor/clase/${id}`)}
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo"
@@ -179,6 +226,62 @@ const ClaseInfo = () => {
                     </div>
                 )}
             </div>
+
+            {/* MODAL DE CARGA PDF */}
+            {exportingPdf && (
+                <>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 9999,
+                            width: '100%',
+                            maxWidth: 350,
+                        }}
+                        ref={exportModalRef}
+                    >
+                        <div className="bg-white rounded-2xl shadow-2xl px-10 py-8 flex flex-col items-center gap-6 min-w-[320px] max-w-xs animate-fadeInPdfModal">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-200 to-indigo-200 flex items-center justify-center mb-2 shadow-lg">
+                                <FileText className="h-8 w-8 text-blue-600 animate-bounce" />
+                            </div>
+                            <h3 className="text-xl font-bold text-blue-900 mb-2 text-center">Exportando página a PDF...</h3>
+                            <div className="w-full">
+                                <div className="relative w-full h-3 bg-blue-100 rounded-full overflow-hidden">
+                                    <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-pdfBar" style={{ width: '100%' }} />
+                                </div>
+                            </div>
+                            <p className="text-blue-700 text-sm mt-2 animate-fadeInPdfText">Por favor, espera unos segundos mientras generamos tu PDF.</p>
+                        </div>
+                    </div>
+                    <div className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm" />
+                    <style>{`
+                        @keyframes pdfBar {
+                            0% { width: 0%; }
+                            60% { width: 80%; }
+                            80% { width: 95%; }
+                            100% { width: 100%; }
+                        }
+                        .animate-pdfBar {
+                            animation: pdfBar 2.2s cubic-bezier(.4,1.4,.6,1) infinite;
+                        }
+                        @keyframes fadeInPdfModal {
+                            0% { opacity: 0; transform: scale(0.95);}
+                            100% { opacity: 1; transform: scale(1);}
+                        }
+                        .animate-fadeInPdfModal {
+                            animation: fadeInPdfModal 0.5s both;
+                        }
+                        @keyframes fadeInPdfText {
+                            0% { opacity: 0; }
+                            100% { opacity: 1; }
+                        }
+                        .animate-fadeInPdfText {
+                            animation: fadeInPdfText 1.2s both;
+                        }
+                    `}</style>
+                </>
+            )}
             <style>{`
                 @keyframes fadeInInfo {
                     0% { opacity: 0; transform: translateY(32px);}

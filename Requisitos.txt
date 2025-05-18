@@ -34,7 +34,7 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
 
 ================================================================================================================================================
 3. Generación de informes en PDF
-   - ❌ knplabs/knp-snappy-bundle → Generación de PDFs desde HTML usando wkhtmltopdf
+   - ✅ knplabs/knp-snappy-bundle → Generación de PDFs desde HTML usando wkhtmltopdf
 ================================================================================================================================================
 4. Validación de cuentas por correo electrónico
    - ✅ symfony/mailer            → Envío de correos de verificación

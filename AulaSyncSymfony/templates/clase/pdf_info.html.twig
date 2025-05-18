@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Información de la Clase</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .header { margin-bottom: 30px; }
+        .info-section { margin-bottom: 20px; }
+        .label { font-weight: bold; color: #2563eb; }
+        .value { margin-left: 10px; }
+        .estudiantes-list { margin-top: 20px; }
+        .estudiante-item { padding: 5px 0; }
+        .tareas-section { margin-top: 30px; }
+        .tarea-item { 
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .tarea-title { 
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .tarea-info { 
+            margin-bottom: 5px;
+            color: #4b5563;
+        }
+        .entregas-list {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{clase.nombre}}</h1>
+        <p><span class="label">Código de clase:</span> {{clase.codigoClase}}</p>
+    </div>
+
+    <div class="info-section">
+        <p><span class="label">Profesor:</span>
+            <span class="value">{{clase.profesor.firstName}} {{clase.profesor.lastName}}</span>
+        </p>
+        <p><span class="label">Especialidad:</span>
+            <span class="value">{{clase.profesor.especialidad|default('No especificada')}}</span>
+        </p>
+        <p><span class="label">Fecha de creación:</span>
+            <span class="value">{{clase.createdAt|date('d/m/Y')}}</span>
+        </p>
+        <p><span class="label">Número de estudiantes:</span>
+            <span class="value">{{clase.numEstudiantes}}</span>
+        </p>
+    </div>
+
+    {% if clase.alumnos is defined and clase.alumnos|length > 0 %}
+        <div class="estudiantes-list">
+            <h2>Lista de Estudiantes</h2>
+            {% for alumno in clase.alumnos %}
+                <div class="estudiante-item">
+                    • {{alumno.firstName}} {{alumno.lastName}}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if clase.anuncios is defined and clase.anuncios|length > 0 %}
+        <div class="tareas-section">
+            <h2>Tareas Publicadas</h2>
+            {% for anuncio in clase.anuncios %}
+                {% if anuncio.tipo == 'tarea' %}
+                    <div class="tarea-item">
+                        <div class="tarea-title">{{anuncio.titulo}}</div>
+                        <div class="tarea-info">
+                            <p><strong>Fecha límite:</strong> 
+                                {% if anuncio.fechaEntrega %}
+                                    {{anuncio.fechaEntrega|date('d M Y, H:i')}}
+                                {% else %}
+                                    Sin fecha límite
+                                {% endif %}
+                            </p>
+                            <p><strong>Descripción:</strong> 
+                                {{anuncio.contenido|default('Sin descripción')}}
+                            </p>
+                            <p><strong>Estado de entregas:</strong></p>
+                            <div class="entregas-list">
+                                {% for alumno in clase.alumnos %}
+                                    <div>• {{alumno.firstName}} {{alumno.lastName}} - No entregado</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>
