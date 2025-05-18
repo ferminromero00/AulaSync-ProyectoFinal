@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { getClasesProfesor, eliminarClase, crearClase } from '../../services/clases';
-import { Plus, BookOpen, Users, Calendar, ChevronRight, Trash, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, BookOpen, Users, Calendar, ChevronRight, Trash, AlertTriangle, MoreVertical } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { GlobalContext } from '../../App';
 import "../../styles/animations.css";
@@ -19,6 +19,7 @@ const Clases = () => {
     const [claseSeleccionada, setClaseSeleccionada] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Siempre recarga desde la API al entrar en la página
@@ -172,18 +173,46 @@ const Clases = () => {
                                     </span>
                                 </div>
 
-                                {/* Botón eliminar */}
+                                {/* Botón menú 3 puntitos */}
                                 <button
-                                    onClick={(e) => {
+                                    type="button"
+                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-500 z-20 menu-button"
+                                    onClick={e => {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        handleEliminarClase(clase.id);
+                                        setMenuAbierto(menuAbierto === clase.id ? null : clase.id);
                                     }}
-                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-red-50 
-                                             text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <Trash className="h-5 w-5" />
+                                    <MoreVertical className="h-5 w-5" />
                                 </button>
+                                {/* Menú desplegable alineado a la derecha */}
+                                {menuAbierto === clase.id && (
+                                    <div className="absolute top-12 right-4 bg-white border border-gray-100 rounded-xl shadow-lg z-30 min-w-[160px] animate-fadeIn"
+                                         style={{ transform: 'translateX(0)' }}>
+                                        <button
+                                            className="w-full text-left px-4 py-2 hover:bg-blue-50 text-blue-700 rounded-t-xl"
+                                            onClick={e => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setMenuAbierto(null);
+                                                navigate(`/profesor/clase/${clase.id}/info`);
+                                            }}
+                                        >
+                                            Ver info clase
+                                        </button>
+                                        <button
+                                            className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-xl"
+                                            onClick={e => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setMenuAbierto(null);
+                                                handleEliminarClase(clase.id);
+                                            }}
+                                        >
+                                            Borrar clase
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </Link>
                     ))}

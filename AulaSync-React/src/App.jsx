@@ -9,6 +9,7 @@ import DashboardAlumno from './pages/alumno/DashboardAlumno'
 import Clases from './pages/profesor/Clases'
 import Configuracion from './pages/profesor/Configuracion'
 import ClaseDashboard from './pages/profesor/ClaseDashboard'
+import ClaseInfo from './pages/profesor/ClaseInfo'; // Importa el nuevo componente
 import ConfiguracionAlumno from './pages/alumno/Configuracion'
 import TareasAlumno from './pages/alumno/TareasAlumno';
 import TareasProfesor from './pages/profesor/TareasProfesor';
@@ -109,6 +110,7 @@ function App() {
                             <Route path="clases" element={<Clases />} />
                             <Route path="configuracion" element={<Configuracion />} />
                             <Route path="clase/:id" element={<ClaseDashboard />} />
+                            <Route path="clase/:id/info" element={<ClaseInfo />} /> {/* NUEVA RUTA */}
                             <Route path="tareas" element={<TareasProfesor />} />
                             {/* ...otras rutas de profesor... */}
                         </Route>
