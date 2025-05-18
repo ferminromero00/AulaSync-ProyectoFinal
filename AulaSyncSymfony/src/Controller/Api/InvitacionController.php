@@ -129,6 +129,24 @@ class InvitacionController extends AbstractController
         return new JsonResponse(['message' => 'Notificación leída']);
     }
 
+    #[Route('/notificaciones/borrar-todas', name: 'notificaciones_borrar_todas', methods: ['DELETE'])]
+    public function borrarTodasNotificaciones(EntityManagerInterface $em): JsonResponse
+    {
+        $alumno = $this->getUser();
+        if (!$alumno instanceof \App\Entity\Alumno) {
+            return new JsonResponse(['error' => 'No autenticado como alumno'], 401);
+        }
+
+        // Eliminar todas las notificaciones del alumno
+        $notificaciones = $em->getRepository(\App\Entity\Notificacion::class)->findBy(['alumno' => $alumno]);
+        foreach ($notificaciones as $notif) {
+            $em->remove($notif);
+        }
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
     private function formatearInvitaciones($invitaciones): array 
     {
         return array_map(function($inv) {

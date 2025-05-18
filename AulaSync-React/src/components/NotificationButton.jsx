@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { Bell, Check, X, FileText, ChevronRight } from "lucide-react";
+import { Bell, Check, X, FileText, ChevronRight, Trash2 } from "lucide-react";
 import { obtenerInvitacionesPendientes, responderInvitacion } from '../services/invitaciones';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -127,6 +127,29 @@ const NotificationButton = () => {
         }
     };
 
+    // NUEVO: Borrar todas las notificaciones del alumno
+    const handleBorrarTodas = async () => {
+        if (role !== 'alumno' || notificacionesVisibles.length === 0) return;
+        setNotifLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`${API_BASE_URL}/api/notificaciones/borrar-todas`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setUserData(prev => ({
+                ...prev,
+                invitaciones: []
+            }));
+            toast.success('Todas las notificaciones han sido borradas');
+            setShowNotifMenu(false);
+        } catch (e) {
+            toast.error('Error al borrar las notificaciones');
+        } finally {
+            setNotifLoading(false);
+        }
+    };
+
     // Filtrar notificaciones realmente visibles
     const notificacionesVisibles = notificaciones.filter(n =>
         (n.tipo === 'invitacion') ||
@@ -141,7 +164,11 @@ const NotificationButton = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
                     <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-lg">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                        <span className="text-lg text-gray-700">Procesando invitación...</span>
+                        <span className="text-lg text-gray-700">
+                            {role === 'alumno' && notificacionesVisibles.length === 0
+                                ? "Eliminando todas las notificaciones..."
+                                : "Procesando invitación..."}
+                        </span>
                     </div>
                 </div>
             )}
@@ -164,9 +191,25 @@ const NotificationButton = () => {
                     ref={notifMenuRef}
                     className="absolute mt-2 right-0 w-80 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-50"
                 >
-                    <div className="font-semibold mb-2 flex items-center gap-2">
-                        <Bell className="h-5 w-5 text-gray-700" />
-                        Notificaciones
+                    <div className="font-semibold mb-2 flex items-center gap-2 justify-between">
+                        <span className="flex items-center gap-2">
+                            <Bell className="h-5 w-5 text-gray-700" />
+                            Notificaciones
+                        </span>
+                        {/* Botón borrar todas */}
+                        {role === 'alumno' && notificacionesVisibles.length > 0 && (
+                            <button
+                                onClick={handleBorrarTodas}
+                                className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-lg
+                                    bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700
+                                    shadow-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                title="Borrar todas las notificaciones"
+                                disabled={notifLoading}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Borrar todas
+                            </button>
+                        )}
                     </div>
                     <div className="space-y-3 max-h-80 overflow-y-auto">
                         {role !== 'alumno' ? (
