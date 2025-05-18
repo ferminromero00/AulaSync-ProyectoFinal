@@ -47,8 +47,7 @@ const ClaseDashboard = () => {
     const [comentarioEntrega, setComentarioEntrega] = useState('');
     const [isEntregando, setIsEntregando] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    const [filtroTareas, setFiltroTareas] = useState('todas');
-    const [tareasFiltradas, setTareasFiltradas] = useState([]);
+    const [filtroTareas, setFiltroTareas] = useState('todas'); // 'todas', 'pendientes', 'finalizadas'
     const [loadingEntregas, setLoadingEntregas] = useState({});
     const [showEntregaModal, setShowEntregaModal] = useState(false);
     const [entregaSeleccionada, setEntregaSeleccionada] = useState(null);
@@ -56,7 +55,10 @@ const ClaseDashboard = () => {
     const [comentarioCorreccionEdicion, setComentarioCorreccionEdicion] = useState('');
     const [isCalificando, setIsCalificando] = useState(false);
 
-    const role = localStorage.getItem('role');
+    // Detectar el rol del usuario (ajusta si lo guardas en otro sitio)
+    const role = localStorage.getItem('role'); // 'profesor' o 'alumno'
+
+    // NUEVO: obtener el id del alumno autenticado (ajusta según tu auth)
     const alumnoId = userData?.user?.id || localStorage.getItem('userId');
 
     console.log('[ClaseDashboard] alumnoId:', alumnoId);
@@ -66,11 +68,13 @@ const ClaseDashboard = () => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
+                // Realizar ambas llamadas en paralelo
                 const [claseResponse, anunciosData] = await Promise.all([
                     getClaseById(id),
                     obtenerAnuncios(id)
                 ]);
                 
+                // NUEVO: Para cada tarea, obtener entregas
                 let anunciosConEntregas = anunciosData || [];
                 if (claseResponse && claseResponse.estudiantes && anunciosConEntregas.length > 0) {
                     const tareas = anunciosConEntregas.filter(a => a.tipo === 'tarea');
@@ -82,6 +86,7 @@ const ClaseDashboard = () => {
                             const idx = tareas.findIndex(t => t.id === anuncio.id);
                             const entregas = entregasPorTarea[idx] || [];
                             
+                            // Si hay entregas, actualizar el estado de entregada
                             const entregaAlumno = entregas.find(e => 
                                 String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
                             );
@@ -92,7 +97,7 @@ const ClaseDashboard = () => {
                                 entregasRealizadas: entregas.length,
                                 entregasPendientes: claseResponse.estudiantes.length - entregas.length,
                                 entregada: !!entregaAlumno,
-                                alumnoId: alumnoId
+                                alumnoId: alumnoId // Añadir el alumnoId aquí
                             };
                         }
                         return anuncio;
@@ -103,13 +108,13 @@ const ClaseDashboard = () => {
             } catch (error) {
                 console.error('Error:', error);
                 toast.error('Error al cargar los datos de la clase');
-                setAnuncios([]);
+                setAnuncios([]); // Asegurarnos de que siempre sea un array
             } finally {
                 setIsLoading(false);
             }
         };
 
-        if (alumnoId) {
+        if (alumnoId) { // Solo cargar si tenemos alumnoId
             fetchData();
         }
         
@@ -119,6 +124,7 @@ const ClaseDashboard = () => {
         };
     }, [id, setClaseData, setAnuncios, alumnoId]);
 
+    // NUEVO: Resetear selector al abrir el modal de anuncio
     useEffect(() => {
         if (showAnuncioModal) {
             setShowTipoSelector(true);
@@ -156,6 +162,7 @@ const ClaseDashboard = () => {
         } catch (error) {
             console.error('Error buscando alumnos:', error);
             setSearchResults([]);
+            // Opcionalmente puedes mostrar un mensaje de error al usuario
         } finally {
             setIsSearching(false);
         }
@@ -181,6 +188,7 @@ const ClaseDashboard = () => {
             toast.success(`Invitación enviada a ${alumno.nombre}`);
             setShowSearchModal(false);
         } catch (error) {
+            // No mostrar en consola si es error controlado
             if (
                 error.message === 'Ya existe una invitación pendiente' ||
                 error.message === 'El alumno ya pertenece a esta clase'
@@ -224,7 +232,7 @@ const ClaseDashboard = () => {
                 descripcion: ''
             });
             setShowTipoSelector(true);
-            await fetchAnuncios();
+            await fetchAnuncios(); // Usar await aquí para asegurar que los anuncios se actualicen
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         } finally {
@@ -233,6 +241,7 @@ const ClaseDashboard = () => {
     };
 
     const handleDeleteAnuncio = async (anuncioId) => {
+        // Solo abrir el modal si el id es válido
         if (!anuncioId) {
             toast.error('No se puede eliminar: ID de anuncio no válido');
             return;
@@ -269,6 +278,7 @@ const ClaseDashboard = () => {
         setComentarioEntrega('');
         setIsEntregando(false);
     
+        // Añadir estado de carga para cada estudiante
         const estudianteIds = claseData?.estudiantes?.map(e => e.id) || [];
         setLoadingEntregas(
             estudianteIds.reduce((acc, id) => ({...acc, [id]: true}), {})
@@ -280,9 +290,10 @@ const ClaseDashboard = () => {
                 const entregasConAlumno = entregas.map(entrega => ({
                     ...entrega,
                     alumno: entrega.alumno,
-                    alumnoId: entrega.alumno?.id
+                    alumnoId: entrega.alumno?.id // Guardar el ID del alumno explícitamente
                 }));
     
+                // Actualizar la tarea con su estado de entrega
                 setTareaSeleccionada(prev => ({
                     ...prev,
                     entregas: entregasConAlumno,
@@ -306,7 +317,7 @@ const ClaseDashboard = () => {
                 entregasPendientes: claseData?.estudiantes?.length || 0
             }));
         } finally {
-            setLoadingEntregas({});
+            setLoadingEntregas({}); // Limpiar estados de carga
         }
     };
 
@@ -320,6 +331,7 @@ const ClaseDashboard = () => {
         }, 200);
     };
 
+    // Elimina la animación de aparición del modal de búsqueda de alumnos (solo para el modal, no para toda la página)
     const renderStudentSearchModal = () => {
         if (!showSearchModal) return null;
 
@@ -328,6 +340,7 @@ const ClaseDashboard = () => {
                 ${isClosing ? 'modal-closing' : ''}`}>
                 <div className={`bg-white rounded-2xl shadow-2xl p-0 w-full max-w-md modal-content overflow-hidden
                     ${isClosing ? 'modal-content-closing' : ''}`}>
+                    {/* Header moderno */}
                     <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl">
                         <Search className="h-7 w-7 text-blue-500 animate-fadeIn" />
                         <span className="text-xl font-bold text-blue-900 animate-fadeIn" style={{ animationDelay: '80ms' }}>
@@ -340,6 +353,7 @@ const ClaseDashboard = () => {
                             <X className="h-6 w-6" />
                         </button>
                     </div>
+                    {/* Input de búsqueda */}
                     <div className="px-8 pt-8 pb-4 bg-white">
                         <div className="relative group">
                             <input
@@ -353,6 +367,7 @@ const ClaseDashboard = () => {
                             <Search className="h-5 w-5 text-blue-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                     </div>
+                    {/* Resultados */}
                     <div className="px-8 pb-8">
                         <div className="mt-2 max-h-72 overflow-y-auto space-y-2">
                             {isSearching ? (
@@ -417,7 +432,7 @@ const ClaseDashboard = () => {
                                 {claseData.estudiantes.map((estudiante) => (
                                     <li
                                         key={estudiante.id}
-                                        className="flex items-center gap-8 py-8 group border-b border-blue-50 last:border-b-0"
+                                        className="flex items-center gap-8 py-8 group border-b border-blue-50 last:border-b-0" // Más separación y mayor gap
                                     >
                                         <img
                                             src={estudiante.fotoPerfilUrl ? `${API_BASE_URL}${estudiante.fotoPerfilUrl}` : '/default-avatar.png'}
@@ -503,6 +518,7 @@ const ClaseDashboard = () => {
     };
 
     const handleOpenEntregaModal = (entrega) => {
+        // Asegúrate de inicializar con los datos actuales del backend
         setEntregaSeleccionada(entrega);
         setNotaEdicion(
             entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== ''
@@ -538,11 +554,13 @@ const ClaseDashboard = () => {
                 })
             });
             if (!response.ok) throw new Error('Error al calificar la entrega');
+            // Actualizar localmente la entrega seleccionada y su estado
             setEntregaSeleccionada(prev =>
                 prev
                     ? { ...prev, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion, calificado: true }
                     : prev
             );
+            // Actualizar la lista de entregas en tareaSeleccionada
             setTareaSeleccionada(prev =>
                 prev && prev.entregas
                     ? {
@@ -563,6 +581,7 @@ const ClaseDashboard = () => {
         }
     };
 
+    // NUEVO: Función para obtener la entrega del alumno actual para la tarea seleccionada
     const getEntregaAlumnoActual = () => {
         if (!tareaSeleccionada || !Array.isArray(tareaSeleccionada.entregas) || !alumnoId) return null;
         return tareaSeleccionada.entregas.find(e => 
@@ -570,119 +589,173 @@ const ClaseDashboard = () => {
         );
     };
 
+    // NUEVO: función para recortar texto con puntos suspensivos
     const recortarTexto = (texto, max = 80) => {
         if (!texto) return '';
         return texto.length > max ? texto.slice(0, max) + '...' : texto;
     };
 
+    // NUEVO: función para calcular tiempo transcurrido
+    const getTimeAgo = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        
+        let interval = seconds / 31536000;
+        if (interval > 1) return `${Math.floor(interval)} años`;
+        
+        interval = seconds / 2592000;
+        if (interval > 1) return `${Math.floor(interval)} meses`;
+        
+        interval = seconds / 86400;
+        if (interval > 1) return `${Math.floor(interval)} días`;
+        
+        interval = seconds / 3600;
+        if (interval > 1) return `${Math.floor(interval)} horas`;
+        
+        interval = seconds / 60;
+        if (interval > 1) return `${Math.floor(interval)} minutos`;
+        
+        return `${Math.floor(seconds)} segundos`;
+    };
+
+    // Modificar la función getEstadoTarea
     const getEstadoTarea = (tarea) => {
-        if (tarea.entregada) {
-            return tarea.nota !== undefined && tarea.nota !== null && tarea.nota !== '' 
-                ? 'calificada' 
-                : 'entregada';
+        if (tarea.tipo !== 'tarea') return null;
+        if (role !== 'alumno') return null; // Solo mostrar estados para alumnos
+
+        // Buscar la entrega del alumno actual
+        const entrega = tarea.entregas?.find(e => 
+            String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+        );
+
+        // Si hay entrega, está entregada sin importar la fecha
+        if (entrega) {
+            return 'entregada';
         }
+
+        // Si no hay entrega y la fecha ha pasado, está expirada
         if (tarea.fechaEntrega) {
-            const fecha = new Date(tarea.fechaEntrega);
-            const hoy = new Date();
-            if (fecha < hoy) return 'expirada';
+            const fechaEntrega = new Date(tarea.fechaEntrega);
+            const ahora = new Date();
+            if (fechaEntrega < ahora) {
+                return 'expirada';
+            }
         }
+
+        // Si no cumple ninguna de las anteriores, está pendiente
         return 'pendiente';
     };
 
-    const EstadoTarea = ({ estado }) => {
-        const config = {
-            calificada: {
-                color: 'text-blue-700',
-                bg: 'bg-blue-50',
-                border: 'border-blue-200',
-                text: 'Calificada',
-                icon: <CheckCircle className="h-3.5 w-3.5" />
-            },
-            entregada: {
-                color: 'text-emerald-700',
-                bg: 'bg-emerald-50',
-                border: 'border-emerald-200',
-                text: 'Entregada',
-                icon: <CheckCircle className="h-3.5 w-3.5" />
-            },
-            expirada: {
-                color: 'text-red-700',
-                bg: 'bg-red-50',
-                border: 'border-red-200',
-                text: 'Expirada',
-                icon: <AlertCircle className="h-3.5 w-3.5" />
-            },
-            pendiente: {
-                color: 'text-amber-700',
-                bg: 'bg-amber-50',
-                border: 'border-amber-200',
-                text: 'Pendiente',
-                icon: <Clock className="h-3.5 w-3.5" />
-            }
-        };
+    const getEstadoTareaClase = (anuncio) => {
+        if (anuncio.tipo !== 'tarea') return null;
 
-        const cfg = config[estado];
-        return (
-            <span className={`px-2.5 py-1 ${cfg.bg} ${cfg.color} text-xs font-medium rounded-full border ${cfg.border} flex items-center gap-1`}>
-                {cfg.icon}
-                {cfg.text}
-            </span>
-        );
+        const totalEstudiantes = claseData?.estudiantes?.length || 0;
+        const totalEntregas = anuncio.entregas?.length || 0;
+        const entregasCalificadas = anuncio.entregas?.filter(e => 
+            e.nota !== undefined && e.nota !== null && e.nota !== ''
+        ).length || 0;
+
+        if (totalEntregas === totalEstudiantes && entregasCalificadas === totalEstudiantes) {
+            return 'finalizada';
+        }
+
+        if (totalEntregas > 0) {
+            return 'entregada';
+        }
+
+        if (anuncio.fechaEntrega && new Date(anuncio.fechaEntrega) < new Date()) {
+            return 'expirada';
+        }
+
+        return 'pendiente';
     };
 
-    useEffect(() => {
-        if (!anuncios) return;
-        
-        const filtrarTareas = () => {
+    // NUEVO: función para saber si está finalizada (entregada y calificada)
+    const isFinalizada = (anuncio) => {
+        // Log para depuración
+        console.log('[ClaseDashboard][isFinalizada] anuncio:', anuncio);
+        return anuncio.entregada && anuncio.nota !== undefined && anuncio.nota !== null && anuncio.nota !== '';
+    };
+
+    // NUEVO: filtrar tareas según el filtro seleccionado y el rol
+    const filtrarTareas = (tareas) => {
+        if (!Array.isArray(tareas)) return [];
+        if (role === 'alumno') {
             switch (filtroTareas) {
                 case 'pendientes':
-                    return anuncios.filter(t => getEstadoTarea(t) === 'pendiente');
+                    return tareas.filter(t => getEstadoTareaClase(t) === 'pendiente');
                 case 'entregadas':
-                    return anuncios.filter(t => getEstadoTarea(t) === 'entregada');
+                    // Mostrar tanto entregadas como calificadas
+                    return tareas.filter(t => {
+                        const estado = getEstadoTareaClase(t);
+                        return estado === 'entregada' || estado === 'calificada';
+                    });
                 case 'expiradas':
-                    return anuncios.filter(t => getEstadoTarea(t) === 'expirada');
+                    return tareas.filter(t => getEstadoTareaClase(t) === 'expirada');
                 case 'finalizadas':
-                    return anuncios.filter(t => getEstadoTarea(t) === 'calificada');
+                    return tareas.filter(t => getEstadoTareaClase(t) === 'finalizada');
                 default:
-                    return anuncios;
+                    return tareas;
             }
-        };
-        
-        setTareasFiltradas(filtrarTareas());
-    }, [anuncios, filtroTareas]);
+        } else {
+            // Profesor (igual que antes)
+            switch (filtroTareas) {
+                case 'pendientes':
+                    return tareas.filter(t =>
+                        t.tipo === 'tarea' &&
+                        Array.isArray(t.entregas) &&
+                        (
+                            t.entregas.length < (claseData?.estudiantes?.length || 0) ||
+                            t.entregas.some(e => e.nota === undefined || e.nota === null || e.nota === '')
+                        )
+                    );
+                case 'finalizadas':
+                    return tareas.filter(t =>
+                        t.tipo === 'tarea' &&
+                        Array.isArray(t.entregas) &&
+                        t.entregas.length === (claseData?.estudiantes?.length || 0) &&
+                        t.entregas.every(e => e.nota !== undefined && e.nota !== null && e.nota !== '')
+                    );
+                default:
+                    return tareas;
+            }
+        }
+    };
 
-    const renderTarea = (tarea) => (
-        <div 
-            className="group p-4 border border-gray-100 rounded-xl cursor-pointer bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight transition-all duration-300 overflow-hidden hover:shadow-2xl hover:border-blue-400 hover:bg-white hover:scale-[1.01] hover:z-10"
-            onClick={() => handleOpenTarea(tarea)}
-        >
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 p-2.5 rounded-lg group-hover:bg-blue-200 transition-colors">
-                        <BookOpen className="h-5.5 w-5.5 text-blue-600" />
-                    </div>
-                    <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-lg">
-                        {tarea.titulo || "Tarea sin título"}
-                    </h3>
+    // Renderizar filtros antes del listado de anuncios
+    const renderFiltros = () => (
+        <div className="flex items-center gap-2 mb-4">
+            <div className="relative">
+                <select
+                    value={filtroTareas}
+                    onChange={(e) => setFiltroTareas(e.target.value)}
+                    className="appearance-none bg-white border border-blue-200 text-blue-700 text-sm rounded-lg px-4 py-2 pr-10 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all font-medium hover:border-blue-400 cursor-pointer"
+                    style={{
+                        backgroundImage:
+                            "url(\"data:image/svg+xml,%3Csvg width='16' height='16' fill='none' stroke='%233b82f6' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 0.75rem center",
+                        backgroundSize: "1.25em 1.25em"
+                    }}
+                >
+                    {role === 'alumno' ? (
+                        <>
+                            <option value="todas" className="bg-white text-blue-700 font-semibold">Todas</option>
+                            <option value="pendientes" className="bg-blue-50 text-blue-700 font-semibold">Pendientes</option>
+                            <option value="entregadas" className="bg-emerald-50 text-emerald-700 font-semibold">Entregadas</option>
+                            <option value="expiradas" className="bg-red-50 text-red-700 font-semibold">Expiradas</option>
+                            <option value="finalizadas" className="bg-indigo-50 text-indigo-700 font-semibold">Finalizadas</option>
+                        </>
+                    ) : (
+                        <>
+                            <option value="todas" className="bg-white text-blue-700 font-semibold">Todas las tareas</option>
+                            <option value="pendientes" className="bg-amber-50 text-amber-700 font-semibold">Pendientes de calificar</option>
+                            <option value="finalizadas" className="bg-emerald-50 text-emerald-700 font-semibold">Finalizadas</option>
+                        </>
+                    )}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ChevronRight className="h-4 w-4 text-blue-400 rotate-90" />
                 </div>
-                <EstadoTarea estado={getEstadoTarea(tarea)} />
-            </div>
-            <div className="flex items-center gap-3 text-sm text-gray-600 mt-3">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="flex-1">
-                    {tarea.fechaEntrega
-                        ? new Date(tarea.fechaEntrega).toLocaleString('es-ES', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                        : "Sin fecha límite"}
-                </span>
-                <span className="text-sm text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
-                    Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </span>
             </div>
         </div>
     );
@@ -702,6 +775,7 @@ const ClaseDashboard = () => {
             )
         );
         
+        // También actualizar la tarea seleccionada si es la misma
         if (tareaSeleccionada?.id === tareaId) {
             setTareaSeleccionada(prev => ({
                 ...prev,
@@ -713,6 +787,7 @@ const ClaseDashboard = () => {
         }
     };
 
+    // Mueve estos hooks fuera del if (isLoading)
     const [step, setStep] = useState(0);
     const steps = [
         { label: "Cargando datos de la clase...", key: "clase" },
@@ -727,6 +802,7 @@ const ClaseDashboard = () => {
             setStep(prev => (prev < steps.length ? prev + 1 : prev));
         }, 1000);
         return () => clearInterval(intervalRef.current);
+    // Solo depende de isLoading para evitar doble efecto
     }, [isLoading]);
 
     const [dotCount, setDotCount] = useState(0);
@@ -799,6 +875,7 @@ const ClaseDashboard = () => {
         <div className="min-h-screen bg-gray-50">
             {renderDeletingOverlay()}
             {renderCreatingOverlay()}
+            {/* Header de la clase */}
             <div className="bg-white border-b shadow-sm opacity-0 animate-fadeIn">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -831,6 +908,7 @@ const ClaseDashboard = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex flex-col lg:flex-row gap-8 stagger-animation">
+                    {/* Lista de estudiantes */}
                     <div className="lg:w-[300px] shrink-0 bg-white rounded-2xl border border-gray-100 shadow p-6 h-fit sticky top-8 opacity-0 animate-slideRight"
                          style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center justify-between mb-6">
@@ -880,39 +958,197 @@ const ClaseDashboard = () => {
                         </div>
                     </div>
 
+                    {/* Tablón de anuncios y tareas juntos */}
                     <div className="flex-1 flex flex-col gap-8 opacity-0 animate-fadeIn"
                          style={{ animationDelay: '400ms' }}>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-semibold text-gray-900">Tablón de anuncios</h2>
-                                <div className="relative">
-                                    <select 
-                                        value={filtroTareas}
-                                        onChange={(e) => setFiltroTareas(e.target.value)}
-                                        className="appearance-none bg-white border border-blue-200 text-blue-700 text-sm rounded-lg px-4 py-2 pr-10 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all font-medium hover:border-blue-400 cursor-pointer"
-                                        style={{
-                                            backgroundImage:
-                                                "url(\"data:image/svg+xml,%3Csvg width='16' height='16' fill='none' stroke='%233b82f6' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
-                                            backgroundRepeat: "no-repeat",
-                                            backgroundPosition: "right 0.75rem center",
-                                            backgroundSize: "1.25em 1.25em"
-                                        }}
-                                    >
-                                        <option value="todas" className="bg-white text-blue-700 font-semibold">Todas</option>
-                                        <option value="pendientes" className="bg-blue-50 text-blue-700 font-semibold">Pendientes</option>
-                                        <option value="entregadas" className="bg-emerald-50 text-emerald-700 font-semibold">Entregadas</option>
-                                        <option value="expiradas" className="bg-red-50 text-red-700 font-semibold">Expiradas</option>
-                                        <option value="finalizadas" className="bg-indigo-50 text-indigo-700 font-semibold">Finalizadas</option>
-                                    </select>
-                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                        <ChevronRight className="h-4 w-4 text-blue-400 rotate-90" />
-                                    </div>
-                                </div>
+                                {renderFiltros()}
                             </div>
                             <div className="min-h-[80px]">
-                                {tareasFiltradas.length > 0 ? (
+                                {filtrarTareas(anuncios).length > 0 ? (
                                     <div className="space-y-4">
-                                        {tareasFiltradas.map((tarea) => renderTarea(tarea))}
+                                        {filtrarTareas(anuncios).map((anuncio, index) =>
+                                            anuncio.tipo === "tarea" ? (
+                                                <div
+                                                    key={anuncio.id}
+                                                    onClick={() => handleOpenTarea(anuncio)}
+                                                    className="group p-4 border border-gray-100 rounded-xl cursor-pointer
+                                                        bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
+                                                        transition-all duration-300
+                                                        overflow-hidden
+                                                        hover:shadow-2xl hover:border-blue-400 hover:bg-white
+                                                        hover:scale-[1.01] hover:z-10"
+                                                    style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                >
+                                                    {/* Fondo decorativo animado */}
+                                                    <div className="pointer-events-none absolute inset-0 z-0">
+                                                        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
+                                                    </div>
+                                                    <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
+                                                    {/* Contenido principal más compacto */}
+                                                    <div className="relative z-20">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-blue-100 p-2.5 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                                    <BookOpen className="h-5.5 w-5.5 text-blue-600" />
+                                                                </div>
+                                                                <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-lg">
+                                                                    {anuncio.titulo || "Tarea sin título"}
+                                                                </h3>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                {role === 'alumno' && anuncio.tipo === 'tarea' && (
+                                                                    (() => {
+                                                                        const estado = getEstadoTarea(anuncio);
+                                                                        switch (estado) {
+                                                                            case 'entregada':
+                                                                                return (
+                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                                                        Entregada
+                                                                                    </span>
+                                                                                );
+                                                                            case 'expirada':
+                                                                                return (
+                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
+                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                                                        Expiró hace {getTimeAgo(anuncio.fechaEntrega)}
+                                                                                    </span>
+                                                                                );
+                                                                            default:
+                                                                                return (
+                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                                                        Pendiente
+                                                                                    </span>
+                                                                                );
+                                                                        }
+                                                                    })()
+                                                                )}
+                                                                {role === 'profesor' && (
+                                                                    <div className="flex items-center gap-2 mr-2 text-xs">
+                                                                        <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                                                                            {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)} entregas
+                                                                        </span>
+                                                                        <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200">
+                                                                            {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                                {/* Botón eliminar más compacto */}
+                                                                {role === 'profesor' && (
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteAnuncio(anuncio.id);
+                                                                        }}
+                                                                        className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colors flex items-center justify-center"
+                                                                        title="Eliminar tarea"
+                                                                        style={{ backdropFilter: 'blur(8px)' }}
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1v3m-7 0h10" />
+                                                                        </svg>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 text-sm text-gray-600 mt-3">
+                                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                                            <span className="flex-1">
+                                                                {anuncio.fechaEntrega
+                                                                    ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
+                                                                        day: 'numeric',
+                                                                        month: 'long',
+                                                                        year: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })
+                                                                    : "Sin fecha límite"}
+                                                            </span>
+                                                            <span className="text-sm text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
+                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    key={anuncio.id}
+                                                    className="group p-5 border border-gray-100 rounded-xl cursor-pointer
+                                                        bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
+                                                        transition-all duration-300
+                                                        overflow-hidden
+                                                        hover:shadow-2xl hover:border-blue-400 hover:bg-white
+                                                        hover:scale-[1.01] hover:z-10"
+                                                    style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                >
+                                                    {/* Fondo decorativo animado */}
+                                                    <div className="pointer-events-none absolute inset-0 z-0">
+                                                        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
+                                                    </div>
+                                                    <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
+                                                    {/* Botón eliminar solo para profesor */}
+                                                    {role === 'profesor' && (
+                                                        <button
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                handleDeleteAnuncio(anuncio.id);
+                                                            }}
+                                                            className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white shadow hover:bg-red-100 border border-red-200 transition-colors flex items-center justify-center"
+                                                            title="Eliminar anuncio"
+                                                            style={{ boxShadow: '0 2px 8px 0 rgba(255,0,0,0.04)' }}
+                                                        >
+                                                            {/* Icono de papelera */}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1v3m-7 0h10" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                    {/* Contenido principal */}
+                                                    <div className="relative z-20">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                                <Bell className="h-5 w-5 text-blue-600" />
+                                                            </div>
+                                                            <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors">
+                                                                {anuncio.titulo || "Anuncio"}
+                                                            </h3>
+                                                        </div>
+                                                        <div className="mb-2 text-gray-700 text-base whitespace-pre-line">
+                                                            {anuncio.contenido}
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                                                            <span className="flex items-center gap-2">
+                                                                <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
+                                                                <span>•</span>
+                                                                <span>{new Date(anuncio.fechaCreacion).toLocaleString('es-ES', {
+                                                                    day: 'numeric',
+                                                                    month: 'short',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}</span>
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between mt-2">
+                                                            <span className="text-sm text-gray-500">
+                                                                {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
+                                                            </span>
+                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="text-gray-500 text-center py-8">
@@ -925,6 +1161,7 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal de confirmación para eliminar anuncio */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
@@ -959,6 +1196,7 @@ const ClaseDashboard = () => {
             {renderStudentSearchModal()}
             {renderAlumnosModal()}
             
+            {/* MODAL DE CREAR ANUNCIO/TAREA CON NUEVO DISEÑO */}
             <AnuncioModal
                 showModal={showAnuncioModal}
                 showTipoSelector={showTipoSelector}
@@ -969,6 +1207,7 @@ const ClaseDashboard = () => {
                 setShowTipoSelector={setShowTipoSelector}
                 isCreatingAnuncio={isCreatingAnuncio}
                 isClosing={isClosing}
+                // --- NUEVO: props de diseño ---
                 modalClassName="rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0"
                 header={(
                     <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl">
@@ -1005,6 +1244,7 @@ const ClaseDashboard = () => {
                 footerClassName="px-8 pb-6"
                 btnCrearClassName="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/10 transition-all text-lg"
                 btnCancelarClassName="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all text-lg"
+                // --- FIN props de diseño ---
             />
 
             <TareaModal
@@ -1022,6 +1262,7 @@ const ClaseDashboard = () => {
                 onOpenEntrega={handleOpenEntregaModal}
                 entregaAlumno={role === 'alumno' ? getEntregaAlumnoActual() : null}
                 onTareaEntregada={handleTareaEntregada}
+                // ...existing code...
             />
 
             <EntregaModal

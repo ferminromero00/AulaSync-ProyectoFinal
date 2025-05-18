@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock, Users } from 'lucide-react';
+import { BookOpen, Calendar, FileText, Paperclip, X, CheckCircle, Clock, Users, AlertCircle } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
 import { toast } from 'react-hot-toast'; // Añadir este import
@@ -25,6 +25,34 @@ const TareaModal = ({
     const [entregada, setEntregada] = useState(!!(tarea && tarea.entregada));
     const [tareaEntregadaData, setTareaEntregadaData] = useState(tarea && tarea.entregada ? tarea : null);
     const [entregaAlumnoReciente, setEntregaAlumnoReciente] = useState(null);
+
+    const isExpired = (tarea) => {
+        if (!tarea.fechaEntrega) return false;
+        const fechaEntrega = new Date(tarea.fechaEntrega);
+        const ahora = new Date();
+        return fechaEntrega < ahora;
+    };
+
+    const getTimeAgo = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        
+        let interval = seconds / 31536000;
+        if (interval > 1) return `${Math.floor(interval)} años`;
+        
+        interval = seconds / 2592000;
+        if (interval > 1) return `${Math.floor(interval)} meses`;
+        
+        interval = seconds / 86400;
+        if (interval > 1) return `${Math.floor(interval)} días`;
+        
+        interval = seconds / 3600;
+        if (interval > 1) return `${Math.floor(interval)} horas`;
+        
+        interval = seconds / 60;
+        if (interval > 1) return `${Math.floor(interval)} minutos`;
+        
+        return `${Math.floor(seconds)} segundos`;
+    };
 
     useEffect(() => {
         console.log('[TareaModal] Iniciando useEffect');
@@ -464,69 +492,86 @@ const TareaModal = ({
                                     </div>
                                 </div>
 
-                                <form onSubmit={handleEntregaTarea} className="flex flex-col gap-6 tarea-anim-slideUp">
-                                    {/* Selector de archivo */}
-                                    <div className="relative group">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Paperclip className="h-5 w-5 text-blue-500" />
-                                            <span className="font-semibold text-gray-900">Adjuntar archivo</span>
+                                {!entregada && (
+                                    isExpired(tarea) ? (
+                                        <div className="flex flex-col gap-4 items-center justify-center py-8 px-4 bg-red-50 border border-red-200 rounded-xl">
+                                            <AlertCircle className="h-12 w-12 text-red-500" />
+                                            <div className="text-center">
+                                                <h3 className="text-lg font-semibold text-red-700 mb-2">Tarea expirada</h3>
+                                                <p className="text-red-600">
+                                                    La fecha límite expiró hace {getTimeAgo(tarea.fechaEntrega)}
+                                                </p>
+                                                <p className="text-sm text-red-500 mt-2">
+                                                    No es posible realizar entregas para esta tarea
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="w-full h-32 border-2 border-dashed border-blue-200 rounded-xl flex flex-col items-center justify-center bg-blue-50/50 group-hover:bg-blue-50 transition-all cursor-pointer relative">
-                                            <input
-                                                type="file"
-                                                onChange={(e) => setArchivoEntrega(e.target.files[0])}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            />
-                                            {archivoEntrega ? (
-                                                <div className="flex items-center gap-2 text-blue-600">
-                                                    <FileText className="h-6 w-6" />
-                                                    <span className="font-medium">{archivoEntrega.name}</span>
+                                    ) : (
+                                        <form onSubmit={handleEntregaTarea} className="flex flex-col gap-6 tarea-anim-slideUp">
+                                            {/* Selector de archivo */}
+                                            <div className="relative group">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Paperclip className="h-5 w-5 text-blue-500" />
+                                                    <span className="font-semibold text-gray-900">Adjuntar archivo</span>
                                                 </div>
-                                            ) : (
-                                                <div className="text-center text-gray-500">
-                                                    <FileText className="h-8 w-8 mx-auto mb-2 text-blue-400" />
-                                                    <p className="text-sm">Arrastra un archivo o haz clic para seleccionar</p>
+                                                <div className="w-full h-32 border-2 border-dashed border-blue-200 rounded-xl flex flex-col items-center justify-center bg-blue-50/50 group-hover:bg-blue-50 transition-all cursor-pointer relative">
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => setArchivoEntrega(e.target.files[0])}
+                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                    />
+                                                    {archivoEntrega ? (
+                                                        <div className="flex items-center gap-2 text-blue-600">
+                                                            <FileText className="h-6 w-6" />
+                                                            <span className="font-medium">{archivoEntrega.name}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center text-gray-500">
+                                                            <FileText className="h-8 w-8 mx-auto mb-2 text-blue-400" />
+                                                            <p className="text-sm">Arrastra un archivo o haz clic para seleccionar</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                            </div>
 
-                                    {/* Comentario */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <FileText className="h-5 w-5 text-blue-500" />
-                                            <span className="font-semibold text-gray-900">Comentario</span>
-                                        </div>
-                                        <textarea
-                                            value={comentarioEntrega}
-                                            onChange={(e) => setComentarioEntrega(e.target.value)}
-                                            placeholder="Añade un comentario a tu entrega..."
-                                            className="w-full h-32 p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white shadow-sm text-gray-700 resize-none"
-                                        />
-                                    </div>
+                                            {/* Comentario */}
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <FileText className="h-5 w-5 text-blue-500" />
+                                                    <span className="font-semibold text-gray-900">Comentario</span>
+                                                </div>
+                                                <textarea
+                                                    value={comentarioEntrega}
+                                                    onChange={(e) => setComentarioEntrega(e.target.value)}
+                                                    placeholder="Añade un comentario a tu entrega..."
+                                                    className="w-full h-32 p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white shadow-sm text-gray-700 resize-none"
+                                                />
+                                            </div>
 
-                                    {/* Botón de entrega */}
-                                    <button
-                                        type="submit"
-                                        disabled={isEntregando}
-                                        className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg 
-                                                 hover:bg-blue-700 active:bg-blue-800 transition-all duration-300
-                                                 disabled:opacity-50 disabled:cursor-not-allowed
-                                                 flex items-center justify-center gap-2"
-                                    >
-                                        {isEntregando ? (
-                                            <>
-                                                <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                                                Entregando...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FileText className="h-5 w-5" />
-                                                Entregar tarea
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
+                                            {/* Botón de entrega */}
+                                            <button
+                                                type="submit"
+                                                disabled={isEntregando}
+                                                className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg 
+                                                         hover:bg-blue-700 active:bg-blue-800 transition-all duration-300
+                                                         disabled:opacity-50 disabled:cursor-not-allowed
+                                                         flex items-center justify-center gap-2"
+                                            >
+                                                {isEntregando ? (
+                                                    <>
+                                                        <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                                                        Entregando...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FileText className="h-5 w-5" />
+                                                        Entregar tarea
+                                                    </>
+                                                )}
+                                            </button>
+                                        </form>
+                                    )
+                                )}
                             </div>
                         )}
                     </div>
