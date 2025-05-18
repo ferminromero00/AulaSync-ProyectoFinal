@@ -83,76 +83,75 @@ const ClasesProfesor = ({ onClaseCreated }) => {
                             <Link
                                 key={clase.id}
                                 to={`/profesor/clase/${clase.id}`}
-                                className="group relative overflow-hidden bg-gradient-to-br from-gray-50 to-white
-                                         border border-gray-100 rounded-xl p-7 hover:border-blue-200
-                                         transition-all duration-300 hover:shadow-lg animate-fadeIn"
+                                className="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50
+                                    border border-gray-100 rounded-2xl p-8 hover:border-blue-300
+                                    transition-all duration-300 hover:shadow-2xl animate-fadeIn min-h-[220px] flex flex-col"
                                 style={{ animationDelay: `${index * 150}ms` }}
                             >
                                 {/* Fondo decorativo */}
-                                <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 
-                                              rounded-full transition-transform duration-500 group-hover:scale-150" />
-                                
+                                <div className="absolute -right-12 -bottom-12 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 
+                                    rounded-full transition-transform duration-500 group-hover:scale-150" />
                                 <div className="relative z-10 flex flex-col h-full">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 rounded-lg
-                                                    group-hover:scale-110 transition-transform duration-300">
-                                            <BookOpen className="h-7 w-7 text-blue-600" />
+                                    <div className="flex items-center gap-5 mb-4">
+                                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-5 rounded-2xl
+                                            group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                                            <BookOpen className="h-9 w-9 text-blue-600" />
                                         </div>
-                                        <div className="min-w-0 flex-1">
-                                            <h3 className="font-semibold text-xl text-gray-900 truncate mb-1 group-hover:text-blue-600 transition-colors">
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-2xl text-gray-900 truncate mb-1 group-hover:text-blue-700 transition-colors">
                                                 {clase.nombre}
                                             </h3>
-                                            <div className="flex flex-col gap-2">
-                                                <div className="flex items-center text-base text-gray-500">
-                                                    <Users className="h-5 w-5 mr-1.5 shrink-0" />
-                                                    <span>{clase.numEstudiantes} estudiantes</span>
-                                                </div>
-                                                <div className="flex items-center text-base text-gray-500">
-                                                    <BookOpen className="h-5 w-5 mr-1.5 shrink-0" />
-                                                    <span className="font-medium text-blue-600">
-                                                        Código: {clase.codigoClase}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center text-base text-gray-500">
-                                                    <Calendar className="h-5 w-5 mr-1.5 shrink-0" />
-                                                    <span>
-                                                        {new Date(clase.createdAt).toLocaleDateString('es-ES', {
-                                                            day: 'numeric',
-                                                            month: 'short'
-                                                        })}
-                                                    </span>
-                                                </div>
-                                                <div className="text-base text-gray-500">
-                                                    <span className="font-medium text-gray-900">
-                                                        {typeof clase.profesor === 'string' 
-                                                            ? clase.profesor 
-                                                            : clase.profesor?.nombre || 'Profesor'}
-                                                    </span>
-                                                    <p>
-                                                        {typeof clase.profesor === 'string' 
-                                                            ? '' 
-                                                            : clase.profesor?.especialidad || 'No especificada'}
-                                                    </p>
-                                                </div>
+                                            <div className="flex flex-wrap gap-3 mt-2">
+                                                <span className="flex items-center gap-1 text-base text-gray-500">
+                                                    <Users className="h-5 w-5" />
+                                                    {clase.numEstudiantes} estudiantes
+                                                </span>
+                                                <span className="flex items-center gap-1 text-base text-blue-600 font-semibold">
+                                                    <BookOpen className="h-5 w-5" />
+                                                    Código: {clase.codigoClase}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Botón Ver detalles abajo a la derecha, separado */}
+                                    <div className="flex flex-col gap-2 mt-2 mb-4">
+                                        <div className="flex items-center gap-2 text-base text-gray-500">
+                                            <Calendar className="h-5 w-5" />
+                                            <span>
+                                                Creada: {new Date(clase.createdAt).toLocaleDateString('es-ES', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-base text-gray-500">
+                                            <span className="font-semibold text-gray-900">
+                                                {typeof clase.profesor === 'string' 
+                                                    ? clase.profesor 
+                                                    : clase.profesor?.nombre || 'Profesor'}
+                                            </span>
+                                            <span className="text-gray-400">|</span>
+                                            <span>
+                                                {typeof clase.profesor === 'string' 
+                                                    ? '' 
+                                                    : clase.profesor?.especialidad || 'No especificada'}
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="flex-1" />
-                                    <div className="flex justify-end mt-6">
-                                        <span className="text-base font-medium text-blue-600 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex justify-end mt-4">
+                                        <span className="text-lg font-medium text-blue-600 flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                                             Ver detalles
-                                            <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
+                                            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                         </span>
                                     </div>
                                 </div>
                             </Link>
                         ))}
                     </div>
-
                     {clases.length === 0 && (
                         <div className="text-center py-12">
-                            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-3"/>
+                            <BookOpen className="h-14 w-14 text-gray-400 mx-auto mb-3"/>
                             <p className="text-gray-500 mb-1">No hay clases creadas</p>
                             <Link 
                                 to="/profesor/clases"

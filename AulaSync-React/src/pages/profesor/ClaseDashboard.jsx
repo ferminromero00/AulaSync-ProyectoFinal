@@ -940,7 +940,7 @@ const ClaseDashboard = () => {
                                                 <div
                                                     key={anuncio.id}
                                                     onClick={() => handleOpenTarea(anuncio)}
-                                                    className="group p-5 border border-gray-100 rounded-xl cursor-pointer
+                                                    className="group p-4 border border-gray-100 rounded-xl cursor-pointer
                                                         bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
                                                         transition-all duration-300
                                                         overflow-hidden
@@ -955,50 +955,63 @@ const ClaseDashboard = () => {
                                                         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
                                                     </div>
                                                     <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
-                                                    {/* Estado de entregas solo para profesor */}
-                                                    {role === 'profesor' && (
-                                                        <div className="absolute top-4 right-4 flex flex-col items-end gap-1 z-20">
-                                                            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 flex items-center gap-1 w-max">
-                                                                Entregadas: {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)}
+                                                    {/* Contenido principal más compacto */}
+                                                    <div className="relative z-20">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-blue-100 p-2.5 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                                    <BookOpen className="h-5.5 w-5.5 text-blue-600" />
+                                                                </div>
+                                                                <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-lg">
+                                                                    {anuncio.titulo || "Tarea sin título"}
+                                                                </h3>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                {role === 'profesor' && (
+                                                                    <div className="flex items-center gap-2 mr-2 text-xs">
+                                                                        <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                                                                            {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)} entregas
+                                                                        </span>
+                                                                        <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200">
+                                                                            {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                                {/* Botón eliminar más compacto */}
+                                                                {role === 'profesor' && (
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            handleDeleteAnuncio(anuncio.id);
+                                                                        }}
+                                                                        className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colors flex items-center justify-center"
+                                                                        title="Eliminar tarea"
+                                                                        style={{ backdropFilter: 'blur(8px)' }}
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10" />
+                                                                        </svg>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 text-sm text-gray-600 mt-3">
+                                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                                            <span className="flex-1">
+                                                                {anuncio.fechaEntrega
+                                                                    ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
+                                                                        day: 'numeric',
+                                                                        month: 'long',
+                                                                        year: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })
+                                                                    : "Sin fecha límite"}
                                                             </span>
-                                                            <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200 flex items-center gap-1 w-max">
-                                                                Pendientes: {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))}
+                                                            <span className="text-sm text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
+                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                                             </span>
                                                         </div>
-                                                    )}
-                                                    <div className="flex items-center gap-3 mb-2 z-20 relative">
-                                                        <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                                            <BookOpen className="h-5 w-5 text-blue-600" />
-                                                        </div>
-                                                        <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors">{anuncio.titulo || "Tarea sin título"}</h3>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2 z-20 relative">
-                                                        <Calendar className="h-4 w-4" />
-                                                        {anuncio.fechaEntrega
-                                                            ? `Fecha entrega: ${new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
-                                                                day: 'numeric',
-                                                                month: 'long',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}`
-                                                            : "Sin fecha límite"}
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2 z-20 relative">
-                                                        {anuncio.archivoUrl && (
-                                                            <span className="flex items-center gap-1 text-blue-600">
-                                                                <Paperclip className="h-4 w-4" />
-                                                                <span className="text-xs">Adjunto</span>
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center justify-between mt-2 z-20 relative">
-                                                        <span className="text-sm text-gray-500">
-                                                            {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
-                                                        </span>
-                                                        <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
-                                                            Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                                                        </span>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -1032,7 +1045,7 @@ const ClaseDashboard = () => {
                                                         >
                                                             {/* Icono de papelera */}
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1v3m-7 0h10" />
                                                             </svg>
                                                         </button>
                                                     )}
@@ -1086,7 +1099,6 @@ const ClaseDashboard = () => {
                     </div>
                 </div>
             </div>
-            {/* ...existing code... */}
             {/* Modal de confirmación para eliminar anuncio */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

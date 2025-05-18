@@ -269,7 +269,7 @@ const TareaModal = ({
                                 </div>
                             </div>
                             {/* Estado por estudiante */}
-                            <div className="mt-8 px-8 tarea-anim-slideUp">
+                            <div className="mt-8 px-8 pb-8 tarea-anim-slideUp"> {/* Añadido pb-8 */}
                                 <div className="flex items-center gap-2 mb-4">
                                     <Users className="h-5 w-5 text-blue-500" />
                                     <span className="font-semibold text-blue-900 text-lg">Estado por estudiante</span>
