@@ -168,7 +168,7 @@ const TareaModal = ({
                     <p className="text-gray-600 font-medium">Cargando tarea...</p>
                 </div>
             ) : (
-                <div className={`bg-white rounded-2xl w-full max-w-6xl mx-4 flex flex-col md:flex-row relative 
+                <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
                     shadow-2xl modal-content max-h-[90vh] overflow-hidden z-50
                     ${isClosing ? 'modal-content-closing' : ''}`}>
                     {/* Animaciones locales solo para este modal */}
@@ -206,19 +206,19 @@ const TareaModal = ({
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="flex-[1.4] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[320px] max-w-[65%] tarea-anim-fadeIn relative z-10">
+                    <div className="flex-[1.2] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[260px] max-w-[55%] tarea-anim-fadeIn relative z-10">
                         <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                             {/* Cabecera */}
-                            <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
-                                <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">
-                                    <BookOpen className="h-7 w-7 text-blue-700" />
+                            <div className="flex items-center gap-4 px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
+                                <div className="bg-blue-200 p-3 rounded-2xl shadow flex items-center justify-center">
+                                    <BookOpen className="h-6 w-6 text-blue-700" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-blue-900">{tareaToShow.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
+                                    <h3 className="text-lg font-bold text-blue-900">{tareaToShow.titulo || <span className="italic text-gray-400">Sin título</span>}</h3>
                                 </div>
                             </div>
                             {/* Fecha de entrega */}
-                            <div className="px-8 py-3 border-b border-blue-50 bg-white flex items-center gap-4 tarea-anim-slideUp">
+                            <div className="px-6 py-3 border-b border-blue-50 bg-white flex items-center gap-4 tarea-anim-slideUp">
                                 <div className="bg-amber-100 p-2 rounded-xl flex items-center justify-center">
                                     <Calendar className="h-5 w-5 text-amber-700" />
                                 </div>
@@ -235,13 +235,13 @@ const TareaModal = ({
                                 </div>
                             </div>
                             {/* Descripción */}
-                            <div className="flex-1 flex flex-col px-8 py-5 border-b border-blue-50 bg-white min-h-0 tarea-anim-slideUp">
+                            <div className="flex-1 flex flex-col px-6 py-4 border-b border-blue-50 bg-white min-h-0 tarea-anim-slideUp">
                                 <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                     <FileText className="h-5 w-5 text-blue-400" />
                                     Descripción de la tarea
                                 </h4>
                                 <div className="flex-1 min-h-0">
-                                    <div className="bg-blue-50 rounded-xl p-4 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[50px] text-sm">
+                                    <div className="bg-blue-50 rounded-xl p-3 text-gray-700 whitespace-pre-line h-full border border-blue-100 flex items-start min-h-[40px] text-sm">
                                         {tareaToShow.contenido
                                             ? tareaToShow.contenido
                                             : <span className="italic text-gray-400">Sin descripción</span>}
@@ -250,7 +250,7 @@ const TareaModal = ({
                             </div>
                             {/* Material adjunto */}
                             {downloadUrl && (
-                                <div className="px-8 py-4 bg-white tarea-anim-slideUp">
+                                <div className="px-6 py-3 bg-white tarea-anim-slideUp">
                                     <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-base">
                                         <Paperclip className="h-5 w-5 text-blue-400" />
                                         Material de la tarea
@@ -271,27 +271,27 @@ const TareaModal = ({
                         </div>
                     </div>
 
-                    {/* Panel derecho - Vista de profesor o alumno */}
+                    {/* Panel derecho - Vista de profesor */}
                     {role === 'profesor' ? (
                         <div className="flex-1 bg-gradient-to-b from-gray-50 to-white w-full md:w-[420px] border-t 
-                            md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto tarea-anim-fadeIn relative z-20">
+                            md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto tarea-anim-fadeIn relative z-20 px-0 py-0">
                             <div className="p-0 tarea-stagger">
                                 {/* Cabecera */}
-                                <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-tr-2xl tarea-anim-fadeIn">
-                                    <BookOpen className="h-7 w-7 text-blue-500" />
-                                    <span className="text-xl font-bold text-blue-900">Entregas de la tarea</span>
+                                <div className="flex items-center gap-3 px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-tr-2xl tarea-anim-fadeIn">
+                                    <BookOpen className="h-6 w-6 text-blue-500" />
+                                    <span className="text-lg font-bold text-blue-900">Entregas de la tarea</span>
                                 </div>
                                 {/* Estadísticas de entregas */}
-                                <div className="flex gap-4 px-8 pt-8 tarea-anim-slideUp">
-                                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col items-center">
+                                <div className="flex gap-4 px-6 pt-6 tarea-anim-slideUp">
+                                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-3 flex flex-col items-center">
                                         <span className="text-xs text-gray-500 mb-1">Entregadas</span>
-                                        <span className="text-2xl font-bold text-emerald-600">
+                                        <span className="text-xl font-bold text-emerald-600">
                                             {tarea.entregas?.length || 0}
                                         </span>
                                     </div>
-                                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col items-center">
+                                    <div className="flex-1 bg-white rounded-xl border border-gray-100 shadow-sm p-3 flex flex-col items-center">
                                         <span className="text-xs text-gray-500 mb-1">Pendientes</span>
-                                        <span className="text-2xl font-bold text-amber-600">
+                                        <span className="text-xl font-bold text-amber-600">
                                             {claseData?.estudiantes?.length
                                                 ? claseData.estudiantes.length - (tarea.entregas?.length || 0)
                                                 : 0}
@@ -299,21 +299,26 @@ const TareaModal = ({
                                     </div>
                                 </div>
                                 {/* Estado por estudiante */}
-                                <div className="mt-8 px-8 tarea-anim-slideUp">
+                                <div className="mt-6 px-6 tarea-anim-slideUp">
                                     <div className="flex items-center gap-2 mb-4">
                                         <Users className="h-5 w-5 text-blue-500" />
-                                        <span className="font-semibold text-blue-900 text-lg">Estado por estudiante</span>
+                                        <span className="font-semibold text-blue-900 text-base">Estado por estudiante</span>
                                     </div>
-                                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm max-h-[420px] overflow-y-auto divide-y divide-gray-100">
                                         {claseData?.estudiantes?.map((estudiante, idx) => {
                                             const entrega = tarea.entregas?.find(e =>
                                                 (e.alumno && (e.alumno.id === estudiante.id || e.alumno === estudiante.id))
                                             );
                                             if (loadingEntregas && loadingEntregas[estudiante.id]) {
                                                 return (
-                                                    <div key={estudiante.id} className="p-4 flex items-center justify-between tarea-anim-fadeIn" style={{ animationDelay: `${180 + idx * 40}ms` }}>
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                    <div key={estudiante.id} 
+                                                         className="p-4 flex items-center justify-between tarea-anim-fadeIn" 
+                                                         style={{ animationDelay: `${180 + idx * 40}ms` }}>
+                                                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-base flex-shrink-0">
+                                                                {estudiante.nombre?.[0] || "?"}
+                                                            </div>
+                                                            <p className="font-medium text-gray-900 truncate">{estudiante.nombre}</p>
                                                         </div>
                                                         <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 flex items-center gap-1">
                                                             <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
@@ -325,16 +330,17 @@ const TareaModal = ({
                                             return (
                                                 <div
                                                     key={estudiante.id}
-                                                    className={`p-4 flex items-center justify-between tarea-anim-fadeIn transition cursor-pointer ${entrega ? "hover:bg-emerald-50" : ""}`}
+                                                    className={`p-4 flex items-center justify-between tarea-anim-fadeIn transition cursor-pointer
+                                                        ${entrega ? "hover:bg-emerald-50" : ""}`}
                                                     style={{ animationDelay: `${180 + idx * 40}ms`, cursor: entrega ? "pointer" : "default" }}
                                                     onClick={() => entrega && onOpenEntrega(entrega)}
                                                     title={entrega ? "Ver entrega" : undefined}
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
+                                                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-base flex-shrink-0">
                                                             {estudiante.nombre?.[0] || "?"}
                                                         </div>
-                                                        <p className="font-medium text-gray-900">{estudiante.nombre}</p>
+                                                        <p className="font-medium text-gray-900 truncate">{estudiante.nombre}</p>
                                                     </div>
                                                     {entrega ? (
                                                         entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '' ? (

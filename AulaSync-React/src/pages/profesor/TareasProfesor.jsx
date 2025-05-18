@@ -140,67 +140,79 @@ const TareasProfesor = () => {
         <div
             key={tarea.id}
             onClick={() => handleAbrirTarea(tarea)}
-            className="group p-5 border border-gray-100 rounded-xl cursor-pointer
-                bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
-                transition-all duration-300
-                overflow-hidden
-                hover:shadow-2xl hover:border-blue-400 hover:bg-white
-                hover:scale-[1.01] hover:z-10"
+            className="group relative bg-white border border-gray-100 rounded-2xl p-6 cursor-pointer
+                transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                hover:border-blue-200 overflow-hidden"
         >
-            {/* Fondo decorativo animado */}
-            <div className="pointer-events-none absolute inset-0 z-0">
-                <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
-            </div>
-            <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
-            {/* Contenido principal */}
-            <div className="relative z-20">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+            {/* Efecto de fondo en hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50 
+                opacity-0 group-hover:opacity-100 transition-opacity duration-500"/>
+
+            {/* Contenido */}
+            <div className="relative">
+                {/* Header con título y estado */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="bg-blue-100 p-3 rounded-xl flex-shrink-0 group-hover:bg-blue-200 transition-colors">
                             <BookOpen className="h-5 w-5 text-blue-600" />
                         </div>
-                        <h4 className="font-medium text-gray-900 text-lg group-hover:text-blue-700 transition-colors">{tarea.titulo}</h4>
+                        <h4 className="font-semibold text-gray-900 text-lg truncate group-hover:text-blue-700 transition-colors">
+                            {tarea.titulo}
+                        </h4>
                     </div>
-                    <span className="px-3 py-1.5 text-xs font-medium rounded-full border 
-                        bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1.5">
-                        <CheckCircle className="h-4 w-4" />
-                        {tarea.entregas?.length || 0}/{tarea.numEstudiantes || 0} entregas
-                    </span>
+                    <div className="flex items-center gap-3 ml-4">
+                        <span className={`px-3 py-1.5 rounded-full text-sm font-medium border flex items-center gap-1.5
+                            ${tarea.entregas?.length === tarea.numEstudiantes 
+                                ? "bg-green-50 text-green-700 border-green-200" 
+                                : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                            <CheckCircle className="h-4 w-4" />
+                            {tarea.entregas?.length || 0}/{tarea.numEstudiantes || 0}
+                        </span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
+
+                {/* Info y fecha */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
                     <span className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="h-4 w-4 text-blue-500" />
                         {tarea.fechaEntrega ? 
-                            `Límite: ${new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric', year: 'numeric' })}` 
+                            new Date(tarea.fechaEntrega).toLocaleDateString('es-ES', { 
+                                day: 'numeric', 
+                                month: 'long', 
+                                year: 'numeric' 
+                            })
                             : "Sin fecha límite"}
                     </span>
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-blue-600">
                         {tarea.clase?.nombre || "Clase"}
                     </span>
                 </div>
+
                 {/* Barra de progreso */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between mb-1.5 text-sm">
-                        <span className="text-gray-600">Progreso de entregas</span>
-                        <span className="text-blue-600 font-medium">
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 font-medium">Progreso de entregas</span>
+                        <span className="text-blue-600 font-semibold">
                             {Math.round(((tarea.entregas?.length || 0) / (tarea.numEstudiantes || 1)) * 100)}%
                         </span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                         <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-out" 
+                            className="h-full transition-all duration-500 rounded-full
+                                bg-gradient-to-r from-blue-500 to-indigo-500" 
                             style={{ 
                                 width: `${((tarea.entregas?.length || 0) / (tarea.numEstudiantes || 1)) * 100}%`,
                             }}
                         />
                     </div>
                 </div>
-                {/* Indicador de acción */}
-                <div className="mt-4 flex justify-end">
-                    <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
-                        Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+
+                {/* Footer con acción */}
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 
+                        group-hover:text-blue-800 transition-colors">
+                        Ver detalles
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                 </div>
             </div>
