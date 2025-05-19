@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { subirFotoPerfil, getPerfil, actualizarPerfil, cambiarPassword } from "../../services/perfil";
-import { Camera, X, User, Mail, Briefcase, Building2, Lock } from "lucide-react";
+import { Camera, X, User, Mail, Briefcase, Building2, Lock, Loader2, Settings } from "lucide-react";
 
 export default function ConfiguracionProfesor() {
   const [perfil, setPerfil] = useState(null);
@@ -22,6 +22,33 @@ export default function ConfiguracionProfesor() {
   });
   const fileInputRef = useRef();
   const [foto, setFoto] = useState(null);
+
+  // Animación de ticks progresivos para la carga
+  const steps = [
+    { label: "Cargando perfil...", icon: <User className="h-6 w-6 text-blue-400" /> },
+    { label: "Cargando foto de perfil...", icon: <Camera className="h-6 w-6 text-blue-400" /> },
+    { label: "Cargando configuración...", icon: <Settings className="h-6 w-6 text-blue-400" /> }
+  ];
+  const [step, setStep] = useState(0);
+  const [dotCount, setDotCount] = useState(0);
+  const intervalRef = useRef();
+  const dotIntervalRef = useRef();
+
+  useEffect(() => {
+    if (isLoading) {
+      setStep(0);
+      intervalRef.current = setInterval(() => {
+        setStep(prev => (prev < steps.length ? prev + 1 : prev));
+      }, 500);
+      dotIntervalRef.current = setInterval(() => {
+        setDotCount(prev => (prev + 1) % 3);
+      }, 400);
+    }
+    return () => {
+      clearInterval(intervalRef.current);
+      clearInterval(dotIntervalRef.current);
+    };
+  }, [isLoading]);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -146,8 +173,57 @@ export default function ConfiguracionProfesor() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+          <div className="flex items-center gap-4 mb-6">
+            <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+            <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+          </div>
+          <div className="flex flex-col gap-3 min-w-[300px]">
+            {steps.map((s, idx) => (
+              <div className="flex items-center gap-3" key={s.label}>
+                {step > idx ? (
+                  <span className="w-4 h-4 flex items-center justify-center">
+                    <svg className="text-blue-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" fill="#dbeafe"/>
+                      <path d="M7 13l3 3 7-7" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                ) : step === idx ? (
+                  <span className="w-4 h-4 flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                  </span>
+                ) : (
+                  <span className="w-4 h-4 flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                  </span>
+                )}
+                <span className={`text-blue-800 ${step > idx ? "line-through text-blue-700" : ""}`}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-blue-700 text-sm flex items-center gap-2">
+            Un momento, cargando configuración de perfil
+            <span className="inline-block w-6 text-blue-700 font-bold" style={{ letterSpacing: 1 }}>
+              {".".repeat(dotCount + 1)}
+            </span>
+          </div>
+          <style>{`
+            @keyframes fade-in-up {
+              0% { opacity: 0; transform: translateY(20px);}
+              100% { opacity: 1; transform: translateY(0);}
+            }
+            .animate-fade-in-up {
+              animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
+            }
+            @keyframes pop {
+              0% { transform: scale(0.7); opacity: 0.5;}
+              60% { transform: scale(1.2);}
+              100% { transform: scale(1); opacity: 1;}
+            }
+            .animate-pop { animation: pop 0.4s; }
+          `}</style>
+        </div>
       </div>
     );
   }

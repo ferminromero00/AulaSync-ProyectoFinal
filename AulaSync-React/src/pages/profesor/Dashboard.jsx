@@ -231,40 +231,40 @@ const Dashboard = () => {
             </div>
 
             {/* Stats Cards con nueva disposición y animaciones */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {statsConfig.map((stat, index) => (
                     <div
                         key={index}
                         onClick={stat.onClick}
-                        className={`group relative overflow-hidden rounded-2xl ${stat.bg} p-8
-                                  border border-gray-100 shadow-xl shadow-gray-200/50
-                                  hover:shadow-2xl hover:shadow-indigo-200/50
+                        className={`group relative overflow-hidden rounded-3xl ${stat.bg} p-10
+                                  border border-gray-100 shadow-2xl shadow-indigo-200/40
+                                  hover:shadow-2xl hover:shadow-indigo-300/60
                                   transform transition-all duration-300 ease-out
                                   animate-fade-in-up cursor-pointer
-                                  hover:scale-[1.02]`}
-                        style={{ animationDelay: `${index * 150}ms` }}
+                                  hover:scale-[1.035]`}
+                        style={{ animationDelay: `${index * 150}ms`, minHeight: '180px' }}
                     >
                         <div className="flex items-start justify-between">
-                            <div className={`rounded-2xl ${stat.iconBg} p-4 
+                            <div className={`rounded-2xl ${stat.iconBg} p-5 
                                           group-hover:scale-110 transition-transform duration-300`}>
-                                <stat.icon className="h-8 w-8 text-white" />
+                                <stat.icon className="h-10 w-10 text-white" />
                             </div>
-                            <span className="text-sm font-medium px-3 py-1 rounded-full
+                            <span className="text-base font-medium px-4 py-1 rounded-full
                                          bg-white/80 text-gray-700 backdrop-blur-sm">
                                 Actualizado hoy
                             </span>
                         </div>
-                        <div className="mt-6 space-y-1">
-                            <h3 className={`text-5xl font-bold ${stat.valueColor}`}>
+                        <div className="mt-8 space-y-2">
+                            <h3 className={`text-6xl font-bold ${stat.valueColor}`}>
                                 {statsLoading ? (
-                                    <div className="h-12 w-24 bg-gray-200/50 rounded-lg animate-pulse" />
+                                    <div className="h-14 w-28 bg-gray-200/50 rounded-lg animate-pulse" />
                                 ) : (
                                     stat.value
                                 )}
                             </h3>
-                            <p className="text-base font-medium text-gray-600">{stat.label}</p>
+                            <p className="text-lg font-medium text-gray-600">{stat.label}</p>
                         </div>
-                        <div className={`absolute -right-6 -bottom-6 w-32 h-32 rounded-full
+                        <div className={`absolute -right-8 -bottom-8 w-40 h-40 rounded-full
                                       bg-gradient-to-br ${stat.color} opacity-10
                                       group-hover:scale-150 transition-transform duration-500`} />
                     </div>

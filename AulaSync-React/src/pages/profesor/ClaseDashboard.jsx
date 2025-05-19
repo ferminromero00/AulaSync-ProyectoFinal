@@ -974,13 +974,18 @@ const ClaseDashboard = () => {
                                                 <div
                                                     key={anuncio.id}
                                                     onClick={() => handleOpenTarea(anuncio)}
-                                                    className="group p-4 border border-gray-100 rounded-xl cursor-pointer
+                                                    className="group p-7 border border-gray-100 rounded-2xl cursor-pointer
                                                         bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
                                                         transition-all duration-300
                                                         overflow-hidden
                                                         hover:shadow-2xl hover:border-blue-400 hover:bg-white
-                                                        hover:scale-[1.01] hover:z-10"
-                                                    style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                        hover:scale-[1.025] hover:z-10
+                                                        shadow-lg"
+                                                    style={{
+                                                        animationDelay: `${600 + (index * 100)}ms`,
+                                                        minHeight: '170px',
+                                                        boxShadow: '0 6px 32px 0 rgba(59,130,246,0.08)'
+                                                    }}
                                                 >
                                                     {/* Fondo decorativo animado */}
                                                     <div className="pointer-events-none absolute inset-0 z-0">
@@ -989,14 +994,13 @@ const ClaseDashboard = () => {
                                                         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
                                                     </div>
                                                     <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
-                                                    {/* Contenido principal más compacto */}
                                                     <div className="relative z-20">
                                                         <div className="flex items-center justify-between gap-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="bg-blue-100 p-2.5 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                                                    <BookOpen className="h-5.5 w-5.5 text-blue-600" />
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="bg-blue-100 p-4 rounded-xl group-hover:bg-blue-200 transition-colors">
+                                                                    <BookOpen className="h-6 w-6 text-blue-600" />
                                                                 </div>
-                                                                <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-lg">
+                                                                <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-xl truncate">
                                                                     {anuncio.titulo || "Tarea sin título"}
                                                                 </h3>
                                                             </div>
@@ -1057,8 +1061,8 @@ const ClaseDashboard = () => {
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-3 text-sm text-gray-600 mt-3">
-                                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                                        <div className="flex items-center gap-4 text-base text-gray-600 mt-4">
+                                                            <Calendar className="h-5 w-5 text-gray-500" />
                                                             <span className="flex-1">
                                                                 {anuncio.fechaEntrega
                                                                     ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
@@ -1070,8 +1074,8 @@ const ClaseDashboard = () => {
                                                                     })
                                                                     : "Sin fecha límite"}
                                                             </span>
-                                                            <span className="text-sm text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
-                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                                            <span className="text-base text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
+                                                                Ver detalles <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                                             </span>
                                                         </div>
                                                     </div>
@@ -1079,13 +1083,17 @@ const ClaseDashboard = () => {
                                             ) : (
                                                 <div
                                                     key={anuncio.id}
-                                                    className="group p-5 border border-gray-100 rounded-xl cursor-pointer
+                                                    className="group p-6 border border-gray-100 rounded-2xl cursor-pointer
                                                         bg-gradient-to-r from-blue-50 to-white relative opacity-0 animate-slideRight
                                                         transition-all duration-300
                                                         overflow-hidden
                                                         hover:shadow-2xl hover:border-blue-400 hover:bg-white
-                                                        hover:scale-[1.01] hover:z-10"
-                                                    style={{ animationDelay: `${600 + (index * 100)}ms` }}
+                                                        hover:scale-[1.015] hover:z-10
+                                                        shadow"
+                                                    style={{
+                                                        animationDelay: `${600 + (index * 100)}ms`,
+                                                        minHeight: '120px'
+                                                    }}
                                                 >
                                                     {/* Fondo decorativo animado */}
                                                     <div className="pointer-events-none absolute inset-0 z-0">

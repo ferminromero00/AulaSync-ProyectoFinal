@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { getClaseById } from '../../services/clases';
 import { obtenerAnuncios } from '../../services/anuncios';
-import { Users, BookOpen, FileText, Calendar, AlertCircle } from 'lucide-react';
+import { Users, BookOpen, FileText, Calendar, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 
 const ClaseInfo = () => {
@@ -15,6 +15,33 @@ const ClaseInfo = () => {
     const [profesorNombre, setProfesorNombre] = useState(null);
     const [exportingPdf, setExportingPdf] = useState(false);
     const exportModalRef = useRef(null);
+
+    // Animación de ticks progresivos para la carga
+    const steps = [
+        { label: "Cargando información de la clase...", icon: <BookOpen className="h-6 w-6 text-blue-400" /> },
+        { label: "Cargando estudiantes...", icon: <Users className="h-6 w-6 text-blue-400" /> },
+        { label: "Cargando tareas publicadas...", icon: <FileText className="h-6 w-6 text-blue-400" /> }
+    ];
+    const [step, setStep] = useState(0);
+    const [dotCount, setDotCount] = useState(0);
+    const intervalRef = useRef();
+    const dotIntervalRef = useRef();
+
+    useEffect(() => {
+        if (loading) {
+            setStep(0);
+            intervalRef.current = setInterval(() => {
+                setStep(prev => (prev < steps.length ? prev + 1 : prev));
+            }, 600);
+            dotIntervalRef.current = setInterval(() => {
+                setDotCount(prev => (prev + 1) % 3);
+            }, 400);
+        }
+        return () => {
+            clearInterval(intervalRef.current);
+            clearInterval(dotIntervalRef.current);
+        };
+    }, [loading]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -93,8 +120,54 @@ const ClaseInfo = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+                        <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+                    </div>
+                    <div className="flex flex-col gap-3 min-w-[300px]">
+                        {steps.map((s, idx) => (
+                            <div className="flex items-center gap-3" key={s.label}>
+                                {step > idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <CheckCircle className="h-4 w-4 text-green-500 animate-pop" />
+                                    </span>
+                                ) : step === idx ? (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                                    </span>
+                                ) : (
+                                    <span className="w-4 h-4 flex items-center justify-center">
+                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                    </span>
+                                )}
+                                <span className={`text-blue-800 ${step > idx ? "line-through text-blue-700" : ""}`}>{s.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-8 text-blue-700 text-sm flex items-center gap-2">
+                        Un momento, preparando la información de la clase
+                        <span className="inline-block w-6 text-blue-700 font-bold" style={{ letterSpacing: 1 }}>
+                            {".".repeat(dotCount + 1)}
+                        </span>
+                    </div>
+                    <style>{`
+                        @keyframes fade-in-up {
+                            0% { opacity: 0; transform: translateY(20px);}
+                            100% { opacity: 1; transform: translateY(0);}
+                        }
+                        .animate-fade-in-up {
+                            animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
+                        }
+                        @keyframes pop {
+                            0% { transform: scale(0.7); opacity: 0.5;}
+                            60% { transform: scale(1.2);}
+                            100% { transform: scale(1); opacity: 1;}
+                        }
+                        .animate-pop { animation: pop 0.4s; }
+                    `}</style>
+                </div>
             </div>
         );
     }
