@@ -50,12 +50,6 @@ const StudentLayout = () => {
                             icon={<FileText className="h-5 w-5" />}
                             label="Tareas"
                         />
-                        <SidebarLink
-                            to="/alumno/configuracion"
-                            icon={<Settings className="h-5 w-5" />}
-                            label="Configuración"
-                        />
-                        
                         {/* Lista de clases */}
                         <div className="mt-6 px-3">
                             <span className="px-4 text-xs font-medium uppercase tracking-wider text-green-300/80">
@@ -88,6 +82,12 @@ const StudentLayout = () => {
 
                     {/* Footer */}
                     <div className="border-t border-green-700/50 p-4">
+                        <SidebarLink
+                            to="/alumno/configuracion"
+                            icon={<Settings className="h-5 w-5" />}
+                            label="Configuración"
+                        />
+                        <div className="h-4" /> {/* Espacio extra entre Configuración y Cerrar Sesión */}
                         <button
                             onClick={handleLogout}
                             className="flex w-full items-center gap-3 px-4 py-2 text-red-100 rounded-lg 

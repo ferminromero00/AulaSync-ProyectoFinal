@@ -173,8 +173,18 @@ export default function ConfiguracionProfesor() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+      <div className="flex items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div
+          className="bg-white rounded-3xl shadow-2xl flex flex-col items-center border border-blue-100 animate-fade-in-up"
+          style={{
+            padding: "4rem 4.5rem",
+            minWidth: 420,
+            maxWidth: 520,
+            width: "100%",
+            boxShadow: "0 10px 48px 0 rgba(59,130,246,0.10)",
+            margin: "0 auto"
+          }}
+        >
           <div className="flex items-center gap-4 mb-6">
             <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
             <span className="text-2xl font-bold text-blue-900">AulaSync</span>

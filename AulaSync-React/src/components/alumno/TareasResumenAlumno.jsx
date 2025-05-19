@@ -265,7 +265,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
 
         return (
             <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
-                ${isClosing ? 'modal-closing' : ''}`}>
+                ${isClosing ? 'modal-closing' : ''}`}  style={{ margin: 0, padding: 0 }}>
                 
                 {isLoadingModal ? (
                     <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl animate-fadeIn">
