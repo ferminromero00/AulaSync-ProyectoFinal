@@ -46,7 +46,7 @@ DESARROLLO EN ENTORNO SERVIDOR - AulaSync
    - ✅ symfony/validator         → Validación de archivos
 ================================================================================================================================================
 6. Importación y exportación de datos
-   - ❌ league/csv                → Lectura y escritura de archivos CSV (importar/exportar datos)
+   - ✅ league/csv                → Lectura y escritura de archivos CSV (importar/exportar datos)
 ================================================================================================================================================
 7. Descarga de archivos del servidor
    - ❌ Gestionado por Symfony   → Con controladores que devuelven archivos como respuesta
