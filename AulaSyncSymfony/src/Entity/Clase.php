@@ -37,12 +37,16 @@ class Clase
     #[ORM\JoinTable(name: 'clase_alumno')]
     private Collection $alumnos;
 
+    #[ORM\ManyToMany(targetEntity: Alumno::class)]
+    private Collection $estudiantes;
+
     #[ORM\OneToMany(mappedBy: 'clase', targetEntity: Anuncio::class, orphanRemoval: true)]
     private Collection $anuncios;
 
     public function __construct()
     {
         $this->alumnos = new ArrayCollection();
+        $this->estudiantes = new ArrayCollection();
         $this->anuncios = new ArrayCollection();
         $this->codigoClase = $this->generarCodigoClase();
     }
@@ -142,6 +146,29 @@ class Clase
         foreach ($this->alumnos as $alumno) {
             $this->removeAlumno($alumno);
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Alumno>
+     */
+    public function getEstudiantes(): Collection
+    {
+        return $this->estudiantes;
+    }
+
+    public function addEstudiante(Alumno $estudiante): self
+    {
+        if (!$this->estudiantes->contains($estudiante)) {
+            $this->estudiantes->add($estudiante);
+        }
+
+        return $this;
+    }
+
+    public function removeEstudiante(Alumno $estudiante): self
+    {
+        $this->estudiantes->removeElement($estudiante);
         return $this;
     }
 

@@ -84,6 +84,7 @@ security:
         - { path: ^/api/clases/\d+/alumno, roles: ROLE_ALUMNO }  # Para alumnos
         - { path: ^/api/clases, roles: ROLE_PROFESOR }           # Para profesores
         - { path: ^/api/profesor/clases, roles: ROLE_PROFESOR }
+        - { path: ^/api/export, roles: ROLE_PROFESOR }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
