@@ -19,6 +19,7 @@ const Clases = () => {
     const [claseSeleccionada, setClaseSeleccionada] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -77,6 +78,21 @@ const Clases = () => {
         }
     };
 
+    const handleExportNotas = async () => {
+        if (!clases.length) return;
+        
+        setIsExporting(true);
+        try {
+            // Por ahora solo simulamos la exportación
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            toast.success('Exportación de notas próximamente');
+        } catch (error) {
+            toast.error('Error al exportar notas');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuAbierto && !event.target.closest('.menu-button')) {
@@ -102,14 +118,38 @@ const Clases = () => {
                         Gestiona todas tus clases y sus detalles
                     </p>
                 </div>
-                <button
-                    onClick={() => setMostrarFormulario(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl 
-                              hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20"
-                >
-                    <Plus className="h-5 w-5" />
-                    <span className="font-medium">Nueva Clase</span>
-                </button>
+                <div className="flex gap-2">
+                    {!isLoading && clases.length > 0 && (
+                        <button
+                            onClick={handleExportNotas}
+                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl 
+                                      hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-500/20"
+                            disabled={isExporting}
+                        >
+                            {isExporting ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                                    <span className="font-medium">Exportando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span className="font-medium">Exportar Notas</span>
+                                </>
+                            )}
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setMostrarFormulario(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl 
+                                  hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20"
+                    >
+                        <Plus className="h-5 w-5" />
+                        <span className="font-medium">Nueva Clase</span>
+                    </button>
+                </div>
             </div>
 
             {/* Grid de clases con nuevo diseño */}
