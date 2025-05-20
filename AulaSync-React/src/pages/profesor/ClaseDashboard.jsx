@@ -761,20 +761,57 @@ const ClaseDashboard = () => {
     );
 
     const handleTareaEntregada = (tareaId, datosEntrega) => {
-        setAnuncios(prevAnuncios => 
-            prevAnuncios.map(anuncio => 
-                anuncio.id === tareaId 
-                    ? { 
-                        ...anuncio, 
+        setAnuncios(prevAnuncios =>
+            prevAnuncios.map(anuncio =>
+                anuncio.id === tareaId
+                    ? {
+                        ...anuncio,
                         entregada: true,
                         archivoEntregaUrl: datosEntrega.archivoEntregaUrl,
                         comentarioEntrega: datosEntrega.comentarioEntrega,
-                        fechaEntregada: datosEntrega.fechaEntregada
-                    } 
+                        fechaEntregada: datosEntrega.fechaEntregada,
+                        nota: datosEntrega.nota ?? anuncio.nota,
+                        comentarioCorreccion: datosEntrega.comentarioCorreccion ?? anuncio.comentarioCorreccion,
+                        // Si hay entregas, actualiza la entrega del alumno actual en el array de entregas
+                        entregas: Array.isArray(anuncio.entregas)
+                            ? anuncio.entregas.some(e =>
+                                String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                              )
+                                ? anuncio.entregas.map(e =>
+                                    String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                                        ? {
+                                            ...e,
+                                            archivoUrl: datosEntrega.archivoEntregaUrl,
+                                            comentario: datosEntrega.comentarioEntrega,
+                                            fechaEntrega: datosEntrega.fechaEntregada,
+                                            nota: datosEntrega.nota ?? e.nota,
+                                            comentarioCorreccion: datosEntrega.comentarioCorreccion ?? e.comentarioCorreccion
+                                        }
+                                        : e
+                                  )
+                                : [
+                                    ...(anuncio.entregas || []),
+                                    {
+                                        alumno: { id: alumnoId },
+                                        archivoUrl: datosEntrega.archivoEntregaUrl,
+                                        comentario: datosEntrega.comentarioEntrega,
+                                        fechaEntrega: datosEntrega.fechaEntregada,
+                                        nota: datosEntrega.nota ?? '',
+                                        comentarioCorreccion: datosEntrega.comentarioCorreccion ?? ''
+                                    }
+                                  ]
+                            : [{
+                                alumno: { id: alumnoId },
+                                archivoUrl: datosEntrega.archivoEntregaUrl,
+                                comentario: datosEntrega.comentarioEntrega,
+                                fechaEntrega: datosEntrega.fechaEntregada,
+                                nota: datosEntrega.nota ?? '',
+                                comentarioCorreccion: datosEntrega.comentarioCorreccion ?? ''
+                            }]
+                    }
                     : anuncio
             )
         );
-        
         // También actualizar la tarea seleccionada si es la misma
         if (tareaSeleccionada?.id === tareaId) {
             setTareaSeleccionada(prev => ({
@@ -782,7 +819,44 @@ const ClaseDashboard = () => {
                 entregada: true,
                 archivoEntregaUrl: datosEntrega.archivoEntregaUrl,
                 comentarioEntrega: datosEntrega.comentarioEntrega,
-                fechaEntregada: datosEntrega.fechaEntregada
+                fechaEntregada: datosEntrega.fechaEntregada,
+                nota: datosEntrega.nota ?? prev.nota,
+                comentarioCorreccion: datosEntrega.comentarioCorreccion ?? prev.comentarioCorreccion,
+                entregas: Array.isArray(prev.entregas)
+                    ? prev.entregas.some(e =>
+                        String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                      )
+                        ? prev.entregas.map(e =>
+                            String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                                ? {
+                                    ...e,
+                                    archivoUrl: datosEntrega.archivoEntregaUrl,
+                                    comentario: datosEntrega.comentarioEntrega,
+                                    fechaEntrega: datosEntrega.fechaEntregada,
+                                    nota: datosEntrega.nota ?? e.nota,
+                                    comentarioCorreccion: datosEntrega.comentarioCorreccion ?? e.comentarioCorreccion
+                                }
+                                : e
+                          )
+                        : [
+                            ...(prev.entregas || []),
+                            {
+                                alumno: { id: alumnoId },
+                                archivoUrl: datosEntrega.archivoEntregaUrl,
+                                comentario: datosEntrega.comentarioEntrega,
+                                fechaEntrega: datosEntrega.fechaEntregada,
+                                nota: datosEntrega.nota ?? '',
+                                comentarioCorreccion: datosEntrega.comentarioCorreccion ?? ''
+                            }
+                          ]
+                    : [{
+                        alumno: { id: alumnoId },
+                        archivoUrl: datosEntrega.archivoEntregaUrl,
+                        comentario: datosEntrega.comentarioEntrega,
+                        fechaEntrega: datosEntrega.fechaEntregada,
+                        nota: datosEntrega.nota ?? '',
+                        comentarioCorreccion: datosEntrega.comentarioCorreccion ?? ''
+                    }]
             }));
         }
     };
@@ -1055,7 +1129,7 @@ const ClaseDashboard = () => {
                                                                         style={{ backdropFilter: 'blur(8px)' }}
                                                                     >
                                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1v3m-7 0h10" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
                                                                         </svg>
                                                                     </button>
                                                                 )}
@@ -1115,7 +1189,7 @@ const ClaseDashboard = () => {
                                                         >
                                                             {/* Icono de papelera */}
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1v3m-7 0h10" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
                                                             </svg>
                                                         </button>
                                                     )}
@@ -1270,7 +1344,6 @@ const ClaseDashboard = () => {
                 onOpenEntrega={handleOpenEntregaModal}
                 entregaAlumno={role === 'alumno' ? getEntregaAlumnoActual() : null}
                 onTareaEntregada={handleTareaEntregada}
-                // ...existing code...
             />
 
             <EntregaModal

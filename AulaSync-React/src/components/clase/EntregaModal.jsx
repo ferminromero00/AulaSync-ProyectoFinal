@@ -1,6 +1,6 @@
 import { X, FileText, Paperclip, CheckCircle } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 
 const EntregaModal = ({
     showModal,
@@ -22,7 +22,20 @@ const EntregaModal = ({
     const handleNotaChange = (e) => {
         const valor = e.target.value;
         if (parseFloat(valor) > 10) {
-            toast.error('La nota no puede ser mayor que 10');
+            toast.error('La nota no puede ser mayor que 10', {
+                position: "top-right",
+                style: {
+                    background: '#fff',
+                    color: '#dc2626',
+                    border: '1px solid #fecaca',
+                    fontWeight: '500',
+                    boxShadow: '0 2px 8px 0 rgba(220,38,38,0.08)'
+                },
+                iconTheme: {
+                    primary: '#dc2626',
+                    secondary: '#fff'
+                }
+            });
             setNotaEdicion('10');
         } else {
             setNotaEdicion(valor);
@@ -31,6 +44,25 @@ const EntregaModal = ({
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            {/* Toaster para notificaciones arriba a la derecha y con z-index alto */}
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    style: {
+                        zIndex: 999999,
+                        background: '#fff',
+                        color: '#dc2626',
+                        border: '1px solid #fecaca',
+                        fontWeight: '500',
+                        boxShadow: '0 2px 8px 0 rgba(220,38,38,0.08)'
+                    },
+                    iconTheme: {
+                        primary: '#dc2626',
+                        secondary: '#fff'
+                    }
+                }}
+                containerStyle={{ zIndex: 999999 }}
+            />
             <div
                 className={`relative w-full max-w-lg mx-4 animate-entregaModalIn`}
                 style={{

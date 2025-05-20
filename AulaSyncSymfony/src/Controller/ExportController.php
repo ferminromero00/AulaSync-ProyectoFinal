@@ -33,7 +33,7 @@ class ExportController extends AbstractController
         $response = new Response($csv);
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            'clase-' . $clase->getId() . '-report.csv'
+            'clase-' . preg_replace('/[^a-zA-Z0-9]/', '-', $clase->getNombre()) . '-report.csv'
         );
         
         $response->headers->set('Content-Disposition', $disposition);

@@ -21,12 +21,22 @@ const TareaModal = ({
     onTareaEntregada
 }) => {
     const [isClosing, setIsClosing] = useState(false);
-    const [localIsEntregando, setLocalIsEntregando] = useState(false);
+    const [isEntregandoLocal, setIsEntregandoLocal] = useState(false);
     const [entregada, setEntregada] = useState(!!(tarea && tarea.entregada));
     const [tareaEntregadaData, setTareaEntregadaData] = useState(tarea && tarea.entregada ? tarea : null);
     const [entregaAlumnoReciente, setEntregaAlumnoReciente] = useState(null);
     const [isProcessing, setIsProcessing] = useState(true);
     const hasInitializedRef = useRef(false);
+
+    // NUEVO: Limpiar estados de entrega al cambiar de tarea/modal
+    useEffect(() => {
+        if (!showModal || !tarea) return;
+        // Limpiar estados locales de entrega al abrir una nueva tarea
+        setEntregada(!!tarea.entregada);
+        setTareaEntregadaData(tarea.entregada ? tarea : null);
+        setEntregaAlumnoReciente(null);
+        hasInitializedRef.current = false;
+    }, [tarea?.id, showModal]);
 
     const isExpired = (tarea) => {
         if (!tarea.fechaEntrega) return false;
@@ -62,51 +72,59 @@ const TareaModal = ({
             return;
         }
 
-        // Si ya se inicializó, no volver a procesar
-        if (hasInitializedRef.current) return;
-
+        // Limpiar datos inmediatamente al cambiar de tarea
         setIsProcessing(true);
-        
-        // Obtener el ID del usuario actual
-        const userId = localStorage.getItem('userId');
-        
-        // Buscar la entrega del usuario actual
-        let entregaActual = null;
-        if (tarea?.entregas?.length) {
-            entregaActual = tarea.entregas.find(e => 
-                String(e.alumno?.id || e.alumnoId) === String(userId)
-            );
-        }
+        setEntregada(false);
+        setTareaEntregadaData(null);
+        setEntregaAlumnoReciente(null);
+        setArchivoEntrega(null);
+        setComentarioEntrega('');
+        hasInitializedRef.current = false;
 
-        // Priorizar entrega más reciente
-        const entregaFinal = entregaAlumnoReciente || entregaAlumno || entregaActual;
-        const tareaEntregada = !!(entregaFinal || tarea?.entregada);
-        
-        setEntregada(tareaEntregada);
+        // Pequeño timeout para asegurar que la UI se actualiza
+        const timer = setTimeout(() => {
+            // Obtener el ID del usuario actual
+            const userId = localStorage.getItem('userId');
+            
+            // Buscar la entrega del usuario actual
+            let entregaActual = null;
+            if (tarea?.entregas?.length) {
+                entregaActual = tarea.entregas.find(e => 
+                    String(e.alumno?.id || e.alumnoId) === String(userId)
+                );
+            }
 
-        if (tareaEntregada) {
-            const data = {
-                ...tarea,
-                entregada: true,
-                archivoEntregaUrl: entregaFinal?.archivoUrl || entregaFinal?.archivoEntregaUrl || tarea?.archivoEntregaUrl,
-                comentarioEntrega: entregaFinal?.comentario || entregaFinal?.comentarioEntrega || tarea?.comentarioEntrega,
-                nota: entregaFinal?.nota ?? tarea?.nota ?? '',
-                comentarioCorreccion: entregaFinal?.comentarioCorreccion ?? tarea?.comentarioCorreccion ?? '',
-                fechaEntregada: entregaFinal?.fechaEntrega || entregaFinal?.fechaEntregada || tarea?.fechaEntregada
-            };
-            setTareaEntregadaData(data);
-        }
+            // Priorizar entrega más reciente
+            const entregaFinal = entregaAlumnoReciente || entregaAlumno || entregaActual;
+            const tareaEntregada = !!(entregaFinal || tarea?.entregada);
+            
+            setEntregada(tareaEntregada);
 
-        // Marcar como inicializado y quitar el estado de carga
-        hasInitializedRef.current = true;
-        setTimeout(() => setIsProcessing(false), 300);
+            if (tareaEntregada) {
+                const data = {
+                    ...tarea,
+                    entregada: true,
+                    archivoEntregaUrl: entregaFinal?.archivoUrl || entregaFinal?.archivoEntregaUrl || tarea?.archivoEntregaUrl,
+                    comentarioEntrega: entregaFinal?.comentario || entregaFinal?.comentarioEntrega || tarea?.comentarioEntrega,
+                    nota: entregaFinal?.nota ?? tarea?.nota ?? '',
+                    comentarioCorreccion: entregaFinal?.comentarioCorreccion ?? tarea?.comentarioCorreccion ?? '',
+                    fechaEntregada: entregaFinal?.fechaEntrega || entregaFinal?.fechaEntregada || tarea?.fechaEntregada
+                };
+                setTareaEntregadaData(data);
+            }
 
-    }, [tarea, entregaAlumno, entregaAlumnoReciente, showModal]);
+            hasInitializedRef.current = true;
+            setIsProcessing(false);
+        }, 100);
+
+        return () => clearTimeout(timer);
+
+    }, [tarea?.id, showModal]);
 
     const handleEntregaTarea = async (e) => {
         e.preventDefault();
         if (!tarea) return;
-        setLocalIsEntregando(true);
+        setIsEntregandoLocal(true);
         try {
             const formData = new FormData();
             formData.append('comentario', comentarioEntrega);
@@ -123,24 +141,37 @@ const TareaModal = ({
             if (!response.ok) throw new Error('Error al entregar la tarea');
             await response.json();
 
-            // Ahora sí: obtener la entrega recién creada para el alumno
+            // Obtener la entrega recién creada para el alumno
             const entregaRes = await fetch(`${API_BASE_URL}/api/tareas/${tarea.id}/entregas`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const entregas = await entregaRes.json();
-            // Busca la entrega del usuario actual
             let userId = localStorage.getItem('userId');
             const entregaAlumnoNueva = Array.isArray(entregas)
                 ? entregas.find(e => String(e.alumno?.id || e.alumnoId) === String(userId))
                 : null;
             setEntregaAlumnoReciente(entregaAlumnoNueva);
 
-            // Notificar al componente padre (si lo necesitas)
+            // Actualizar el modal con los datos de la entrega
+            setEntregada(true);
+            setTareaEntregadaData({
+                ...tarea,
+                entregada: true,
+                archivoEntregaUrl: entregaAlumnoNueva?.archivoUrl || null,
+                comentarioEntrega: entregaAlumnoNueva?.comentario || '',
+                fechaEntregada: entregaAlumnoNueva?.fechaEntrega || new Date().toISOString(),
+                nota: entregaAlumnoNueva?.nota ?? '',
+                comentarioCorreccion: entregaAlumnoNueva?.comentarioCorreccion ?? ''
+            });
+
+            // Notificar al padre para actualizar el estado global
             if (onTareaEntregada) {
                 onTareaEntregada(tarea.id, {
                     archivoEntregaUrl: entregaAlumnoNueva?.archivoUrl || null,
                     comentarioEntrega: entregaAlumnoNueva?.comentario || '',
-                    fechaEntregada: entregaAlumnoNueva?.fechaEntrega || new Date().toISOString()
+                    fechaEntregada: entregaAlumnoNueva?.fechaEntrega || new Date().toISOString(),
+                    nota: entregaAlumnoNueva?.nota ?? '',
+                    comentarioCorreccion: entregaAlumnoNueva?.comentarioCorreccion ?? ''
                 });
             }
 
@@ -149,7 +180,7 @@ const TareaModal = ({
             console.error('[TareaModal] Error al entregar la tarea:', e);
             toast.error('Error al entregar la tarea');
         } finally {
-            setLocalIsEntregando(false);
+            setIsEntregandoLocal(false);
         }
     };
 
@@ -558,13 +589,13 @@ const TareaModal = ({
                                                 {/* Botón de entrega */}
                                                 <button
                                                     type="submit"
-                                                    disabled={isEntregando}
+                                                    disabled={isEntregandoLocal}
                                                     className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg 
                                                              hover:bg-blue-700 active:bg-blue-800 transition-all duration-300
                                                              disabled:opacity-50 disabled:cursor-not-allowed
                                                              flex items-center justify-center gap-2"
                                                 >
-                                                    {isEntregando ? (
+                                                    {isEntregandoLocal ? (
                                                         <>
                                                             <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                                                             Entregando...
