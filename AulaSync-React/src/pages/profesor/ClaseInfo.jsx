@@ -58,7 +58,7 @@ const ClaseInfo = () => {
                 setClase(claseData);
                 setTareas(anuncios.filter(a => a.tipo === 'tarea'));
 
-                // Buscar nombre del profesor en el primer autor de las tareas/anuncios
+                // Buscar nombre del profesor en el objeto profesor de la clase
                 let nombreProfesor = null;
                 if (claseData.profesor && (claseData.profesor.nombre || claseData.profesor.firstName)) {
                     nombreProfesor = claseData.profesor.nombre || `${claseData.profesor.firstName || ''} ${claseData.profesor.lastName || ''}`.trim();
@@ -70,6 +70,17 @@ const ClaseInfo = () => {
                     }
                 }
                 setProfesorNombre(nombreProfesor);
+
+                // NUEVO: Log extra para depuración si no hay profesor en la clase
+                if (!claseData.profesor) {
+                    console.warn('[ClaseInfo] clase.profesor es undefined. ¿El backend está devolviendo el profesor en la petición de clase?');
+                    const primerAutor = anuncios.find(a => a.autor && a.autor.nombre)?.autor;
+                    if (primerAutor) {
+                        console.warn('[ClaseInfo] Primer autor encontrado en anuncios:', primerAutor);
+                    } else {
+                        console.warn('[ClaseInfo] No se encontró autor en los anuncios.');
+                    }
+                }
             } catch (e) {
                 console.error('[ClaseInfo] Error al cargar datos:', e);
                 setClase(null);
@@ -209,10 +220,13 @@ const ClaseInfo = () => {
                     </div>
                     <div className="text-sm text-gray-500">
                         <span className="font-semibold text-blue-700">Especialidad:</span>{" "}
-                        {clase.profesor && clase.profesor.especialidad
-                            ? clase.profesor.especialidad
-                            : <span className="italic text-gray-400">No disponible</span>
-                        }
+                        {(() => {
+                            // Mostrar especialidad del objeto profesor si existe
+                            const especialidad = clase.profesor && clase.profesor.especialidad;
+                            return (especialidad && especialidad.trim() !== "")
+                                ? especialidad
+                                : <span className="italic text-gray-400">No disponible</span>;
+                        })()}
                     </div>
                 </div>
             </div>

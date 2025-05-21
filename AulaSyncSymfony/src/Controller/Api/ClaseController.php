@@ -223,11 +223,22 @@ class ClaseController extends AbstractController
                 ];
             }, $clase->getAlumnos()->toArray());
 
+            // NUEVO: Añadir datos del profesor en la respuesta
+            $profesor = $clase->getProfesor();
+            $profesorData = $profesor ? [
+                'id' => $profesor->getId(),
+                'nombre' => $profesor->getFirstName() . ' ' . $profesor->getLastName(),
+                'email' => $profesor->getEmail(),
+                'especialidad' => $profesor->getEspecialidad(),
+                'departamento' => $profesor->getDepartamento()
+            ] : null;
+
             return new JsonResponse([
                 'id' => $clase->getId(),
                 'nombre' => $clase->getNombre(),
                 'codigoClase' => $clase->getCodigoClase(),
                 'numEstudiantes' => $clase->getNumEstudiantes(),
+                'profesor' => $profesorData,
                 'estudiantes' => $estudiantes,
             ]);
         } catch (\Exception $e) {
@@ -293,7 +304,10 @@ class ClaseController extends AbstractController
         return new JsonResponse([
             'id' => $clase->getId(),
             'nombre' => $clase->getNombre(),
-            'profesor' => $clase->getProfesor()->getFirstName().' '.$clase->getProfesor()->getLastName(),
+            'profesor' => [
+                'nombre' => $clase->getProfesor()->getFirstName().' '.$clase->getProfesor()->getLastName(),
+                'especialidad' => $clase->getProfesor()->getEspecialidad()
+            ],
             'codigoClase' => $clase->getCodigoClase(),
         ]);
     }
