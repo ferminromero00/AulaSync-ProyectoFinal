@@ -48,10 +48,10 @@ jobs:
         run: |
           cd terraform
           terraform apply -auto-approve
-        
-      - name: Subir directorio web a S3
-        run: aws s3 sync Web/ s3://bucketfermin/
 
+      - name: Subir estado de Terraform a S3
+        run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
+        
 
         
   destroy:
@@ -73,8 +73,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Descargar estado de Terraform desde S3
-        run: |
-          aws s3 cp s3://bucketfermin/terraform.tfstate terraform/terraform.tfstate
+        run: aws s3 cp s3://bucketfermin-2daw-202406/terraform.tfstate terraform/terraform.tfstate
 
       - name: Inicializar y Destruir Terraform
         run: |
