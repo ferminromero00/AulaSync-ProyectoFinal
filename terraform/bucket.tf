@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "s3" {
-  bucket        = "bucketfermin"
+  bucket        = "bucketfermin-2daw-202406" # Cambia este nombre por uno único
   force_destroy = true
 
 }
