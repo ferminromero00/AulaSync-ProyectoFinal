@@ -55,7 +55,6 @@ resource "aws_key_pair" "ssh_servidor_apache" {
   tags       = { Name = "apache-server" }
 }
 
-
 # Instancia EC2 para el Servidor Web
 resource "aws_instance" "servidor_web" {
   ami                    = var.ami_id
