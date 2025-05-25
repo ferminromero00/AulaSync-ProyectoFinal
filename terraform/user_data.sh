@@ -45,7 +45,8 @@ docker pull ferminromero/aulasync-front:latest
 # =========================
 docker run -d --name aulasync-front -p 80:80 ferminromero/aulasync-front:latest
 docker run -d --name aulasync-back -p 8000:8000 \
-    -e APP_ENV=dev \
-    -e APP_DEBUG=1 \
+    -e APP_ENV=prod \
+    -e APP_DEBUG=0 \
+    -e DATABASE_URL="mysql://AulaSync2_finalfolks:f5547bd5ffe59fdcbc00329d618e71adbf376135@yuwvf.h.filess.io:61002/AulaSync2_finalfolks" \
     -e CORS_ALLOW_ORIGIN='*' \
     ferminromero/aulasync-back:latest
