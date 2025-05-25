@@ -1,7 +1,9 @@
 FROM php:8.2-fpm-alpine
 
-# Instalar dependencias
+# Instalar dependencias del sistema
 RUN apk add --no-cache \
+    nginx \
+    supervisor \
     git \
     zip \
     unzip \
@@ -16,14 +18,20 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
+# Copiar todo el proyecto
+COPY . .
+
+# Copiar configuración personalizada de Nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Copiar configuración de supervisord
+COPY docker/supervisord.conf /etc/supervisord.conf
+
 # Establecer entorno de producción
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
-# Copiar todo el proyecto
-COPY . .
-
-# Instalar todas las dependencias
+# Instalar dependencias PHP
 RUN composer install \
     --prefer-dist \
     --optimize-autoloader \
@@ -36,6 +44,6 @@ RUN composer run-script post-install-cmd
 # Configurar permisos
 RUN chown -R www-data:www-data .
 
-EXPOSE 9000
+EXPOSE 8000
 
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
