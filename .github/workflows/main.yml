@@ -27,6 +27,12 @@ jobs:
           extensions: mbstring, xml
           coverage: xdebug      
 
+      - name: Instalar dependencias Composer
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Ejecutar tests unitarios
+        run: php bin/phpunit --testdox
+
       - name: Configurar credenciales AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
