@@ -84,6 +84,7 @@ INGLÉS EN AULA BILINGÜE
 
 DESPLIEGUE WEB
 - ❌ Uso de nube + Kubernetes + contenedores.
+- ✅ Contenedores (Pruebas sin EKS)
 - ❌ Configuración correcta de servidor web y servidor de aplicaciones.
 - ❌ Uso de SCV.
 - ❌ Uso de IaC con Terraform.
@@ -93,5 +94,5 @@ DESPLIEGUE WEB
 
 REQUISITOS ADICIONALES (Curso actual)
 - ❌ Uso de metodología CI/CD con GithubActions o Jenkins.
-- ❌ Realización de pruebas unitarias.
+- ✅ Realización de pruebas unitarias.
 - ❌ Generación de documentación automática del código.
