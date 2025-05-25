@@ -41,11 +41,31 @@ docker pull ferminromero/aulasync-back:latest
 docker pull ferminromero/aulasync-front:latest
 
 # =========================
-# Lanzar contenedores
+# Obtener IP pública de la instancia
 # =========================
-docker run -d --name aulasync-front -p 80:80 ferminromero/aulasync-front:latest
+EC2_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
+# =========================
+# Configurar variables de entorno
+# =========================
+echo "VITE_API_URL=http://${EC2_IP}:8000" > /tmp/env.production
+
+# =========================
+# Lanzar contenedores con la configuración correcta
+# =========================
+docker run -d --name aulasync-front -p 80:80 \
+    --env-file /tmp/env.production \
+    ferminromero/aulasync-front:latest
+
 docker run -d --name aulasync-back -p 8000:8000 \
-    -e APP_ENV=dev \
-    -e APP_DEBUG=1 \
-    -e CORS_ALLOW_ORIGIN='*' \
+    -e APP_ENV=prod \
+    -e APP_DEBUG=0 \
+    -e CORS_ALLOW_ORIGIN="*" \
     ferminromero/aulasync-back:latest
+
+# Limpiar archivo temporal
+rm /tmp/env.production
+
+# Añadir configuración de red
+iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
