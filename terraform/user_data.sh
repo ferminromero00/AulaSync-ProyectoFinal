@@ -44,4 +44,8 @@ docker pull ferminromero/aulasync-front:latest
 # Lanzar contenedores
 # =========================
 docker run -d --name aulasync-front -p 80:80 ferminromero/aulasync-front:latest
-docker run -d --name aulasync-back -p 8000:8000 ferminromero/aulasync-back:latest
+docker run -d --name aulasync-back -p 8000:8000 \
+    -e APP_ENV=dev \
+    -e APP_DEBUG=1 \
+    -e CORS_ALLOW_ORIGIN='*' \
+    ferminromero/aulasync-back:latest

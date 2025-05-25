@@ -30,6 +30,15 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     description = "Acceso SSH desde cualquier origen"
   }
 
+  # Regla de entrada para HTTP en puerto 8000 (Symfony API)
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Acceso API Symfony"
+  }
+
   # Regla de salida para todo el trafico
   egress {
     from_port   = 0
