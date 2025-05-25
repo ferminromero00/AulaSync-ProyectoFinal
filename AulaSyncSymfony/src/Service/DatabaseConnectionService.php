@@ -145,4 +145,14 @@ class DatabaseConnectionService
             $this->closeConnection();
         }
     }
+
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
+    }
+
+    public function logError(string $message): void
+    {
+        $this->logger->error($message);
+    }
 }

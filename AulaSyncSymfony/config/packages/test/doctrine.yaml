@@ -1,0 +1,21 @@
+doctrine:
+    dbal:
+        # Usar driver SQLite
+        driver: 'pdo_sqlite'
+        # Usar una base de datos en archivo temporal en vez de memoria
+        url: 'sqlite:///:memory:'
+        memory: true
+        options:
+            mode: 0666
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
