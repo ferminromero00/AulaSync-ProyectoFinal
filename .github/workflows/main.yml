@@ -52,13 +52,13 @@ jobs:
           terraform init
           terraform plan
 
-      #- name: Aplicar Terraform
-      #  run: |
-      #    cd terraform
-      #    terraform apply -auto-approve
+      - name: Aplicar Terraform
+        run: |
+          cd terraform
+          terraform apply -auto-approve
 
-      #- name: Subir estado de Terraform a S3
-      #  run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
+      - name: Subir estado de Terraform a S3
+        run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
         
 
         
