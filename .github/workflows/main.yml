@@ -28,9 +28,11 @@ jobs:
           coverage: xdebug      
 
       - name: Instalar dependencias Composer
+        working-directory: ./AulaSyncSymfony
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Ejecutar tests unitarios
+        working-directory: ./AulaSyncSymfony
         run: php bin/phpunit --testdox
 
       - name: Configurar credenciales AWS
