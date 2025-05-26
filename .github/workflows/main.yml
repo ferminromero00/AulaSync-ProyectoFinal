@@ -23,13 +23,13 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.2'
           extensions: mbstring, xml
           coverage: xdebug      
 
       - name: Instalar dependencias Composer
         working-directory: ./AulaSyncSymfony
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Ejecutar tests unitarios
         working-directory: ./AulaSyncSymfony
