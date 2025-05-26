@@ -1,0 +1,219 @@
+Aquí tienes una **guía paso a paso** para crear tu clúster EKS en AWS y desplegar tus dos contenedores (frontend y backend), de modo que se comuniquen internamente usando un Service de Kubernetes. Al final verás también algunas **observaciones y recomendaciones** para producción.
+
+---
+
+## 1. Prepara tu entorno local
+
+1. **Instala AWS CLI y eksctl**
+
+   * AWS CLI: [https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+   * eksctl: [https://eksctl.io/introduction/#installation](https://eksctl.io/introduction/#installation)
+
+2. **Configura tus credenciales AWS**
+
+   ```bash
+   aws configure
+   # Te pedirá:
+   # AWS Access Key ID [···]
+   # AWS Secret Access Key [···]
+   # Default region name [us-east-1]
+   # Default output format [json]
+   ```
+
+3. **Verifica que `eksctl` y `kubectl` funcionen**
+
+   ```bash
+   eksctl version
+   kubectl version --client
+   ```
+
+---
+
+## 2. Crea el clúster EKS
+
+Usaremos `eksctl` para simplificar la creación:
+
+```bash
+eksctl create cluster \
+  --name aulasync-cluster \
+  --region us-east-1 \
+  --nodegroup-name default-nodes \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 2 \
+  --nodes-max 3 \
+  --managed
+```
+
+* **`--managed`** crea un NodeGroup gestionado.
+* Ajusta tipos y número de nodos según tus necesidades.
+
+Al acabar, `eksctl`:
+
+* Habrá creado el VPC, subredes, roles IAM…
+* Actualizará tu `~/.kube/config` para apuntar a este clúster.
+
+Verifica la conexión:
+
+```bash
+kubectl get nodes
+```
+
+---
+
+## 3. Prepara los manifiestos de Kubernetes
+
+Crea un directorio `k8s/` con estos dos archivos:
+
+### 3.1. `backend-deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: ferminromero/aulasync-back:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: APP_ENV
+          value: "prod"
+        - name: APP_DEBUG
+          value: "0"
+        - name: CORS_ALLOW_ORIGIN
+          value: "*"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: backend
+```
+
+### 3.2. `frontend-deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ferminromero/aulasync-front:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          # Usamos el DNS interno del Service 'backend'
+          value: "http://backend:8000"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: frontend
+```
+
+---
+
+## 4. Despliega todo en EKS
+
+```bash
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+```
+
+Comprueba que los recursos estén listos:
+
+```bash
+kubectl get deployments
+kubectl get pods
+kubectl get svc
+```
+
+* El Service **frontend** de tipo `LoadBalancer` creará un ELB en AWS y te mostrará su dirección externa.
+* El Service **backend** es `ClusterIP`, accesible sólo desde dentro del clúster, por ejemplo desde el frontend o un `kubectl port-forward`.
+
+---
+
+## 5. Verifica la comunicación y acceso
+
+1. **URL externa**
+
+   ```bash
+   kubectl get svc frontend
+   ```
+
+   Copia la EXTERNAL-IP del frontend y abre en el navegador.
+
+2. **Prueba interna**
+   Ejecuta un pod temporal y haz curl al backend desde dentro del clúster:
+
+   ```bash
+   kubectl run test-pod --rm -it --image=busybox --restart=Never -- sh
+   # Dentro del pod:
+   wget -qO- http://backend:8000
+   exit
+   ```
+
+---
