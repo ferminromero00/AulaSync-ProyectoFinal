@@ -22,8 +22,8 @@ resource "aws_subnet" "subred_publica" {
   availability_zone       = "${var.region}a"
   tags = {
     Name = "SubredPublica"
-    "kubernetes.io/cluster/my-cluster" = "shared"
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/AulaSync" = "shared"
+    "kubernetes.io/role/elb"         = "1"
   }
 }
 
@@ -35,8 +35,8 @@ resource "aws_subnet" "subred_publica2" {
   availability_zone       = "${var.region}b"
   tags = {
     Name = "SubredPublica2"
-    "kubernetes.io/cluster/my-cluster" = "shared"
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/AulaSync" = "shared"
+    "kubernetes.io/role/elb"         = "1"
   }
 }
 
