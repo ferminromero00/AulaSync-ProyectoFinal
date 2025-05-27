@@ -42,7 +42,7 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     to_port     = 65535
     protocol    = "-1"
     self        = true
-    description = "Comunicación entre nodos"
+    description = "Comunicacion entre nodos"
   }
 
   # Acceso a la API de Kubernetes (puerto 6443)
