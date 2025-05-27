@@ -39,7 +39,7 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
   # Comunicación entre nodos
   ingress {
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     self        = true
     description = "Comunicacion entre nodos"
