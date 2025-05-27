@@ -65,6 +65,18 @@ jobs:
           cd terraform
           echo "EC2_IP=$(terraform output -raw instance_public_ip)" >> $GITHUB_ENV
 
+      - name: Esperar a que la EC2 esté lista para SSH
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          for i in {1..15}; do
+            echo "Intentando conectar por SSH (intento $i)..."
+            ssh -i private_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=5 ec2-user@${{ env.EC2_IP }} 'echo EC2 lista' && break
+            sleep 10
+          done
+
       - name: Copiar archivos YAML a la instancia EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
