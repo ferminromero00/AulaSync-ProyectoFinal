@@ -38,10 +38,11 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
 
   # Comunicación entre nodos
   ingress {
-    from_port = 0
-    to_port   = 65535
-    protocol  = "-1"
-    self      = true
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "-1"
+    self        = true
+    description = "Comunicación entre nodos"
   }
 
   # Acceso a la API de Kubernetes (puerto 6443)
@@ -50,6 +51,7 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     to_port     = 6443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Acceso API Kubernetes"
   }
 
   # Metrics Server (puerto 4443)
@@ -58,6 +60,7 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     to_port     = 4443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Metrics Server"
   }
   
   # Regla de salida para todo el trafico
@@ -71,5 +74,6 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
 
   tags = {
     Name = "GrupoSeguridadServidor"
+    "kubernetes.io/cluster/my-cluster" = "owned"
   }
 }

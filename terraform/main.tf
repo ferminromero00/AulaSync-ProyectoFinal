@@ -10,6 +10,7 @@ resource "aws_vpc" "principal" {
   enable_dns_support   = true
   tags = {
     Name = "VPCPrincipal"
+    "kubernetes.io/cluster/my-cluster" = "shared"
   }
 }
 
@@ -21,6 +22,8 @@ resource "aws_subnet" "subred_publica" {
   availability_zone       = "${var.region}a"
   tags = {
     Name = "SubredPublica"
+    "kubernetes.io/cluster/my-cluster" = "shared"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
@@ -32,6 +35,8 @@ resource "aws_subnet" "subred_publica2" {
   availability_zone       = "${var.region}b"
   tags = {
     Name = "SubredPublica2"
+    "kubernetes.io/cluster/my-cluster" = "shared"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
