@@ -17,3 +17,13 @@ output "security_group_id" {
   description = "ID del grupo de seguridad"
   value       = aws_security_group.grupo_seguridad_servidor.id
 }
+
+output "public_subnet_id_2" {
+  description = "ID de la segunda subred pública"
+  value       = aws_subnet.subred_publica2.id
+}
+
+output "eks_security_group_id" {
+  description = "ID del grupo de seguridad para EKS"
+  value       = aws_security_group.grupo_seguridad_eks.id
+}

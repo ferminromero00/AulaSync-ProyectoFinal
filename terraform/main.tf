@@ -22,6 +22,17 @@ resource "aws_subnet" "subred_publica" {
   }
 }
 
+# Subred Pública 2 (en otra zona de disponibilidad)
+resource "aws_subnet" "subred_publica2" {
+  vpc_id                  = aws_vpc.principal.id
+  cidr_block              = "10.0.2.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "${var.region}b"
+  tags = {
+    Name = "SubredPublica2"
+  }
+}
+
 # Puerta de Enlace a Internet
 resource "aws_internet_gateway" "pei" {
   vpc_id = aws_vpc.principal.id
@@ -45,6 +56,12 @@ resource "aws_route_table" "tabla_rutas_publica" {
 # Asociación de la Tabla de Rutas con la Subred Publica.
 resource "aws_route_table_association" "asociacion_publica" {
   subnet_id      = aws_subnet.subred_publica.id
+  route_table_id = aws_route_table.tabla_rutas_publica.id
+}
+
+# Asociación de la Tabla de Rutas con la Subred Pública 2
+resource "aws_route_table_association" "asociacion_publica2" {
+  subnet_id      = aws_subnet.subred_publica2.id
   route_table_id = aws_route_table.tabla_rutas_publica.id
 }
 
