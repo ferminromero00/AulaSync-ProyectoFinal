@@ -59,9 +59,22 @@ jobs:
 
       - name: Subir estado de Terraform a S3
         run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
-        
+      - name: Obtener IP pública de la instancia EC2
+        id: get-ip
+        run: |
+          cd terraform
+          echo "EC2_IP=$(terraform output -raw instance_public_ip)" >> $GITHUB_ENV
 
-        
+      - name: Copiar archivos YAML a la instancia EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no ./EKS/* ec2-user@${{ env.EC2_IP }}:/home/ec2-user/
+          rm private_key.pem
+
+      
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
