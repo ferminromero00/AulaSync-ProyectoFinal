@@ -96,3 +96,4 @@ REQUISITOS ADICIONALES (Curso actual)
 - ❌ Uso de metodología CI/CD con GithubActions o Jenkins.
 - ✅ Realización de pruebas unitarias.
 - ❌ Generación de documentación automática del código.
+

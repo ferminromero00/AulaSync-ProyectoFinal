@@ -24,6 +24,7 @@ success_handler: App\Security\JwtSuccessHandler
 php bin/console make: (Es la ayuda para ver bastantes comandos)
 
 
+
 // INICIAR SERVER
 symfony server:start
 
