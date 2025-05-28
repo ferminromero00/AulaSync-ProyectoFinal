@@ -34,6 +34,16 @@ sudo yum install -y docker
 sudo systemctl enable --now docker
 sudo usermod -aG docker ec2-user
 
+# Instalar kubectl
+sudo curl -LO "https://dl.k8s.io/release/v1.31.1/bin/linux/amd64/kubectl"
+sudo chmod +x ./kubectl
+sudo mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+
+# Instalar eksctl
+sudo curl -Lo eksctl_Linux_amd64.tar.gz https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz
+sudo tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp && rm eksctl_Linux_amd64.tar.gz
+sudo sudo mv /tmp/eksctl /usr/local/bin
+
 # =========================
 # Descargar imágenes de backend y frontend
 # =========================
@@ -43,7 +53,7 @@ docker pull ferminromero/aulasync-front:latest
 # =========================
 # Obtener IP pública de la instancia
 # =========================
-EC2_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+EC2_IP=$(curl -s https://api.ipify.org)
 
 # =========================
 # Configurar variables de entorno

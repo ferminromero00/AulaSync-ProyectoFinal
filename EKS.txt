@@ -23,15 +23,26 @@ curl -Lo eksctl_Linux_amd64.tar.gz https://github.com/weaveworks/eksctl/releases
 tar -xzf eksctl_Linux_amd64.tar.gz -C /tmp && rm eksctl_Linux_amd64.tar.gz
 sudo mv /tmp/eksctl /usr/local/bin
 
+aws configure
+
 nano ~/.aws/credentials
 nano ~/.aws/config
-aws_session_token =
+
+aws_access_key_id = 
+aws_secret_access_key = 
+aws_session_token = IQoJb3JpZ2luX2VjEK7//////////wEaCXVzLXdlc3QtMiJIMEYCIQDOtylu5BbM1neq+W3U0DjQ/haF0FWBZJVj5wD0dAaL1wIhAOu8ODwTh2r1yZzdw92cwk3azKmcRo4ryfWf7+PjBRs+KrACCHcQABoMMTE5MzczNzMxMjQ1IgwSgauIvT96bqrBHjkqjQLokpLTlrg9Q5qRsZjTQSHo7ZzI8iXz+kWuTUHxUrGGRjilyujdrxtKjhXSj6qdmHuFiGuWkgV8CK3VcWbfuoMa7w4HYeUlCw2G9LKEtCnHyAGgjwlJKu+Wqnexf/wFu3eUbjlBdbXV7EB8Bb54trjKCR9B7IrAynrpICA9H5UJymuKl78++zNyBOi2fT3o2XibQ7fFIEfn2R/xoHNpDnxBHFlU2sU6UWxutsfP1AVA/bOM+XSRpxYWkZqeOsCeQ9UGWhYtIXS59M0SL/M9ld3OvOfKJm1jBBUz3jekJ2Vi03RroDS4Qc1/5qF22QnbsOINFmJ1ywPfTVpVUj/LemQh6G2rAzeyJd5xtGY4ZDDDqdzBBjqcAX3eqbXL+Ezj2jsEkv8E+3T4w+wbCc6LUu7py0NoRPX0WctabuJgqay1ug4XuI77+qoSd7/unaTbEMOSc8uqPOVo+VOVblmTXNrjXMJtom4L1YSe/7N654r+sEsgPlgZrDK46OQtSF+0x3i34q9zhP/lOconposNrgcWLKqw+6JJbX60cnS8mOo6AssZKJPPsElmLl5aulunrZH2fQ==
 
 # Ver si lo encuentra
 eksctl get cluster
 
 #Ver status del cluster
-aws eks update-kubeconfig --name AulaSync --region us-east-1
+aws eks update-kubeconfig --name AulaSyncCluster --region us-east-1
+
+# Desplegar el backend
+kubectl apply -f backend.yml
+
+# Desplegar el frontend
+kubectl apply -f front.yml
 
 # Ver nodos
 kubectl get nodes
@@ -39,11 +50,20 @@ kubectl get nodes
 kubectl get pods
 kubectl get svc
 
-# Desplegar el backend
-kubectl apply -f backend.yml
+kubectl describe pods
+kubectl describe svc
 
-# Desplegar el frontend
-kubectl apply -f front.yml
+# Para la subred en us-east-1a
+aws ec2 create-tags \
+  --resources subnet-0afe1ef93ddf0ee0e \
+  --tags Key=kubernetes.io/cluster/AulaSyncCluster,Value=shared \
+         Key=kubernetes.io/role/elb,Value=1
+
+# Para la subred en us-east-1b
+aws ec2 create-tags \
+  --resources subnet-0d22cb7dde6e8ccd2 \
+  --tags Key=kubernetes.io/cluster/AulaSyncCluster,Value=shared \
+         Key=kubernetes.io/role/elb,Value=1
 
 
 kubectl exec -it php-apache-55d99fc54b-nqj2h -- /bin/bash
