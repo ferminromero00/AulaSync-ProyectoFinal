@@ -62,6 +62,14 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "Metrics Server"
   }
+  # Acceso al backend Symfony (puerto 8000)
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Acceso al backend Symfony"
+  }
   
   # Regla de salida para todo el trafico
   egress {
