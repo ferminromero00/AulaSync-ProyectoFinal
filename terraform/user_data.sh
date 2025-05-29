@@ -61,17 +61,23 @@ EC2_IP=$(curl -s https://api.ipify.org)
 echo "VITE_API_URL=http://${EC2_IP}:8000" > /tmp/env.production
 
 # =========================
+# Actualizar el registro DNS para apuntar al host aulasync.work.gd
+# =========================
+curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d host=aulasync.work.gd
+
+
+# =========================
 # Lanzar contenedores con la configuración correcta
 # =========================
-#docker run -d --name aulasync-front -p 80:80 \
-#    --env-file /tmp/env.production \
-#    ferminromero/aulasync-front:latest
+docker run -d --name aulasync-front -p 80:80 \
+    --env-file /tmp/env.production \
+    ferminromero/aulasync-front:latest
 
-#docker run -d --name aulasync-back -p 8000:8000 \
-#    -e APP_ENV=prod \
-#    -e APP_DEBUG=0 \
-#    -e CORS_ALLOW_ORIGIN="*" \
-#    ferminromero/aulasync-back:latest
+docker run -d --name aulasync-back -p 8000:8000 \
+    -e APP_ENV=prod \
+    -e APP_DEBUG=0 \
+    -e CORS_ALLOW_ORIGIN="*" \
+    ferminromero/aulasync-back:latest
 
 # Limpiar archivo temporal
 rm /tmp/env.production
