@@ -19,4 +19,7 @@ spec:
         - containerPort: 80
         env:
         - name: VITE_API_URL
-          value: "http://backend:8000"  # Usa el nombre del Service de Kubernetes
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: VITE_API_URL
