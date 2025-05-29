@@ -22,12 +22,12 @@ resource "aws_subnet" "subred_publica" {
   availability_zone       = "${var.region}a"
   tags = {
     Name = "SubredPublica"
-    "kubernetes.io/cluster/AulaSync" = "shared"
-    "kubernetes.io/role/elb"         = "1"
+    "kubernetes.io/cluster/AulaSyncCluster" = "shared"
+    "kubernetes.io/role/elb"                = "1"
   }
 }
 
-# Subred Pública 2 (en otra zona de disponibilidad)
+# Subred Pública 2
 resource "aws_subnet" "subred_publica2" {
   vpc_id                  = aws_vpc.principal.id
   cidr_block              = "10.0.2.0/24"
@@ -35,8 +35,8 @@ resource "aws_subnet" "subred_publica2" {
   availability_zone       = "${var.region}b"
   tags = {
     Name = "SubredPublica2"
-    "kubernetes.io/cluster/AulaSync" = "shared"
-    "kubernetes.io/role/elb"         = "1"
+    "kubernetes.io/cluster/AulaSyncCluster" = "shared"
+    "kubernetes.io/role/elb"                = "1"
   }
 }
 
