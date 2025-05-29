@@ -20,15 +20,3 @@ spec:
         env:
         - name: VITE_API_URL
           value: "http://backend:8000"  # Usa el nombre del Service de Kubernetes
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 80
-  selector:
-    app: frontend

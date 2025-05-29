@@ -24,15 +24,3 @@ spec:
           value: "1"
         - name: CORS_ALLOW_ORIGIN
           value: "*"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 8000
-    targetPort: 8000
-  selector:
-    app: backend
