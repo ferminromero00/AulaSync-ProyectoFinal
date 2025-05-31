@@ -20,9 +20,12 @@ RUN npm run build
 # Etapa 2: Configuración del servidor Nginx
 FROM nginx:alpine
 
-# Crear directorios para certificados
+# Crear directorios para certificados y configurar ZeroSSL
 RUN mkdir -p /etc/pki/tls/certs \
-    && mkdir -p /etc/pki/tls/private
+    && mkdir -p /etc/pki/tls/private \
+    && mkdir -p /etc/pki/ca-trust/source/anchors/ \
+    && curl -o /etc/pki/ca-trust/source/anchors/zerossl.crt https://crt.sh/?d=2099991459 \
+    && update-ca-certificates
 
 # Copiar los certificados SSL
 COPY SSL/aulasync.work.gd.cer /etc/pki/tls/certs/certificate.crt
@@ -60,6 +63,13 @@ server {
     index index.html index.htm;
     location / {
         try_files \$uri \$uri/ /index.html;
+    }
+    location /api/ {
+        proxy_pass http://aulasync-back:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 EOF

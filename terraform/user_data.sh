@@ -79,9 +79,6 @@ echo "VITE_API_URL=http://${EC2_IP}:8000" > /tmp/env.production
 #    -e CORS_ALLOW_ORIGIN="*" \
 #    ferminromero/aulasync-back:latest
 
-# Limpiar archivo temporal
-rm /tmp/env.production
-
 # Añadir configuración de red
 iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT

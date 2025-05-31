@@ -23,6 +23,9 @@ RUN composer install --no-scripts --optimize-autoloader
 # Copiar el resto de archivos
 COPY AulaSyncSymfony/. .
 
+# Copiar las claves JWT
+COPY AulaSyncSymfony/config/jwt /var/www/config/jwt
+
 # Configurar el entorno y permisos
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
