@@ -18,7 +18,7 @@ WORKDIR /var/www
 COPY AulaSyncSymfony/composer.json AulaSyncSymfony/composer.lock ./
 
 # Instalar dependencias sin scripts ni dev
-RUN composer install --no-scripts --no-dev --optimize-autoloader
+RUN composer install --no-scripts --optimize-autoloader
 
 # Copiar el resto de archivos
 COPY AulaSyncSymfony/. .
