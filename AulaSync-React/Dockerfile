@@ -62,6 +62,20 @@ server {
     root /usr/share/nginx/html;
     index index.html index.htm;
     
+    location /uploads/ {
+        proxy_pass http://aulasync-back:8000/uploads/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        # Cache para archivos estáticos
+        proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
+        proxy_cache_valid 200 24h;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+    }
+
     location / {
         try_files \$uri \$uri/ /index.html;
     }
