@@ -58,12 +58,12 @@ EC2_IP=$(curl -s https://api.ipify.org)
 # =========================
 # Configurar variables de entorno
 # =========================
-echo "VITE_API_URL=http://${EC2_IP}:8000" > /tmp/env.production
+echo "VITE_API_URL=https://aulasync.work.gd" > /tmp/env.production
 
 # =========================
 # Actualizar el registro DNS para apuntar al host aulasync.work.gd
 # =========================
-# curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d host=aulasync.work.gd
+curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d host=aulasync.work.gd
 
 
 # =========================
