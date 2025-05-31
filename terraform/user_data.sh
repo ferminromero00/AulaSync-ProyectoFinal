@@ -69,15 +69,17 @@ curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d ho
 # =========================
 # Lanzar contenedores con la configuración correcta
 # =========================
-#docker run -d --name aulasync-front -p 80:80 \
-#    --env-file /tmp/env.production \
-#    ferminromero/aulasync-front:latest
+# Primero el backend
+docker run -d --name aulasync-back -p 8000:8000 \
+    -e APP_ENV=prod \
+    -e APP_DEBUG=0 \
+    ferminromero/aulasync-back:latest
 
-#docker run -d --name aulasync-back -p 8000:8000 \
-#    -e APP_ENV=prod \
-#    -e APP_DEBUG=0 \
-#    -e CORS_ALLOW_ORIGIN="*" \
-#    ferminromero/aulasync-back:latest
+# Después el frontend con link al backend
+docker run -d --name aulasync-front -p 80:80 -p 443:443 \
+    --env-file /tmp/env.production \
+    --link aulasync-back \
+    ferminromero/aulasync-front:latest
 
 # Añadir configuración de red
 iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
