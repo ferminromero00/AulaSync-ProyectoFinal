@@ -59,7 +59,6 @@ jobs:
 
       - name: Subir estado de Terraform a S3
         run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
-
       - name: Obtener IP pública de la instancia EC2
         id: get-ip
         run: |
@@ -78,35 +77,16 @@ jobs:
             sleep 10
           done
 
-      - name: Crear directorio del proyecto en EC2
+      - name: Copiar archivos YAML a la instancia EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_IP }} 'mkdir -p ~/AulaSync-ProyectoFinal'
-
-      - name: Copiar todo el proyecto a la EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          # Copiar todo el proyecto
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r ./* ec2-user@${{ env.EC2_IP }}:~/AulaSync-ProyectoFinal/
-          # Copiar archivos ocultos (.env, .gitignore, etc)
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r ./.* ec2-user@${{ env.EC2_IP }}:~/AulaSync-ProyectoFinal/ 2>/dev/null || true
+          scp -i private_key.pem -o StrictHostKeyChecking=no ./EKS/* ec2-user@${{ env.EC2_IP }}:/home/ec2-user/
           rm private_key.pem
 
-      - name: Configurar permisos en EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_IP }} 'chmod -R 755 ~/AulaSync-ProyectoFinal'
-          rm private_key.pem
-
+      
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
