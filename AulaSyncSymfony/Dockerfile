@@ -15,13 +15,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Copiar composer.json y composer.lock primero
-COPY composer.json composer.lock ./
+COPY AulaSyncSymfony/composer.json AulaSyncSymfony/composer.lock ./
 
 # Instalar dependencias sin scripts ni dev
 RUN composer install --no-scripts --no-dev --optimize-autoloader
 
 # Copiar el resto de archivos
-COPY . .
+COPY AulaSyncSymfony/. .
 
 # Configurar el entorno y permisos
 ENV APP_ENV=prod
