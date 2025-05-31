@@ -23,8 +23,10 @@ RUN composer install --no-scripts --optimize-autoloader
 # Copiar el resto de archivos
 COPY AulaSyncSymfony/. .
 
-# Copiar las claves JWT
-COPY AulaSyncSymfony/config/jwt /var/www/config/jwt
+# Generar claves JWT
+RUN mkdir -p config/jwt && \
+    openssl genrsa -aes256 -passout pass:d2fc5260fad6e9ae752cd8666c237d78b2f970a4befe84df28120cd1a21803a9 -out config/jwt/private.pem 4096 && \
+    openssl rsa -pubout -in config/jwt/private.pem -passin pass:d2fc5260fad6e9ae752cd8666c237d78b2f970a4befe84df28120cd1a21803a9 -out config/jwt/public.pem
 
 # Configurar el entorno y permisos
 ENV APP_ENV=prod
