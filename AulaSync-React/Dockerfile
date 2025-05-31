@@ -40,7 +40,7 @@ RUN chmod 644 /etc/pki/tls/certs/*.crt \
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copia el script de entrada personalizado
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY AulaSync-React/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Configura Nginx para redirigir HTTP a HTTPS y servir la aplicación
