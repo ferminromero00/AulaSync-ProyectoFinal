@@ -28,9 +28,9 @@ RUN mkdir -p /etc/pki/tls/certs \
     && mkdir -p /etc/pki/tls/private
 
 # Copiar los certificados SSL
-COPY ../SSL/aulasync.work.gd.cer /etc/pki/tls/certs/certificate.crt
-COPY ../SSL/aulasync.work.gd.key /etc/pki/tls/private/private.key
-COPY ../SSL/ca.cer /etc/pki/tls/certs/ca_bundle.crt
+COPY SSL/aulasync.work.gd.cer /etc/pki/tls/certs/certificate.crt
+COPY SSL/aulasync.work.gd.key /etc/pki/tls/private/private.key
+COPY SSL/ca.cer /etc/pki/tls/certs/ca_bundle.crt
 
 # Ajustar permisos de los certificados
 RUN chmod 644 /etc/pki/tls/certs/*.crt \
