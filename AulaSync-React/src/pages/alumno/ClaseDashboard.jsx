@@ -64,7 +64,7 @@ const ClaseDashboard = () => {
         }
 
         return () => { mounted = false; };
-    // Solo depende de id y alumnoId
+        // Solo depende de id y alumnoId
     }, [id, alumnoId, navigate]);
 
     const handleSearchAlumnos = async (query) => {
@@ -72,7 +72,7 @@ const ClaseDashboard = () => {
             setSearchResults([]);
             return;
         }
-        
+
         setIsSearching(true);
         try {
             const data = await searchAlumnos(query);
@@ -152,7 +152,7 @@ const ClaseDashboard = () => {
                 <div className="bg-white rounded-lg p-6 w-full max-w-md">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">Buscar Alumnos</h3>
-                        <button 
+                        <button
                             onClick={() => setShowSearchModal(false)}
                             className="text-gray-500 hover:text-gray-700"
                         >
@@ -181,8 +181,8 @@ const ClaseDashboard = () => {
                         ) : (
                             <ul className="divide-y divide-gray-200">
                                 {searchResults.map((alumno) => (
-                                    <li 
-                                        key={alumno.id} 
+                                    <li
+                                        key={alumno.id}
                                         className="py-3 hover:bg-gray-50 cursor-pointer px-2 rounded transition-colors"
                                         onClick={() => handleInvitarAlumno(alumno)}
                                     >
@@ -254,7 +254,7 @@ const ClaseDashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 stagger-animation">
                     {/* Panel lateral */}
                     <div className="lg:col-span-1 space-y-6 opacity-0 animate-slideRight"
-                         style={{ animationDelay: '200ms' }}>
+                        style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
                             <button
@@ -270,18 +270,18 @@ const ClaseDashboard = () => {
                                 {clase.estudiantes.slice(0, 5).map((estudiante) => (
                                     <li key={estudiante.id} className="flex items-center gap-3">
                                         <img
-                                            src={estudiante.fotoPerfilUrl ? estudiante.fotoPerfilUrl : '/default-avatar.png'}
+                                            src={estudiante.fotoPerfilUrl ? estudiante.fotoPerfilUrl : '/uploads/perfiles/default.png'}
                                             alt={`Foto de ${estudiante.nombre}`}
                                             className="h-9 w-9 rounded-full object-cover border border-gray-200"
                                             onError={(e) => {
-                                                e.target.src = '/default-avatar.png';
+                                                e.target.src = '/uploads/perfiles/default.png';
                                             }}
                                         />
                                         <span className="font-medium text-gray-900 truncate">{estudiante.nombre}</span>
                                     </li>
                                 ))}
                                 {clase.estudiantes.length > 5 && (
-                                    <li 
+                                    <li
                                         className="text-blue-600 text-sm cursor-pointer hover:text-blue-800"
                                         onClick={() => setShowAlumnosModal(true)}
                                     >
@@ -296,15 +296,15 @@ const ClaseDashboard = () => {
 
                     {/* Contenido central - tareas con nuevo diseño */}
                     <div className="lg:col-span-3 space-y-6 opacity-0 animate-slideRight"
-                         style={{ animationDelay: '400ms' }}>
+                        style={{ animationDelay: '400ms' }}>
                         <div className="space-y-4">
                             <h2 className="text-xl font-bold text-blue-900 mb-2">Tablón de tareas</h2>
                             {tareas?.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                     {tareas.map((tarea, index) => (
                                         <div key={tarea.id}
-                                             className="opacity-0 animate-bounceIn"
-                                             style={{ animationDelay: `${600 + (index * 100)}ms` }}>
+                                            className="opacity-0 animate-bounceIn"
+                                            style={{ animationDelay: `${600 + (index * 100)}ms` }}>
                                             <div
                                                 className="cursor-pointer group bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow hover:shadow-xl transition-all duration-300 hover:border-blue-300"
                                                 onClick={() => handleAbrirTarea(tarea.id)}
@@ -355,8 +355,8 @@ const ClaseDashboard = () => {
                                     {/* Añadir anuncios tipo "anuncio" con el mismo diseño */}
                                     {clase?.anuncios?.filter(a => a.tipo === 'anuncio').map((anuncio, idx) => (
                                         <div key={anuncio.id}
-                                             className="opacity-0 animate-bounceIn"
-                                             style={{ animationDelay: `${600 + ((tareas.length + idx) * 100)}ms` }}>
+                                            className="opacity-0 animate-bounceIn"
+                                            style={{ animationDelay: `${600 + ((tareas.length + idx) * 100)}ms` }}>
                                             <div
                                                 className="cursor-pointer group bg-gradient-to-br from-blue-50 via-white to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow hover:shadow-xl transition-all duration-300 hover:border-blue-300"
                                             >

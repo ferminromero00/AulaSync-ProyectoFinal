@@ -55,7 +55,7 @@ const DashboardAlumno = () => {
             clearInterval(intervalRef.current);
             clearInterval(dotIntervalRef.current);
         };
-    // Solo depende de loading y localLoading
+        // Solo depende de loading y localLoading
     }, [userData?.loading, userData?.clases, localLoading]);
 
     const handleBuscarClase = async (e) => {
@@ -86,7 +86,7 @@ const DashboardAlumno = () => {
         try {
             setIsJoining(true);
             console.log('Intentando unirse a la clase:', claseParaUnirse.codigoClase);
-            
+
             const response = await unirseAClase(claseParaUnirse.codigoClase);
             console.log('Respuesta de unirse:', response);
 
@@ -240,8 +240,8 @@ const DashboardAlumno = () => {
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
                                         <svg className="text-green-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" fill="#bbf7d0"/>
-                                            <path d="M7 13l3 3 7-7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <circle cx="12" cy="12" r="10" fill="#bbf7d0" />
+                                            <path d="M7 13l3 3 7-7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                         </svg>
                                     </span>
                                 ) : step === idx ? (
@@ -307,10 +307,10 @@ const DashboardAlumno = () => {
                             </div>
                         ) : (
                             <img
-                                src={userData?.user?.fotoPerfilUrl ? userData.user.fotoPerfilUrl : "/default-avatar.png"}
+                                src={userData?.user?.fotoPerfilUrl ? userData.user.fotoPerfilUrl : "/uploads/perfiles/default.png"}
                                 alt="Foto de perfil"
                                 className="h-16 w-16 rounded-full object-cover border-4 border-green-100 shadow-lg"
-                                onError={e => { e.target.src = '/default-avatar.png'; }}
+                                onError={e => { e.target.src = '/uploads/perfiles/default.png'; }}
                             />
                         )}
                     </div>
@@ -392,8 +392,8 @@ const DashboardAlumno = () => {
                                             <div className="border-t pt-4 flex items-center justify-between">
                                                 <div className="text-sm text-gray-600">
                                                     <p className="font-medium text-gray-900">
-                                                        {typeof clase.profesor === 'string' 
-                                                            ? clase.profesor 
+                                                        {typeof clase.profesor === 'string'
+                                                            ? clase.profesor
                                                             : clase.profesor?.nombre || "Profesor"}
                                                     </p>
                                                 </div>
@@ -548,7 +548,7 @@ const DashboardAlumno = () => {
                                     <BookOpen className="h-10 w-10 text-green-600" />
                                 </div>
                             </div>
-                            
+
                             {/* Título con animación de entrada */}
                             <div className="text-center space-y-2 animate-fadeInUp">
                                 <h3 className="text-2xl font-bold text-gray-900">¡Clase encontrada!</h3>
@@ -556,7 +556,7 @@ const DashboardAlumno = () => {
                             </div>
 
                             {/* Detalles con animación de entrada retrasada */}
-                            <div className="w-full space-y-3 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+                            <div className="w-full space-y-3 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
                                 <div className="flex items-center justify-center gap-2 text-gray-600">
                                     <Users className="h-5 w-5 text-green-500" />
                                     <span className="font-medium">Profesor:</span>
@@ -570,7 +570,7 @@ const DashboardAlumno = () => {
                             </div>
 
                             {/* Botones con animación de entrada */}
-                            <div className="flex gap-3 w-full mt-4 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+                            <div className="flex gap-3 w-full mt-4 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
                                 <button
                                     onClick={() => {
                                         setShowJoinConfirmModal(false);

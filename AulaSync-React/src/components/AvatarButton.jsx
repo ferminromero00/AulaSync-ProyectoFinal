@@ -29,21 +29,21 @@ const AvatarButton = ({ size = 40, reload = false }) => {
     };
 
     return (
-        <button 
+        <button
             onClick={handleClick}
             className="rounded-full hover:ring-2 hover:ring-offset-2 hover:ring-gray-300 transition-all relative"
             title="Ver perfil"
         >
             {loading ? (
-                <div className="animate-pulse bg-gray-200 rounded-full" 
-                     style={{ width: size, height: size }}></div>
+                <div className="animate-pulse bg-gray-200 rounded-full"
+                    style={{ width: size, height: size }}></div>
             ) : (
                 <img
-                    src={perfil?.fotoPerfilUrl || '/default-avatar.png'}
+                    src={perfil?.fotoPerfilUrl || '/uploads/perfiles/default.png'}
                     alt="Foto de perfil"
                     style={{ width: size, height: size }}
                     className="rounded-full object-cover"
-                    onError={e => { e.target.src = '/default-avatar.png'; }}
+                    onError={e => { e.target.src = '/uploads/perfiles/default.png'; }}
                 />
             )}
         </button>
