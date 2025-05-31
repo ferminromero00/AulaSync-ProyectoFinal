@@ -1,23 +1,20 @@
 # Etapa 1: Construcción de la aplicación con Node.js
 FROM node:18-alpine AS builder
 
-# Establece el directorio de trabajo
 WORKDIR /app
 
 # Copia los archivos de dependencias
-COPY package*.json ./
+COPY AulaSync-React/package*.json ./
 
 # Instala las dependencias
 RUN npm install
 
 # Copia el resto de los archivos de la aplicación
-COPY . .
+COPY AulaSync-React/. .
 
-# Define la variable de entorno para la URL de la API
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
-# Construye la aplicación para producción
 RUN npm run build
 
 # Etapa 2: Configuración del servidor Nginx
