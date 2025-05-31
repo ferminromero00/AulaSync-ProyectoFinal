@@ -26,7 +26,7 @@ COPY AulaSyncSymfony/. .
 # Configurar el entorno y permisos
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
-RUN chown -R www-data:www-data var
+RUN mkdir -p var && chown -R www-data:www-data var
 
 # Generar caché para producción
 RUN composer dump-env prod \
