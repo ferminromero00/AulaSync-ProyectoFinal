@@ -23,8 +23,18 @@ RUN npm run build
 # Etapa 2: Configuración del servidor Nginx
 FROM nginx:alpine
 
-# Crea el directorio para los certificados SSL
-RUN mkdir -p /etc/nginx/certs
+# Crear directorios para certificados
+RUN mkdir -p /etc/pki/tls/certs \
+    && mkdir -p /etc/pki/tls/private
+
+# Copiar los certificados SSL
+COPY ../SSL/aulasync.work.gd.cer /etc/pki/tls/certs/certificate.crt
+COPY ../SSL/aulasync.work.gd.key /etc/pki/tls/private/private.key
+COPY ../SSL/ca.cer /etc/pki/tls/certs/ca_bundle.crt
+
+# Ajustar permisos de los certificados
+RUN chmod 644 /etc/pki/tls/certs/*.crt \
+    && chmod 600 /etc/pki/tls/private/*.key
 
 # Copia los archivos construidos desde la etapa anterior
 COPY --from=builder /app/dist /usr/share/nginx/html

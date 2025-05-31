@@ -37,9 +37,17 @@ RUN composer dump-env prod \
 # -------------------------------------------------------------------
 
 # Crear directorios para stunnel y certificados
-RUN mkdir -p /etc/stunnel/certs \
-    && mkdir -p /etc/pki/tls/certs \
-    && mkdir -p /etc/pki/tls/private
+RUN mkdir -p /etc/stunnel/certs
+
+# Copiar los certificados SSL
+COPY ../SSL/aulasync.work.gd.cer /etc/stunnel/certs/certificate.crt
+COPY ../SSL/aulasync.work.gd.key /etc/stunnel/certs/private.key
+COPY ../SSL/ca.cer /etc/stunnel/certs/ca_bundle.crt
+
+# Ajustar permisos de los certificados
+RUN chmod 644 /etc/stunnel/certs/*.crt \
+    && chmod 600 /etc/stunnel/certs/*.key
+
 
 # Inyectar configuración mejorada de stunnel
 RUN printf '\

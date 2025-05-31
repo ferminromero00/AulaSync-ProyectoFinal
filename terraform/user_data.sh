@@ -8,7 +8,7 @@ sudo yum update -y
 # =========================
 # Instalación de Apache y PHP
 # =========================
-sudo yum install -y httpd php
+sudo yum install -y httpd php git
 
 # =========================
 # Configuración y arranque de SSH
@@ -17,10 +17,10 @@ sudo systemctl restart sshd
 sudo systemctl enable sshd
 
 # =========================
-# (No arrancar Apache para liberar el puerto 80)
+# Clonar repositorio del proyecto
 # =========================
-# sudo systemctl enable httpd
-# sudo systemctl start httpd
+git clone https://github.com/ferminromero00/AulaSync-ProyectoFinal.git
+chown -R ec2-user:ec2-user AulaSync-ProyectoFinal
 
 # =========================
 # Limpiar el directorio web
