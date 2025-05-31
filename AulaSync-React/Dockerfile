@@ -41,28 +41,28 @@ COPY AulaSync-React/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Configura Nginx para redirigir HTTP a HTTPS y servir la aplicación
-RUN echo '\
-server {\n\
-    listen 80;\n\
-    server_name aulasync.work.gd;\n\
-    return 301 https://$host$request_uri;\n\
-}\n\
-\n\
-server {\n\
-    listen 443 ssl;\n\
-    server_name aulasync.work.gd;\n\
-    ssl_certificate /etc/pki/tls/certs/certificate.crt;\n\
-    ssl_certificate_key /etc/pki/tls/private/private.key;\n\
-    ssl_trusted_certificate /etc/pki/tls/certs/ca_bundle.crt;\n\
-    ssl_protocols TLSv1.2 TLSv1.3;\n\
-    ssl_ciphers HIGH:!aNULL:!MD5;\n\
-    root /usr/share/nginx/html;\n\
-    index index.html index.htm;\n\
-    location / {\n\
-        try_files $uri $uri/ /index.html;\n\
-    }\n\
-}\n\
-' > /etc/nginx/conf.d/default.conf
+RUN cat > /etc/nginx/conf.d/default.conf <<EOF
+server {
+    listen 80;
+    server_name aulasync.work.gd;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name aulasync.work.gd;
+    ssl_certificate /etc/pki/tls/certs/certificate.crt;
+    ssl_certificate_key /etc/pki/tls/private/private.key;
+    ssl_trusted_certificate /etc/pki/tls/certs/ca_bundle.crt;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+}
+EOF
 
 # Expone los puertos necesarios
 EXPOSE 80 443
