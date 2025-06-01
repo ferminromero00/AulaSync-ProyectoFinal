@@ -91,6 +91,8 @@ docker run -d --name aulasync-back --network aulasync-net \
     -p 8000:8000 \
     -e APP_ENV=prod \
     -e APP_DEBUG=1 \
+    -e LDAP_HOST=aulasync-ldap \
+    -e LDAP_PORT=389 \
     ferminromero/aulasync-back:latest
 
 # 3. Frontend (React)

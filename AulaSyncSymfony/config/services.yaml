@@ -58,8 +58,8 @@ services:
     arguments:
         $adapter: 'ext_ldap'
         $config:
-            host: aulasync-ldap
-            port: 389
+            host: '%env(LDAP_HOST)%'
+            port: '%env(LDAP_PORT)%'
             version: 3
             encryption: none
             options:
