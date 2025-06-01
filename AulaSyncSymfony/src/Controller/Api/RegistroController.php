@@ -44,20 +44,21 @@ class RegistroController extends AbstractController
 
         // --- NUEVO: Comprobación LDAP si es profesor ---
         if (($data['role'] ?? null) === 'profesor') {
-            error_log('DEBUG: Entrando en comprobación LDAP para profesor');
+            $this->logger->info('DEBUG: Entrando en comprobación LDAP para profesor');
             try {
-                error_log('DEBUG: Variables de entorno LDAP:');
-                error_log('DEBUG: LDAP_HOST=' . $_ENV['LDAP_HOST']);
-                error_log('DEBUG: LDAP_PORT=' . $_ENV['LDAP_PORT']);
-                error_log('DEBUG: LDAP_BASE_DN=' . $_ENV['LDAP_BASE_DN']);
-                error_log('DEBUG: LDAP_USER_DN=' . $_ENV['LDAP_USER_DN']);
+                $this->logger->info('DEBUG: Variables de entorno LDAP:', [
+                    'LDAP_HOST' => $_ENV['LDAP_HOST'],
+                    'LDAP_PORT' => $_ENV['LDAP_PORT'],
+                    'LDAP_BASE_DN' => $_ENV['LDAP_BASE_DN'],
+                    'LDAP_USER_DN' => $_ENV['LDAP_USER_DN'],
+                ]);
 
-                error_log('DEBUG: Intentando conectar a LDAP: ' . $_ENV['LDAP_HOST']);
+                $this->logger->info('DEBUG: Intentando conectar a LDAP: ' . $_ENV['LDAP_HOST']);
                 try {
                     $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
-                    error_log('DEBUG: Conexión LDAP exitosa');
+                    $this->logger->info('DEBUG: Conexión LDAP exitosa');
                 } catch (LdapException $bindError) {
-                    error_log('DEBUG: Error en bind LDAP: ' . $bindError->getMessage());
+                    $this->logger->error('DEBUG: Error en bind LDAP: ' . $bindError->getMessage());
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
@@ -72,9 +73,9 @@ class RegistroController extends AbstractController
                         $_ENV['LDAP_BASE_DN'],
                         sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
                     );
-                    error_log('DEBUG: Consulta LDAP ejecutada');
+                    $this->logger->info('DEBUG: Consulta LDAP ejecutada');
                 } catch (LdapException $queryError) {
-                    error_log('DEBUG: Error en query LDAP: ' . $queryError->getMessage());
+                    $this->logger->error('DEBUG: Error en query LDAP: ' . $queryError->getMessage());
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
@@ -85,9 +86,9 @@ class RegistroController extends AbstractController
 
                 try {
                     $results = $query->execute();
-                    error_log('DEBUG: Resultados LDAP encontrados: ' . count($results));
+                    $this->logger->info('DEBUG: Resultados LDAP encontrados: ' . count($results));
                 } catch (LdapException $executeError) {
-                    error_log('DEBUG: Error en execute LDAP: ' . $executeError->getMessage());
+                    $this->logger->error('DEBUG: Error en execute LDAP: ' . $executeError->getMessage());
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
@@ -97,7 +98,7 @@ class RegistroController extends AbstractController
                 }
 
                 if (count($results) === 0) {
-                    error_log('DEBUG: Email no encontrado en LDAP');
+                    $this->logger->warning('DEBUG: Email no encontrado en LDAP');
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
@@ -106,10 +107,10 @@ class RegistroController extends AbstractController
                     ], 403);
                 }
 
-                error_log('DEBUG: Profesor verificado en LDAP correctamente');
+                $this->logger->info('DEBUG: Profesor verificado en LDAP correctamente');
             } catch (LdapException $e) {
-                error_log('DEBUG: Error LDAP detallado: ' . $e->getMessage());
-                error_log('DEBUG: Código de error LDAP: ' . $e->getCode());
+                $this->logger->error('DEBUG: Error LDAP detallado: ' . $e->getMessage());
+                $this->logger->error('DEBUG: Código de error LDAP: ' . $e->getCode());
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'No se pudo verificar al profesor en el sistema',
