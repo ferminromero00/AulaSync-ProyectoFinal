@@ -67,28 +67,38 @@ curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d ho
 
 
 # =========================
-# Lanzar contenedores con la configuración correcta
+# Configuración de Docker Network
 # =========================
-# Primero el backend
-docker run -d --name aulasync-back -p 8000:8000 \
+# Crear red personalizada para la comunicación entre contenedores
+docker network create aulasync-net
+
+# =========================
+# Despliegue de Servicios
+# =========================
+
+# 1. Servidor LDAP
+# ---------------
+docker run -d --name aulasync-ldap --network aulasync-net \
+    -p 389:389 -p 636:636 \
+    ferminromero/aulasync-ldap:latest
+
+# Esperar a que el servicio LDAP esté completamente iniciado
+sleep 10
+
+# 2. Backend (Symfony)
+# -------------------
+docker run -d --name aulasync-back --network aulasync-net \
+    -p 8000:8000 \
     -e APP_ENV=prod \
     -e APP_DEBUG=1 \
     ferminromero/aulasync-back:latest
 
-# LDAP
-docker run -d --name aulasync-ldap -p 389:389 -p 636:636 \
-    ferminromero/aulasync-ldap:latest
-
-# Después el frontend con link al backend
-docker run -d --name aulasync-front -p 80:80 -p 443:443 \
+# 3. Frontend (React)
+# -----------------
+docker run -d --name aulasync-front --network aulasync-net \
+    -p 80:80 -p 443:443 \
     --env-file /tmp/env.production \
-    --link aulasync-back \
     ferminromero/aulasync-front:latest
-
-docker network create aulasync-net
-docker network connect aulasync-net aulasync-back
-docker network connect aulasync-net aulasync-ldap
-
 
 # Añadir configuración de red
 iptables -A INPUT -p tcp --dport 8000 -j ACCEPT  # Backend

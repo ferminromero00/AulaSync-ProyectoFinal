@@ -54,16 +54,17 @@ services:
         autowire: true
 
     Symfony\Component\Ldap\Ldap:
-        factory: ['Symfony\Component\Ldap\Ldap', 'create']
-        arguments: 
-            $adapter: 'ext_ldap'
-            $config:
-                host: '%env(LDAP_HOST)%'
-                port: '%env(LDAP_PORT)%'
-                encryption: 'none'
-                options:
-                    protocol_version: 3
-                    referrals: false
+    factory: ['Symfony\Component\Ldap\Ldap', 'create']
+    arguments:
+        $adapter: 'ext_ldap'
+        $config:
+            host: aulasync-ldap
+            port: 389
+            version: 3
+            encryption: none
+            options:
+                protocol_version: 3
+                referrals: false
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
