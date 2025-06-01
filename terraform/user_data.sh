@@ -85,6 +85,11 @@ docker run -d --name aulasync-front -p 80:80 -p 443:443 \
     --link aulasync-back \
     ferminromero/aulasync-front:latest
 
+docker network create aulasync-net
+docker network connect aulasync-net aulasync-back
+docker network connect aulasync-net aulasync-ldap
+
+
 # Añadir configuración de red
 iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT

@@ -34,7 +34,6 @@ class RegistroController extends AbstractController
     public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer, Ldap $ldap): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        error_log('DEBUG: Datos recibidos en iniciarRegistro: ' . json_encode($data));
         $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
 
         // Validar email y que no exista ya
@@ -42,84 +41,31 @@ class RegistroController extends AbstractController
             return new JsonResponse(['error' => 'Email inválido o ya registrado'], 400);
         }
 
-        // --- NUEVO: Comprobación LDAP si es profesor ---
+        // Si es profesor, verificar en LDAP antes de continuar
         if (($data['role'] ?? null) === 'profesor') {
-            $this->logger->info('DEBUG: Entrando en comprobación LDAP para profesor');
             try {
-                $this->logger->info('DEBUG: Variables de entorno LDAP:', [
-                    'LDAP_HOST' => $_ENV['LDAP_HOST'],
-                    'LDAP_PORT' => $_ENV['LDAP_PORT'],
-                    'LDAP_BASE_DN' => $_ENV['LDAP_BASE_DN'],
-                    'LDAP_USER_DN' => $_ENV['LDAP_USER_DN'],
-                ]);
-
-                $this->logger->info('DEBUG: Intentando conectar a LDAP: ' . $_ENV['LDAP_HOST']);
-                try {
-                    $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
-                    $this->logger->info('DEBUG: Conexión LDAP exitosa');
-                } catch (LdapException $bindError) {
-                    $this->logger->error('DEBUG: Error en bind LDAP: ' . $bindError->getMessage());
-                    return new JsonResponse([
-                        'success' => false,
-                        'message' => 'No se pudo verificar al profesor en el sistema',
-                        'error' => 'No se pudo establecer conexión con el servidor de verificación.',
-                        'errorType' => 'LDAP_CONNECTION_ERROR',
-                        'details' => 'Por favor, inténtelo más tarde.'
-                    ], 500);
-                }
-
-                try {
-                    $query = $ldap->query(
-                        $_ENV['LDAP_BASE_DN'],
-                        sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
-                    );
-                    $this->logger->info('DEBUG: Consulta LDAP ejecutada');
-                } catch (LdapException $queryError) {
-                    $this->logger->error('DEBUG: Error en query LDAP: ' . $queryError->getMessage());
-                    return new JsonResponse([
-                        'success' => false,
-                        'message' => 'No se pudo verificar al profesor en el sistema',
-                        'error' => 'Error en la consulta de verificación.',
-                        'errorType' => 'LDAP_QUERY_ERROR'
-                    ], 500);
-                }
-
-                try {
-                    $results = $query->execute();
-                    $this->logger->info('DEBUG: Resultados LDAP encontrados: ' . count($results));
-                } catch (LdapException $executeError) {
-                    $this->logger->error('DEBUG: Error en execute LDAP: ' . $executeError->getMessage());
-                    return new JsonResponse([
-                        'success' => false,
-                        'message' => 'No se pudo verificar al profesor en el sistema',
-                        'error' => 'Error al procesar la verificación.',
-                        'errorType' => 'LDAP_EXECUTE_ERROR'
-                    ], 500);
-                }
+                $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
+                $query = $ldap->query(
+                    $_ENV['LDAP_BASE_DN'],
+                    sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
+                );
+                $results = $query->execute();
 
                 if (count($results) === 0) {
-                    $this->logger->warning('DEBUG: Email no encontrado en LDAP');
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
-                        'error' => 'Tu email no está autorizado en la base de datos de profesores.',
-                        'errorType' => 'LDAP_VERIFICATION_FAILED'
+                        'error' => 'Tu email no está autorizado en la base de datos de profesores.'
                     ], 403);
                 }
-
-                $this->logger->info('DEBUG: Profesor verificado en LDAP correctamente');
             } catch (LdapException $e) {
-                $this->logger->error('DEBUG: Error LDAP detallado: ' . $e->getMessage());
-                $this->logger->error('DEBUG: Código de error LDAP: ' . $e->getCode());
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'No se pudo verificar al profesor en el sistema',
-                    'error' => 'Error de conexión con el servidor de verificación.',
-                    'errorType' => 'LDAP_CONNECTION_ERROR'
+                    'error' => 'Error de conexión con el servidor de verificación.'
                 ], 500);
             }
         }
-        // --- FIN NUEVO ---
 
         // Eliminar registros pendientes previos para ese email
         $repoPendiente = $em->getRepository(RegistroPendiente::class);
