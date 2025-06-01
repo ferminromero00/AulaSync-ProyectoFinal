@@ -7,7 +7,8 @@ RUN apk add --no-cache \
     stunnel \
     openssl \
     ca-certificates \
-  && docker-php-ext-install pdo pdo_mysql zip
+    openldap-dev \
+  && docker-php-ext-install pdo pdo_mysql zip ldap
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

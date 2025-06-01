@@ -33,67 +33,121 @@ class RegistroController extends AbstractController
     #[Route('/registro/iniciar', name: 'registro_iniciar', methods: ['POST'])]
     public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer, Ldap $ldap): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
+        try {
+            $data = json_decode($request->getContent(), true);
+            $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
 
-        // Validar email y que no exista ya
-        if (!$email || $em->getRepository(Alumno::class)->findOneBy(['email' => $email]) || $em->getRepository(Profesor::class)->findOneBy(['email' => $email])) {
-            return new JsonResponse(['error' => 'Email inválido o ya registrado'], 400);
-        }
+            $this->logger->info('Iniciando registro', [
+                'email' => $email,
+                'role' => $data['role'] ?? 'no-role'
+            ]);
 
-        // Si es profesor, verificar en LDAP antes de continuar
-        if (($data['role'] ?? null) === 'profesor') {
-            try {
-                $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
-                $query = $ldap->query(
-                    $_ENV['LDAP_BASE_DN'],
-                    sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
-                );
-                $results = $query->execute();
+            // Validar email y que no exista ya
+            if (!$email) {
+                $this->logger->warning('Email inválido o vacío');
+                return new JsonResponse(['error' => 'Email inválido'], 400);
+            }
 
-                if (count($results) === 0) {
+            // Verificar si ya existe
+            if (
+                $em->getRepository(Alumno::class)->findOneBy(['email' => $email]) ||
+                $em->getRepository(Profesor::class)->findOneBy(['email' => $email])
+            ) {
+                $this->logger->warning('Email ya registrado', ['email' => $email]);
+                return new JsonResponse(['error' => 'Email ya registrado'], 400);
+            }
+
+            // Si es profesor, verificar en LDAP antes de continuar
+            if (($data['role'] ?? null) === 'profesor') {
+                try {
+                    $this->logger->info('Intentando verificar profesor en LDAP', [
+                        'host' => $_ENV['LDAP_HOST'],
+                        'base_dn' => $_ENV['LDAP_BASE_DN']
+                    ]);
+
+                    // Verificar que tenemos todas las variables necesarias
+                    if (!$_ENV['LDAP_HOST'] || !$_ENV['LDAP_BASE_DN'] || !$_ENV['LDAP_USER_DN'] || !$_ENV['LDAP_PASSWORD']) {
+                        throw new \RuntimeException('Faltan variables de configuración LDAP');
+                    }
+
+                    $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
+
+                    $query = $ldap->query(
+                        $_ENV['LDAP_BASE_DN'],
+                        sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
+                    );
+
+                    $results = $query->execute();
+                    $this->logger->info('Búsqueda LDAP completada', [
+                        'resultCount' => count($results)
+                    ]);
+
+                    if (count($results) === 0) {
+                        $this->logger->warning('Profesor no encontrado en LDAP', ['email' => $email]);
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'No se pudo verificar al profesor en el sistema',
+                            'error' => 'Tu email no está autorizado en la base de datos de profesores.'
+                        ], 403);
+                    }
+                } catch (LdapException $e) {
+                    $this->logger->error('Error de conexión LDAP', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
                     return new JsonResponse([
                         'success' => false,
                         'message' => 'No se pudo verificar al profesor en el sistema',
-                        'error' => 'Tu email no está autorizado en la base de datos de profesores.'
-                    ], 403);
+                        'error' => 'Error de conexión con el servidor de verificación.'
+                    ], 500);
                 }
-            } catch (LdapException $e) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'No se pudo verificar al profesor en el sistema',
-                    'error' => 'Error de conexión con el servidor de verificación.'
-                ], 500);
             }
+
+            // Limpiar registros pendientes anteriores
+            $repoPendiente = $em->getRepository(RegistroPendiente::class);
+            $pendientesPrevios = $repoPendiente->findBy(['email' => $email]);
+            foreach ($pendientesPrevios as $pendiente) {
+                $em->remove($pendiente);
+            }
+            $em->flush();
+
+            // Generar y guardar nuevo registro
+            $codigo = random_int(100000, 999999);
+            $registro = new RegistroPendiente();
+            $registro->setEmail($email);
+            $registro->setDatos(json_encode($data));
+            $registro->setCodigo($codigo);
+            $registro->setFechaSolicitud(new \DateTime());
+
+            $em->persist($registro);
+            $em->flush();
+
+            // Enviar email con el código
+            $emailObj = (new Email())
+                ->from('no-reply@aulasync.com')
+                ->to($email)
+                ->subject('Código de verificación AulaSync')
+                ->text("Tu código de verificación es: $codigo");
+
+            $mailer->send($emailObj);
+
+            $this->logger->info('Registro iniciado correctamente', [
+                'email' => $email,
+                'role' => $data['role'] ?? 'alumno'
+            ]);
+
+            return new JsonResponse(['message' => 'Código enviado al email']);
+
+        } catch (\Exception $e) {
+            $this->logger->error('Error general en iniciarRegistro', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return new JsonResponse([
+                'error' => 'Error interno del servidor'
+            ], 500);
         }
-
-        // Eliminar registros pendientes previos para ese email
-        $repoPendiente = $em->getRepository(RegistroPendiente::class);
-        $pendientesPrevios = $repoPendiente->findBy(['email' => $email]);
-        foreach ($pendientesPrevios as $pendiente) {
-            $em->remove($pendiente);
-        }
-        $em->flush();
-
-        // Generar código y guardar datos en RegistroPendiente
-        $codigo = random_int(100000, 999999);
-        $registro = new RegistroPendiente();
-        $registro->setEmail($email);
-        $registro->setDatos(json_encode($data));
-        $registro->setCodigo($codigo);
-        $registro->setFechaSolicitud(new \DateTime());
-        $em->persist($registro);
-        $em->flush();
-
-        // Enviar email
-        $emailObj = (new Email())
-            ->from('no-reply@aulasync.com')
-            ->to($email)
-            ->subject('Código de verificación AulaSync')
-            ->text("Tu código de verificación es: $codigo");
-        $mailer->send($emailObj);
-
-        return new JsonResponse(['message' => 'Código enviado al email']);
     }
 
     #[Route('/registro/verificar', name: 'registro_verificar', methods: ['POST'])]

@@ -57,6 +57,15 @@ services:
         factory: ['Symfony\Component\Ldap\Ldap', 'create']
         arguments:
             $adapter: 'ext_ldap'
+        calls:
+            - method: connect
+              arguments:
+                  - host: '%env(LDAP_HOST)%'
+                    port: '%env(LDAP_PORT)%'
+                    encryption: 'none'
+                    options:
+                        protocol_version: 3
+                        referrals: false
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

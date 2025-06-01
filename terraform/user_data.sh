@@ -71,7 +71,7 @@ curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d ho
 # =========================
 # Primero el backend
 docker run -d --name aulasync-back -p 8000:8000 \
-    -e APP_ENV=dev \
+    -e APP_ENV=prod \
     -e APP_DEBUG=1 \
     ferminromero/aulasync-back:latest
 
