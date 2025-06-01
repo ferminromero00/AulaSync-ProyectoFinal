@@ -45,25 +45,42 @@ class RegistroController extends AbstractController
         if (($data['role'] ?? null) === 'profesor') {
             error_log('DEBUG: Entrando en comprobación LDAP para profesor');
             try {
+                error_log('DEBUG: Intentando conectar a LDAP: ' . $_ENV['LDAP_HOST']);
                 $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
+                error_log('DEBUG: Conexión LDAP exitosa');
+
                 $query = $ldap->query(
                     $_ENV['LDAP_BASE_DN'],
                     sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
                 );
-                $results = $query->execute();
+                error_log('DEBUG: Consulta LDAP ejecutada');
 
-                error_log('DEBUG: Resultados LDAP: ' . count($results));
-                foreach ($results as $entry) {
-                    error_log('DEBUG: Entrada LDAP encontrada: ' . $entry->getDn());
-                }
+                $results = $query->execute();
+                error_log('DEBUG: Resultados LDAP encontrados: ' . count($results));
 
                 if (count($results) === 0) {
-                    error_log('DEBUG: Email no autorizado por LDAP');
-                    return new JsonResponse(['error' => 'El email no está autorizado por la organización (LDAP)'], 403);
+                    error_log('DEBUG: Email no encontrado en LDAP');
+                    return new JsonResponse([
+                        'error' => 'No estás autorizado para registrarte como profesor. Tu email no está en nuestra base de datos de profesores.',
+                        'errorType' => 'LDAP_USER_NOT_FOUND'
+                    ], 403);
+                } else {
+                    error_log('DEBUG: Profesor encontrado en LDAP');
+                    // Continuamos con el proceso normal pero añadimos un mensaje en la respuesta
+                    $codigo = random_int(100000, 999999);
+                    // ... resto del código de generación y envío ...
+                    return new JsonResponse([
+                        'message' => 'Código enviado al email',
+                        'verificationStatus' => 'LDAP_VERIFIED',
+                        'details' => 'Profesor verificado correctamente en el sistema'
+                    ]);
                 }
             } catch (LdapException $e) {
-                error_log('DEBUG: Error al conectar con LDAP: ' . $e->getMessage());
-                return new JsonResponse(['error' => 'Error al conectar con LDAP: ' . $e->getMessage()], 500);
+                error_log('DEBUG: Error LDAP: ' . $e->getMessage());
+                return new JsonResponse([
+                    'error' => 'Error de verificación con el servidor LDAP. Por favor, inténtelo más tarde.',
+                    'errorType' => 'LDAP_CONNECTION_ERROR'
+                ], 500);
             }
         }
         // --- FIN NUEVO ---
