@@ -34,6 +34,7 @@ class RegistroController extends AbstractController
     public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer, Ldap $ldap): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        error_log('DEBUG: Datos recibidos en iniciarRegistro: ' . json_encode($data));
         $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
 
         // Validar email y que no exista ya
@@ -61,24 +62,18 @@ class RegistroController extends AbstractController
                 if (count($results) === 0) {
                     error_log('DEBUG: Email no encontrado en LDAP');
                     return new JsonResponse([
-                        'error' => 'No estás autorizado para registrarte como profesor. Tu email no está en nuestra base de datos de profesores.',
-                        'errorType' => 'LDAP_USER_NOT_FOUND'
+                        'success' => false,
+                        'error' => 'No se pudo verificar al profesor en el sistema.',
+                        'details' => 'Tu email no está autorizado en la base de datos de profesores.',
+                        'errorType' => 'LDAP_VERIFICATION_FAILED'
                     ], 403);
-                } else {
-                    error_log('DEBUG: Profesor encontrado en LDAP');
-                    // Continuamos con el proceso normal pero añadimos un mensaje en la respuesta
-                    $codigo = random_int(100000, 999999);
-                    // ... resto del código de generación y envío ...
-                    return new JsonResponse([
-                        'message' => 'Código enviado al email',
-                        'verificationStatus' => 'LDAP_VERIFIED',
-                        'details' => 'Profesor verificado correctamente en el sistema'
-                    ]);
                 }
             } catch (LdapException $e) {
                 error_log('DEBUG: Error LDAP: ' . $e->getMessage());
                 return new JsonResponse([
-                    'error' => 'Error de verificación con el servidor LDAP. Por favor, inténtelo más tarde.',
+                    'success' => false,
+                    'error' => 'No se pudo verificar al profesor en el sistema.',
+                    'details' => 'Error de conexión con el servidor de verificación.',
                     'errorType' => 'LDAP_CONNECTION_ERROR'
                 ], 500);
             }
