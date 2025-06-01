@@ -72,13 +72,13 @@ curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d ho
 # Primero el backend
 docker run -d --name aulasync-back -p 8000:8000 \
     -e APP_ENV=prod \
-    -e APP_DEBUG=0 \
+    -e APP_DEBUG=1 \
     ferminromero/aulasync-back:latest
 
 # LDAP
 docker run -d --name aulasync-ldap -p 389:389 -p 636:636 \
     ferminromero/aulasync-ldap:latest
-    
+
 # Después el frontend con link al backend
 docker run -d --name aulasync-front -p 80:80 -p 443:443 \
     --env-file /tmp/env.production \
