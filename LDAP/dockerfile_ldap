@@ -1,0 +1,14 @@
+FROM osixia/openldap:latest
+
+# Configuración de LDAP
+ENV LDAP_ORGANISATION="Aulasync" \
+    LDAP_DOMAIN="aulasync.work.gd" \
+    LDAP_ADMIN_PASSWORD="admin"
+
+RUN apt-get install -y ldap-utils
+
+# Exponer los puertos de LDAP
+EXPOSE 389 636
+
+# Iniciar el servidor OpenLDAP
+CMD /container/tool/run

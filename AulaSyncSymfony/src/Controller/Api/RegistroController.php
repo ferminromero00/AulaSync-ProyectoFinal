@@ -17,6 +17,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Entity\RegistroPendiente;
+use Symfony\Component\Ldap\Ldap;
+use Symfony\Component\Ldap\Exception\LdapException;
 
 #[Route('/api', name: 'api_')]
 class RegistroController extends AbstractController
@@ -29,7 +31,7 @@ class RegistroController extends AbstractController
     }
 
     #[Route('/registro/iniciar', name: 'registro_iniciar', methods: ['POST'])]
-    public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer, Ldap $ldap): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $email = isset($data['email']) ? trim(strtolower($data['email'])) : null;
@@ -38,6 +40,25 @@ class RegistroController extends AbstractController
         if (!$email || $em->getRepository(Alumno::class)->findOneBy(['email' => $email]) || $em->getRepository(Profesor::class)->findOneBy(['email' => $email])) {
             return new JsonResponse(['error' => 'Email inválido o ya registrado'], 400);
         }
+
+        // --- NUEVO: Comprobación LDAP si es profesor ---
+        if (($data['role'] ?? null) === 'profesor') {
+            try {
+                $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
+                $query = $ldap->query(
+                    $_ENV['LDAP_BASE_DN'],
+                    sprintf('(mail=%s)', $email)
+                );
+                $results = $query->execute();
+
+                if (count($results) === 0) {
+                    return new JsonResponse(['error' => 'El email no está autorizado por la organización (LDAP)'], 403);
+                }
+            } catch (LdapException $e) {
+                return new JsonResponse(['error' => 'Error al conectar con LDAP: ' . $e->getMessage()], 500);
+            }
+        }
+        // --- FIN NUEVO ---
 
         // Eliminar registros pendientes previos para ese email
         $repoPendiente = $em->getRepository(RegistroPendiente::class);

@@ -53,5 +53,10 @@ services:
         tags: ['controller.service_arguments']
         autowire: true
 
+    Symfony\Component\Ldap\Ldap:
+        factory: ['Symfony\Component\Ldap\Ldap', 'create']
+        arguments:
+            $adapter: 'ext_ldap'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

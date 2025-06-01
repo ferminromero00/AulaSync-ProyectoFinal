@@ -70,6 +70,25 @@ resource "aws_security_group" "grupo_seguridad_servidor" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "Acceso al backend Symfony"
   }
+
+# Acceso LDAP (puerto 389)
+  ingress {
+    from_port   = 389
+    to_port     = 389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Acceso LDAP"
+  }
+
+  # Acceso LDAP seguro (puerto 636)
+  ingress {
+    from_port   = 636
+    to_port     = 636
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Acceso LDAP seguro (LDAPS)"
+  }
+
   
   # Regla de salida para todo el trafico
   egress {
