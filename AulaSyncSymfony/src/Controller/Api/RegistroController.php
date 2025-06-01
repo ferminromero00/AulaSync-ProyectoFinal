@@ -43,18 +43,26 @@ class RegistroController extends AbstractController
 
         // --- NUEVO: Comprobación LDAP si es profesor ---
         if (($data['role'] ?? null) === 'profesor') {
+            error_log('DEBUG: Entrando en comprobación LDAP para profesor');
             try {
                 $ldap->bind($_ENV['LDAP_USER_DN'], $_ENV['LDAP_PASSWORD']);
                 $query = $ldap->query(
                     $_ENV['LDAP_BASE_DN'],
-                    sprintf('(mail=%s)', $email)
+                    sprintf('(&(objectClass=inetOrgPerson)(mail=%s))', $email)
                 );
                 $results = $query->execute();
 
+                error_log('DEBUG: Resultados LDAP: ' . count($results));
+                foreach ($results as $entry) {
+                    error_log('DEBUG: Entrada LDAP encontrada: ' . $entry->getDn());
+                }
+
                 if (count($results) === 0) {
+                    error_log('DEBUG: Email no autorizado por LDAP');
                     return new JsonResponse(['error' => 'El email no está autorizado por la organización (LDAP)'], 403);
                 }
             } catch (LdapException $e) {
+                error_log('DEBUG: Error al conectar con LDAP: ' . $e->getMessage());
                 return new JsonResponse(['error' => 'Error al conectar con LDAP: ' . $e->getMessage()], 500);
             }
         }
@@ -129,7 +137,7 @@ class RegistroController extends AbstractController
         if ($isAlumno) {
             $alumno = new Alumno();
             $form = $this->createForm(AlumnoRegistroType::class, $alumno);
-            
+
             // Ajustar los datos para usar plainPassword en lugar de password
             $formData = [
                 'email' => $datos['email'],
@@ -137,7 +145,7 @@ class RegistroController extends AbstractController
                 'firstName' => $datos['firstName'],
                 'lastName' => $datos['lastName']
             ];
-            
+
             $form->submit($formData);
 
             if (!$form->isValid()) {
@@ -169,7 +177,7 @@ class RegistroController extends AbstractController
         } else {
             $profesor = new Profesor();
             $form = $this->createForm(ProfesorRegistroType::class, $profesor);
-            
+
             // Ajustar los datos para usar plainPassword en lugar de password
             $formData = [
                 'email' => $datos['email'],
@@ -177,9 +185,9 @@ class RegistroController extends AbstractController
                 'firstName' => $datos['firstName'],
                 'lastName' => $datos['lastName']
             ];
-            
+
             error_log('DEBUG: Datos enviados al formulario: ' . json_encode($formData));
-            
+
             $form->submit($formData);
 
             if (!$form->isValid()) {
@@ -291,8 +299,8 @@ class RegistroController extends AbstractController
     public function listAlumnos(EntityManagerInterface $em): JsonResponse
     {
         $alumnos = $em->getRepository(Alumno::class)->findAll();
-        
-        $alumnosArray = array_map(function($alumno) {
+
+        $alumnosArray = array_map(function ($alumno) {
             return [
                 'id' => $alumno->getId(),
                 'email' => $alumno->getEmail(),
@@ -311,7 +319,7 @@ class RegistroController extends AbstractController
     {
         try {
             $query = $request->query->get('query');
-            
+
             if (!$query) {
                 return new JsonResponse([]);
             }
@@ -328,8 +336,8 @@ class RegistroController extends AbstractController
                 ->setMaxResults(10);
 
             $alumnos = $qb->getQuery()->getResult();
-            
-            return new JsonResponse(array_map(function($alumno) {
+
+            return new JsonResponse(array_map(function ($alumno) {
                 return [
                     'id' => $alumno->getId(),
                     'email' => $alumno->getEmail(),
@@ -341,7 +349,7 @@ class RegistroController extends AbstractController
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return new JsonResponse([
                 'error' => 'Error al buscar alumnos'
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
