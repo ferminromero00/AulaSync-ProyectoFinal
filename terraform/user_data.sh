@@ -106,6 +106,3 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT    # Frontend HTTP
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT   # Frontend HTTPS
 iptables -A INPUT -p tcp --dport 389 -j ACCEPT   # LDAP
 iptables -A INPUT -p tcp --dport 636 -j ACCEPT   # LDAPS
-
-# Comandos Docker originales (comentados para referencia)
-
