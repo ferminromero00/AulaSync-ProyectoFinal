@@ -291,56 +291,86 @@ class ClaseController extends AbstractController
         }
     }
 
-    #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET'])]
-    public function buscarClasePorCodigoAlumno(string $codigo, EntityManagerInterface $em): JsonResponse
+    #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET', 'OPTIONS'])]
+    public function buscarClasePorCodigoAlumno(string $codigo, Request $request, EntityManagerInterface $em): JsonResponse
     {
-        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Código recibido: " . $codigo);
+        // Manejar preflight OPTIONS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new JsonResponse([], 200, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+            ]);
+        }
+
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $codigo]);
         if (!$clase) {
-            \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase no encontrada con código: " . $codigo);
-            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
         }
-        \Symfony\Component\VarDumper\VarDumper::dump("buscarClasePorCodigoAlumno - Clase encontrada: " . $clase->getNombre());
+        // Cambiar profesor a string
         return new JsonResponse([
             'id' => $clase->getId(),
             'nombre' => $clase->getNombre(),
-            'profesor' => [
-                'nombre' => $clase->getProfesor()->getFirstName().' '.$clase->getProfesor()->getLastName(),
-                'especialidad' => $clase->getProfesor()->getEspecialidad()
-            ],
+            'profesor' => $clase->getProfesor()->getFirstName().' '.$clase->getProfesor()->getLastName(),
             'codigoClase' => $clase->getCodigoClase(),
+        ], 200, [
+            'Access-Control-Allow-Origin' => '*'
         ]);
     }
 
-    #[Route('/alumno/clases/unirse', name: 'clase_unirse_alumno', methods: ['POST'])]
+    #[Route('/alumno/clases/unirse', name: 'clase_unirse_alumno', methods: ['POST', 'OPTIONS'])]
     public function unirseAClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        // Manejar preflight OPTIONS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new JsonResponse([], 200, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'POST, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+            ]);
+        }
+
         $data = json_decode($request->getContent(), true);
-        \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Datos recibidos: " . json_encode($data));
         if (empty($data['codigo'])) {
-            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - No se proporcionó código");
-            return new JsonResponse(['error' => 'No se proporcionó código'], JsonResponse::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'No se proporcionó código'], 
+                JsonResponse::HTTP_BAD_REQUEST,
+                ['Access-Control-Allow-Origin' => '*']
+            );
         }
         
         $clase = $em->getRepository(Clase::class)->findOneBy(['codigoClase' => $data['codigo']]);
         if (!$clase) {
-            \Symfony\Component\VarDumper\VarDumper::dump("unirseAClase - Clase no encontrada con código: " . $data['codigo']);
-            return new JsonResponse(['error' => 'Clase no encontrada'], JsonResponse::HTTP_NOT_FOUND);
+            return new JsonResponse(
+                ['error' => 'Clase no encontrada'], 
+                JsonResponse::HTTP_NOT_FOUND,
+                ['Access-Control-Allow-Origin' => '*']
+            );
         }
         
         $alumno = $this->getUser();
         
         if ($clase->getAlumnos()->contains($alumno)) {
-            return new JsonResponse(['error' => 'Ya estás inscrito en esta clase'], JsonResponse::HTTP_CONFLICT);
+            return new JsonResponse(
+                ['error' => 'Ya estás inscrito en esta clase'], 
+                JsonResponse::HTTP_CONFLICT,
+                ['Access-Control-Allow-Origin' => '*']
+            );
         }
         
         $clase->addAlumno($alumno);
         $em->flush();
         
-        return new JsonResponse([
-            'message' => 'Te has unido a la clase correctamente',
-            'claseId' => $clase->getId()
-        ]);
+        return new JsonResponse(
+            [
+                'message' => 'Te has unido a la clase correctamente',
+                'claseId' => $clase->getId()
+            ],
+            200,
+            ['Access-Control-Allow-Origin' => '*']
+        );
     }
 
     #[Route('/alumno/clases/{id}/salir', name: 'clase_salir_alumno', methods: ['POST'])]
@@ -392,12 +422,15 @@ class ClaseController extends AbstractController
             $data = [];
 
             foreach ($clases as $clase) {
+                $profesor = $clase->getProfesor();
+                $profesorNombre = $profesor ? $profesor->getFirstName().' '.$profesor->getLastName() : '';
                 $data[] = [
                     'id' => $clase->getId(),
                     'nombre' => $clase->getNombre(),
                     'numEstudiantes' => $clase->getNumEstudiantes(),
                     'codigoClase' => $clase->getCodigoClase(),
-                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s')
+                    'createdAt' => $clase->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'profesor' => $profesorNombre
                 ];
             }
 
