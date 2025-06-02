@@ -1,4 +1,4 @@
-dn: uid=ferminromero,ou=profesores,dc=aulasync,dc=com
+dn: uid=ferminromero,ou=profesores,dc=aulasync,dc=work,dc=gd
 objectClass: inetOrgPerson
 objectClass: organizationalPerson
 objectClass: person

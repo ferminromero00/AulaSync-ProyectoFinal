@@ -90,6 +90,20 @@ class RegistroController extends AbstractController
                             'error' => 'Tu email no está autorizado en la base de datos de profesores.'
                         ], 403);
                     }
+
+                    // Añadir log de éxito cuando encuentra al profesor
+                    $this->logger->info('Profesor encontrado en LDAP', [
+                        'email' => $email,
+                        'ldapEntry' => $results[0]->getAttributes()
+                    ]);
+
+                    // También puedes devolver una respuesta de éxito si quieres confirmar que se encontró
+                    return new JsonResponse([
+                        'success' => true,
+                        'message' => 'Profesor verificado correctamente',
+                        'email' => $email
+                    ]);
+
                 } catch (LdapException $e) {
                     $this->logger->error('Error de conexión LDAP', [
                         'error' => $e->getMessage(),

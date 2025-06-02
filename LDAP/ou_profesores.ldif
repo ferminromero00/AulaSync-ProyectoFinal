@@ -1,0 +1,3 @@
+dn: ou=profesores,dc=aulasync,dc=work,dc=gd
+objectClass: organizationalUnit
+ou: profesores

@@ -108,3 +108,18 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT    # Frontend HTTP
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT   # Frontend HTTPS
 iptables -A INPUT -p tcp --dport 389 -j ACCEPT   # LDAP
 iptables -A INPUT -p tcp --dport 636 -j ACCEPT   # LDAPS
+
+# =========================
+# Configuración y carga de LDAP (Profesores)
+# =========================
+
+# Esperar a que el servicio LDAP esté completamente iniciado
+sleep 10
+
+# Copiar los archivos LDIF al contenedor LDAP
+docker cp /home/ec2-user/AulaSync-ProyectoFinal/LDAP/ou_profesores.ldif aulasync-ldap:/ou_profesores.ldif
+docker cp /home/ec2-user/AulaSync-ProyectoFinal/LDAP/add_profesor.ldif aulasync-ldap:/add_profesor.ldif
+
+# Crear la OU y el profesor dentro del contenedor LDAP
+docker exec aulasync-ldap ldapadd -x -D "cn=admin,dc=aulasync,dc=work,dc=gd" -w admin -f /ou_profesores.ldif
+docker exec aulasync-ldap ldapadd -x -D "cn=admin,dc=aulasync,dc=work,dc=gd" -w admin -f /add_profesor.ldif
