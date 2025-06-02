@@ -1,0 +1,9 @@
+dn: uid=ferminromero,ou=profesores,dc=aulasync,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+uid: ferminromero
+cn: Fermin Romero
+sn: Romero
+mail: ferminromerotrapero@gmail.com
+userPassword: 123456
