@@ -17,6 +17,7 @@ spec:
         image: ferminromero/aulasync-front:latest
         ports:
         - containerPort: 80
+        - containerPort: 443
         env:
         - name: VITE_API_URL
           valueFrom:
