@@ -24,3 +24,14 @@ spec:
           value: "1"
         - name: CORS_ALLOW_ORIGIN
           value: "*"
+        # Configuración LDAP
+        - name: LDAP_HOST
+          value: "aulasync-ldap"
+        - name: LDAP_PORT
+          value: "389"
+        - name: LDAP_BASE_DN
+          value: "dc=aulasync,dc=work,dc=gd"
+        - name: LDAP_BIND_DN
+          value: "cn=admin,dc=aulasync,dc=work,dc=gd"
+        - name: LDAP_BIND_PASSWORD
+          value: "admin"
