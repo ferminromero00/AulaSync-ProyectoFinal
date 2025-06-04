@@ -63,7 +63,7 @@ echo "VITE_API_URL=https://aulasync.work.gd" > /tmp/env.production
 # =========================
 # Actualizar el registro DNS para apuntar al host aulasync.work.gd
 # =========================
-curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d host=aulasync.work.gd
+#curl https://api.dnsexit.com/dns/ud/?apikey=I2pljh2r7G5J7ShzFLS9P3ieEVUyyC -d host=aulasync.work.gd
 
 
 # =========================
@@ -78,29 +78,32 @@ docker network create aulasync-net
 
 # 1. Servidor LDAP
 # ---------------
-docker run -d --name aulasync-ldap --network aulasync-net \
-    -p 389:389 -p 636:636 \
-    ferminromero/aulasync-ldap:latest
+# Despliega el contenedor de LDAP en la red personalizada 'aulasync-net' y expone los puertos estándar de LDAP.
+# docker run -d --name aulasync-ldap --network aulasync-net \
+#     -p 389:389 -p 636:636 \
+#     ferminromero/aulasync-ldap:latest
 
 # Esperar a que el servicio LDAP esté completamente iniciado
-sleep 10
+# sleep 10
 
 # 2. Backend (Symfony)
 # -------------------
-docker run -d --name aulasync-back --network aulasync-net \
-    -p 8000:8000 \
-    -e APP_ENV=prod \
-    -e APP_DEBUG=1 \
-    -e LDAP_HOST=aulasync-ldap \
-    -e LDAP_PORT=389 \
-    ferminromero/aulasync-back:latest
+# Despliega el backend Symfony en la red personalizada, expone el puerto 8000 y configura variables de entorno necesarias.
+# docker run -d --name aulasync-back --network aulasync-net \
+#     -p 8000:8000 \
+#     -e APP_ENV=prod \
+#     -e APP_DEBUG=1 \
+#     -e LDAP_HOST=aulasync-ldap \
+#     -e LDAP_PORT=389 \
+#     ferminromero/aulasync-back:latest
 
 # 3. Frontend (React)
 # -----------------
-docker run -d --name aulasync-front --network aulasync-net \
-    -p 80:80 -p 443:443 \
-    --env-file /tmp/env.production \
-    ferminromero/aulasync-front:latest
+# Despliega el frontend React en la red personalizada, expone los puertos 80 y 443, y carga las variables de entorno desde un archivo.
+# docker run -d --name aulasync-front --network aulasync-net \
+#     -p 80:80 -p 443:443 \
+#     --env-file /tmp/env.production \
+#     ferminromero/aulasync-front:latest
 
 # Añadir configuración de red
 iptables -A INPUT -p tcp --dport 8000 -j ACCEPT  # Backend

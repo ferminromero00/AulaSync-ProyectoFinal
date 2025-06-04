@@ -1,6 +1,6 @@
 export const getApiUrl = () => {
     const baseUrl = import.meta.env.VITE_API_URL;
-    if (baseUrl) return baseUrl;
+    if (baseUrl) return baseUrl.replace(/\.$/, ''); // Eliminar punto final si existe
     
     // En desarrollo, usar localhost
     if (import.meta.env.DEV) return 'http://localhost:8000';
