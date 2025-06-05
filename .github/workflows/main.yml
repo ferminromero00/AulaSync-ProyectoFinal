@@ -14,7 +14,7 @@ on:
 
 jobs:
   deploy:
-    if: inputs.action == 'deploy'
+    if: ${{ github.event.inputs.action == 'deploy' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,6 +26,17 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, xml
           coverage: xdebug      
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias de documentación
+        run: npm install -g documentation
+
+      - name: Generar documentación de React (JS/JSX)
+        run: documentation build "src/**/*.{js,jsx}" -f html -o docs
 
       - name: Instalar dependencias Composer
         working-directory: ./AulaSyncSymfony
@@ -59,7 +70,6 @@ jobs:
 
       - name: Subir estado de Terraform a S3
         run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
-
       - name: Obtener IP pública de la instancia EC2
         id: get-ip
         run: |
@@ -78,17 +88,18 @@ jobs:
             sleep 10
           done
 
-      - name: Copiar archivos YAML a la instancia EC2
+      - name: Copiar proyecto completo a la instancia EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no ./EKS/* ec2-user@${{ env.EC2_IP }}:/home/ec2-user/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_IP }}:/home/ec2-user/AulaSync-ProyectoFinal
           rm private_key.pem
 
+      
   destroy:
-    if: inputs.action == 'destroy'
+    if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
