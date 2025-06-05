@@ -27,6 +27,17 @@ jobs:
           extensions: mbstring, xml
           coverage: xdebug      
 
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias de documentación
+        run: npm install -g documentation
+
+      - name: Generar documentación de React (JS/JSX)
+        run: documentation build "src/**/*.{js,jsx}" -f html -o docs
+
       - name: Instalar dependencias Composer
         working-directory: ./AulaSyncSymfony
         run: composer install --prefer-dist --no-progress
@@ -77,13 +88,13 @@ jobs:
             sleep 10
           done
 
-      - name: Copiar archivos YAML a la instancia EC2
+      - name: Copiar proyecto completo a la instancia EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no ./EKS/* ec2-user@${{ env.EC2_IP }}:/home/ec2-user/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_IP }}:/home/ec2-user/AulaSync-ProyectoFinal
           rm private_key.pem
 
       

@@ -19,7 +19,7 @@ sudo systemctl enable sshd
 # =========================
 # Clonar repositorio del proyecto
 # =========================
-sudo -u ec2-user git clone https://github.com/ferminromero00/AulaSync-ProyectoFinal.git /home/ec2-user/AulaSync-ProyectoFinal
+#sudo -u ec2-user git clone https://github.com/ferminromero00/AulaSync-ProyectoFinal.git /home/ec2-user/AulaSync-ProyectoFinal
 sudo chown -R ec2-user:ec2-user /home/ec2-user/AulaSync-ProyectoFinal
 
 # =========================
