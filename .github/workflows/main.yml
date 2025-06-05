@@ -33,10 +33,17 @@ jobs:
           node-version: '18'
 
       - name: Instalar dependencias de documentación
-        run: npm install -g documentation
+        run: |
+          set -x
+          npm install -g documentation
 
       - name: Generar documentación de React (JS/JSX)
-        run: documentation build "src/**/*.{js,jsx}" -f html -o docs
+        run: |
+          set -x
+          timeout 60s documentation build "src/**/*.{js,jsx}" -f html -o docs
+
+      - name: Verificar fin del paso de documentación
+        run: echo "✅ Documentación generada correctamente"
 
       - name: Instalar dependencias Composer
         working-directory: ./AulaSyncSymfony
@@ -70,6 +77,7 @@ jobs:
 
       - name: Subir estado de Terraform a S3
         run: aws s3 cp terraform/terraform.tfstate s3://bucketfermin-2daw-202406/terraform.tfstate
+
       - name: Obtener IP pública de la instancia EC2
         id: get-ip
         run: |
@@ -97,7 +105,6 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_IP }}:/home/ec2-user/AulaSync-ProyectoFinal
           rm private_key.pem
 
-      
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
