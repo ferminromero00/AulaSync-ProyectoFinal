@@ -4,6 +4,14 @@ import TareasResumenAlumno from "../../components/alumno/TareasResumenAlumno";
 import { BookOpen, Loader2, FileText } from "lucide-react"; // <--- Añade FileText aquí
 import { useLocation } from "react-router-dom";
 
+/**
+ * Página principal de tareas del alumno.
+ * Muestra una vista completa de todas las tareas asignadas con animaciones de carga
+ * y sistema de apertura directa de tareas específicas.
+ * 
+ * @component
+ * @returns {JSX.Element} Vista completa de tareas con animación de carga y panel de resumen
+ */
 const TareasAlumno = () => {
     const [tareas, setTareas] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

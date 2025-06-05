@@ -7,6 +7,14 @@ import toast, { Toaster } from 'react-hot-toast'; // Modificar esta línea
 import NotificationButton from '../../components/NotificationButton';
 import { GlobalContext } from "../../App"
 
+/**
+ * Panel de control principal del alumno.
+ * Muestra un resumen de todas sus clases, permite unirse a nuevas clases
+ * y gestiona las notificaciones y estados de las clases.
+ * 
+ * @component
+ * @returns {JSX.Element} Dashboard principal del alumno con listado de clases y acciones principales
+ */
 const DashboardAlumno = () => {
     const { userData, setUserData } = useContext(GlobalContext);
     const { clases, invitaciones, loading } = userData;

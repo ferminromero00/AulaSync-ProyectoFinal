@@ -2,6 +2,23 @@ import { X, FileText, Paperclip, CheckCircle } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 import { toast, Toaster } from 'react-hot-toast';
 
+/**
+ * Modal para gestionar la entrega de tareas y su calificación.
+ * Permite ver detalles de la entrega, descargar archivos y calificar.
+ * Incluye validación de notas y notificaciones toast.
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {boolean} props.showModal - Si es true, el modal se muestra en pantalla
+ * @param {Object} props.entrega - Objeto con los datos de la entrega a mostrar (alumno, archivo, nota, etc.)
+ * @param {string} props.notaEdicion - Valor actual de la nota que se está editando o asignando
+ * @param {function(string):void} props.setNotaEdicion - Función para actualizar el valor de la nota en edición
+ * @param {string} props.comentarioCorreccion - Texto actual del comentario de corrección del profesor
+ * @param {function(string):void} props.setComentarioCorreccion - Función para actualizar el comentario de corrección
+ * @param {function():void} props.onClose - Función que se ejecuta al cerrar el modal
+ * @param {function():void} props.onCalificar - Función que se ejecuta al guardar la calificación
+ * @param {boolean} props.isCalificando - Indica si está en proceso de calificación (muestra loading)
+ * @returns {JSX.Element} Modal con interfaz de gestión de entregas
+ */
 const EntregaModal = ({
     showModal,
     entrega,

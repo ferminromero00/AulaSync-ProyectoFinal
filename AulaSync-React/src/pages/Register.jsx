@@ -1,3 +1,11 @@
+/**
+ * Página de registro de usuario.
+ * Permite registrar un nuevo alumno o profesor, mostrando un formulario adaptado al rol
+ * y una sección lateral con información y beneficios del registro.
+ *
+ * @component
+ * @returns {JSX.Element} Vista de registro con formulario y presentación visual según el rol
+ */
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import RegisterForm from '../components/register-form'

@@ -1,3 +1,11 @@
+/**
+ * Página de inicio de sesión.
+ * Permite seleccionar el rol (profesor o alumno), iniciar sesión y muestra información
+ * relevante y características según el rol seleccionado.
+ *
+ * @component
+ * @returns {JSX.Element} Vista de login con selector de rol, formulario y presentación visual
+ */
 import React, { useState, useEffect } from "react"
 import LoginForm from "../components/login-form"
 import { Link, useLocation } from "react-router-dom"

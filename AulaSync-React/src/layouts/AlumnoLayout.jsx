@@ -3,6 +3,13 @@ import { getTareasByAlumno } from "../../services/stats";
 import TareasResumenAlumno from "../../components/alumno/TareasResumenAlumno";
 import { BookOpen } from "lucide-react";
 
+/**
+ * Layout de tareas del alumno.
+ * Muestra un resumen de todas las tareas asignadas al alumno con animación de carga.
+ *
+ * @component
+ * @returns {JSX.Element} Vista principal de tareas del alumno con resumen y animación de carga
+ */
 const TareasAlumno = () => {
     const [tareas, setTareas] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

@@ -4,6 +4,28 @@ import { API_BASE_URL } from '../../config/config';
 import '../../styles/modalAnimations.css';
 import { toast } from 'react-hot-toast'; // Añadir este import
 
+/**
+ * Modal que muestra los detalles de una tarea y gestiona su entrega/calificación.
+ * Adapta su interfaz según el rol (profesor/alumno) y el estado de la tarea.
+ * Permite la entrega de archivos, comentarios y calificaciones.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {boolean} props.showModal - Si es true, el modal se muestra en pantalla
+ * @param {Object} props.tarea - Objeto con los datos de la tarea a mostrar (título, descripción, entregas, etc.)
+ * @param {string} props.role - Rol del usuario actual ('profesor' o 'alumno')
+ * @param {Object} props.claseData - Datos de la clase asociada a la tarea
+ * @param {function():void} props.onClose - Función que se ejecuta al cerrar el modal
+ * @param {string} props.comentarioEntrega - Comentario actual del alumno para la entrega
+ * @param {function(string):void} props.setComentarioEntrega - Función para actualizar el comentario de entrega
+ * @param {File|null} props.archivoEntrega - Archivo adjunto para la entrega de la tarea
+ * @param {function(File):void} props.setArchivoEntrega - Función para actualizar el archivo de entrega
+ * @param {boolean} props.isEntregando - Indica si se está procesando la entrega (loading)
+ * @param {Object} props.loadingEntregas - Estado de carga de las entregas por estudiante (solo para profesor)
+ * @param {function(Object):void} props.onOpenEntrega - Función para abrir el modal de una entrega específica (profesor)
+ * @param {Object|null} props.entregaAlumno - Datos de la entrega del alumno actual (si existe)
+ * @param {function(number, Object):void} props.onTareaEntregada - Callback para notificar al padre que la tarea fue entregada
+ * @returns {JSX.Element} Modal interactivo para gestión de tareas
+ */
 const TareaModal = ({
     showModal,
     tarea,
@@ -620,4 +642,4 @@ const TareaModal = ({
     );
 };
 
-export default TareaModal;  // Asegúrate de que esta línea existe
+export default TareaModal;

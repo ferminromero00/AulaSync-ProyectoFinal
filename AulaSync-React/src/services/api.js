@@ -7,6 +7,15 @@ const handleError = (error) => {
     throw error;
 };
 
+/**
+ * Función principal para manejar peticiones a la API.
+ * Gestiona automáticamente la autenticación y los errores comunes.
+ * 
+ * @param {string} url - URL del endpoint
+ * @param {Object} [options] - Opciones de la petición fetch
+ * @returns {Promise<Object>} Respuesta de la API procesada como JSON
+ * @throws {Error} Si la petición falla o hay errores de autenticación
+ */
 export const handleRequest = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     const tokenTimestamp = localStorage.getItem('tokenTimestamp');
@@ -107,7 +116,17 @@ export const handleRequest = async (url, options = {}) => {
     }
 };
 
+/**
+ * Cliente HTTP para realizar peticiones a la API.
+ * Incluye métodos para operaciones CRUD básicas y manejo de formularios.
+ */
 export const api = {
+    /**
+     * Realiza una petición GET.
+     * 
+     * @param {string} endpoint - URL del endpoint
+     * @returns {Promise<Object>} Respuesta de la API
+     */
     async get(endpoint) {
         try {
             return await handleRequest(endpoint);
@@ -116,6 +135,14 @@ export const api = {
         }
     },
 
+    /**
+     * Realiza una petición POST.
+     * 
+     * @param {string} endpoint - URL del endpoint
+     * @param {Object|FormData} data - Datos a enviar
+     * @param {Object} [customConfig] - Configuración adicional para fetch
+     * @returns {Promise<Object>} Respuesta de la API
+     */
     async post(endpoint, data, customConfig = {}) {
         try {
             const token = localStorage.getItem('token');
@@ -151,7 +178,13 @@ export const api = {
         }
     },
 
-    // Agregar método PUT
+    /**
+     * Realiza una petición PUT.
+     * 
+     * @param {string} endpoint - URL del endpoint
+     * @param {Object} data - Datos a actualizar
+     * @returns {Promise<Object>} Respuesta de la API
+     */
     async put(endpoint, data) {
         return handleRequest(endpoint, {
             method: 'PUT',
@@ -159,6 +192,12 @@ export const api = {
         });
     },
 
+    /**
+     * Realiza una petición DELETE.
+     * 
+     * @param {string} endpoint - URL del endpoint
+     * @returns {Promise<Object>} Respuesta de la API
+     */
     async delete(endpoint) {
         return handleRequest(endpoint, {
             method: 'DELETE'

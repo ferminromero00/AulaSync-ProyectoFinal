@@ -7,6 +7,19 @@ import { getPerfil } from '../services/perfil'
 import { getClasesAlumno, getClasesProfesor } from '../services/clases'
 import { obtenerInvitacionesPendientes } from '../services/invitaciones'
 
+/**
+ * @typedef {Object} LoginFormProps
+ * @property {'profesor'|'alumno'} role - Rol del usuario que intenta iniciar sesión
+ */
+
+/**
+ * Formulario de inicio de sesión con validación y feedback visual.
+ * Maneja la autenticación y redirección según el rol del usuario.
+ * Incluye campos para email y contraseña con sus respectivas validaciones.
+ * 
+ * @param {LoginFormProps} props - Propiedades del componente
+ * @returns {JSX.Element} Formulario de login con validación
+ */
 export default function LoginForm({ role }) {
     const { register, handleSubmit, formState: { errors }, setError } = useForm()
     const navigate = useNavigate()

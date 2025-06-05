@@ -7,6 +7,14 @@ import "../../styles/animations.css";
 import { GlobalContext } from '../../App';
 import { Loader2, Users, BarChart2 } from 'lucide-react';
 
+/**
+ * Dashboard principal del profesor.
+ * Muestra estadísticas generales, acceso rápido a clases y tareas,
+ * y un resumen visual de la actividad reciente del profesor.
+ * 
+ * @component
+ * @returns {JSX.Element} Panel principal con estadísticas y accesos rápidos para el profesor
+ */
 const Dashboard = () => {
     const navigate = useNavigate();
     const clasesRef = useRef(null);

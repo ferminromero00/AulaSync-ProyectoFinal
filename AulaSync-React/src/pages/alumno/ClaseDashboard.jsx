@@ -9,6 +9,14 @@ import { toast } from 'react-hot-toast';
 import '../../styles/animations.css';
 import TareasResumenAlumno from '../../components/alumno/TareasResumenAlumno';
 
+/**
+ * Panel de control de una clase específica para el alumno.
+ * Muestra anuncios, tareas y lista de compañeros de clase.
+ * Gestiona la visualización de tareas y sus estados (entregada, pendiente, etc.)
+ * 
+ * @component
+ * @returns {JSX.Element} Panel de control completo de la clase con todas sus funcionalidades
+ */
 const ClaseDashboard = () => {
     const { id } = useParams();
     const navigate = useNavigate();

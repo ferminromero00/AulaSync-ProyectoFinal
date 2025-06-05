@@ -7,6 +7,14 @@ import { API_BASE_URL } from "../../config/config";
 import { toast } from "react-hot-toast";
 import { getClaseById } from "../../services/clases";
 
+/**
+ * Página de resumen de tareas del profesor.
+ * Muestra todas las tareas creadas por el profesor, permite ver detalles, calificar entregas
+ * y acceder a estadísticas de progreso de cada tarea.
+ * 
+ * @component
+ * @returns {JSX.Element} Vista de gestión y resumen de tareas del profesor
+ */
 const TareasProfesor = () => {
     const { userData } = useContext(GlobalContext);
     const [tareas, setTareas] = useState([]);

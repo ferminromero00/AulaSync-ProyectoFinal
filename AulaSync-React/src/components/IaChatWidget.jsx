@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 
-// Cambia esto por tu API Key real de AIMLAPI
+// Configuración de la API
 const API_KEY = "84bd259c834644c2a3d40c62b6d7be44";
 const BASE_URL = "https://api.aimlapi.com/v1";
 
-// Resumen del proyecto y funciones principales para contexto de la IA
+// Contexto del proyecto para la IA
 const PROJECT_CONTEXT = `
 Eres el asistente IA de AulaSync, una plataforma para estudiantes y profesores. 
 Funciones principales del proyecto:
@@ -18,6 +18,17 @@ Funciones principales del proyecto:
 Utiliza este contexto para responder preguntas relacionadas con el funcionamiento y uso de AulaSync.
 `;
 
+/**
+ * Widget de chat con IA integrado para asistencia en la plataforma
+ * Utiliza la API de AIMLAPI para procesar las consultas y proporcionar respuestas
+ * contextualizadas sobre AulaSync
+ * 
+ * @returns {JSX.Element} Widget flotante de chat con IA
+ * 
+ * @example
+ * // Uso en layout principal de la aplicación
+ * <IaChatWidget />
+ */
 const IaChatWidget = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([

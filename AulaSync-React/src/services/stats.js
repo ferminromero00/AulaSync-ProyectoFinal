@@ -1,5 +1,11 @@
 const API_URL = 'http://localhost:8000/api';
 
+/**
+ * Obtiene estadísticas generales del profesor (clases, estudiantes, etc).
+ * 
+ * @returns {Promise<Object>} Estadísticas del profesor
+ * @throws {Error} Si ocurre un error al obtener las estadísticas
+ */
 export const getProfesorStats = async () => {
     try {
         const token = localStorage.getItem('token');
@@ -22,6 +28,12 @@ export const getProfesorStats = async () => {
     }
 };
 
+/**
+ * Obtiene estadísticas generales de tareas.
+ * 
+ * @returns {Promise<Object>} Estadísticas de tareas
+ * @throws {Error} Si ocurre un error al obtener las estadísticas
+ */
 export const getTareasStats = async () => {
     try {
         const token = localStorage.getItem('token');
@@ -44,6 +56,12 @@ export const getTareasStats = async () => {
     }
 };
 
+/**
+ * Obtiene todas las tareas creadas por el profesor autenticado.
+ * 
+ * @returns {Promise<Array>} Lista de tareas del profesor
+ * @throws {Error} Si ocurre un error al obtener las tareas
+ */
 export const getTareasByProfesor = async () => {
     try {
         const token = localStorage.getItem('token');
@@ -66,6 +84,12 @@ export const getTareasByProfesor = async () => {
     }
 };
 
+/**
+ * Obtiene todas las tareas asignadas al alumno autenticado.
+ * 
+ * @returns {Promise<Array>} Lista de tareas del alumno
+ * @throws {Error} Si ocurre un error al obtener las tareas
+ */
 export const getTareasByAlumno = async () => {
     try {
         const token = localStorage.getItem('token');

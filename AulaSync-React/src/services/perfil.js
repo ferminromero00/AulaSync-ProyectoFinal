@@ -36,6 +36,12 @@ export const cambiarPasswordAlumno = async (passwords) => {
     return response;
 };
 
+/**
+ * Obtiene el perfil del usuario autenticado (profesor o alumno).
+ * 
+ * @returns {Promise<Object>} Datos del perfil del usuario
+ * @throws {Error} Si ocurre un error al obtener el perfil
+ */
 export const getPerfil = async () => {
     const role = localStorage.getItem('role');
     try {
@@ -91,6 +97,13 @@ export const getPerfil = async () => {
     }
 };
 
+/**
+ * Sube una nueva foto de perfil para el usuario autenticado.
+ * 
+ * @param {FormData} formData - FormData con la imagen a subir
+ * @returns {Promise<Object>} Respuesta de la API
+ * @throws {Error} Si ocurre un error al subir la foto
+ */
 export async function subirFotoPerfil(formData) {
     const role = localStorage.getItem('role');
     const endpoint = role === 'profesor' ? '/profesor/perfil/foto' : '/alumno/perfil/foto';
@@ -107,6 +120,13 @@ export async function subirFotoPerfil(formData) {
     }
 }
 
+/**
+ * Actualiza el perfil del usuario autenticado.
+ * 
+ * @param {Object} datos - Datos a actualizar en el perfil
+ * @returns {Promise<Object>} Respuesta de la API
+ * @throws {Error} Si ocurre un error al actualizar el perfil
+ */
 export const actualizarPerfil = async (datos) => {
     const role = localStorage.getItem('role');
     if (role === 'profesor') {

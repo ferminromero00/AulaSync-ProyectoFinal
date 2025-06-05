@@ -1,5 +1,12 @@
 import { handleRequest } from './api';
 
+/**
+ * Busca alumnos por un término de búsqueda (nombre, email, etc).
+ * 
+ * @param {string} query - Término de búsqueda
+ * @returns {Promise<Array>} Lista de alumnos que coinciden con la búsqueda
+ * @throws {Error} Si ocurre un error en la búsqueda
+ */
 export const searchAlumnos = async (query) => {
     try {
         console.log('searchAlumnos - Iniciando búsqueda con query:', query);

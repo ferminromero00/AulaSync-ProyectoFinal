@@ -2,6 +2,25 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Clock, Calendar, AlertCircle, Hourglass, X, FileText, BookOpen, CheckCircle, Paperclip } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 
+/**
+ * @typedef {Object} TareaAlumno
+ * @property {number} id - ID de la tarea
+ * @property {string} titulo - Título de la tarea
+ * @property {Date} fechaEntrega - Fecha límite de entrega
+ * @property {boolean} entregada - Indica si la tarea está entregada
+ * @property {string} [nota] - Calificación de la tarea (si está corregida)
+ * @property {string} [comentarioCorreccion] - Comentarios del profesor
+ */
+
+/**
+ * Componente que muestra un resumen detallado de las tareas del alumno.
+ * Organiza las tareas en categorías: calificadas, entregadas, expiradas, etc.
+ * Permite ver detalles y gestionar entregas de tareas.
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {TareaAlumno[]} props.tareas - Lista de tareas del alumno a mostrar y organizar por estado
+ * @returns {JSX.Element} Panel con tareas organizadas y funcionalidades de entrega
+ */
 const TareasResumenAlumno = ({ tareas = [] }) => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
         estaSemana: false,

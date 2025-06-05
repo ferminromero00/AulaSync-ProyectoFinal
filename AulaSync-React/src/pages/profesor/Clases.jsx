@@ -7,6 +7,14 @@ import { toast } from 'react-hot-toast';
 import { GlobalContext } from '../../App';
 import "../../styles/animations.css";
 
+/**
+ * Página de gestión de clases del profesor.
+ * Permite crear, eliminar, exportar y visualizar todas las clases del profesor,
+ * así como acceder a los detalles de cada clase.
+ * 
+ * @component
+ * @returns {JSX.Element} Vista de gestión de clases del profesor
+ */
 const Clases = () => {
     const { userData, setUserData } = useContext(GlobalContext);
     const [clases, setClases] = useState([]);

@@ -6,6 +6,14 @@ import { obtenerAnuncios } from '../../services/anuncios';
 import { Users, BookOpen, FileText, Calendar, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { API_BASE_URL } from '../../config/config';
 
+/**
+ * Página de información detallada de una clase para el profesor.
+ * Muestra los datos principales de la clase, lista de estudiantes, tareas publicadas
+ * y permite exportar la información a PDF.
+ * 
+ * @component
+ * @returns {JSX.Element} Vista de información y gestión de una clase concreta
+ */
 const ClaseInfo = () => {
     const { id } = useParams();
     const navigate = useNavigate();

@@ -4,6 +4,32 @@ import { Plus, BookOpen, Users, Calendar, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { GlobalContext } from '../../App';
 
+/**
+ * @typedef {Object} ClaseProfesor
+ * @property {number} id - ID de la clase
+ * @property {string} nombre - Nombre de la clase
+ * @property {string} codigoClase - Código único de la clase
+ * @property {number} numEstudiantes - Número de estudiantes inscritos
+ * @property {Object} profesor - Datos del profesor
+ * @property {Date} createdAt - Fecha de creación
+ */
+
+/**
+ * @typedef {Object} ClasesProfesorProps
+ * @property {() => void} [onClaseCreated] - Función callback que se ejecuta después de crear exitosamente una nueva clase. 
+ *                                           Útil para actualizar la lista de clases o realizar acciones adicionales.
+ */
+
+/**
+ * Componente que muestra y gestiona las clases del profesor.
+ * Permite ver un resumen de clases activas, crear nuevas clases y navegar a los detalles.
+ * Integra con el contexto global para mantener el estado de las clases.
+ * 
+ * @param {ClasesProfesorProps} props - Propiedades del componente
+ * @param {() => void} [props.onClaseCreated] - Función callback que se ejecuta después de crear exitosamente una nueva clase.
+ *                                              Útil para actualizar la lista de clases o realizar acciones adicionales.
+ * @returns {JSX.Element} Panel de gestión de clases del profesor
+ */
 const ClasesProfesor = ({ onClaseCreated }) => {
     const { userData, setUserData } = useContext(GlobalContext);
     const [clases, setClases] = useState(userData.clases || []);

@@ -7,6 +7,13 @@ import AvatarButton from '../components/AvatarButton'
 import { GlobalContext } from '../App'
 import IaChatWidget from '../components/IaChatWidget'
 
+/**
+ * Layout principal para la interfaz de alumno.
+ * Incluye barra lateral con lista de clases, notificaciones
+ * y navegación responsiva.
+ * 
+ * @returns {JSX.Element} Layout completo para vistas de alumno
+ */
 const StudentLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const navigate = useNavigate()
@@ -160,7 +167,15 @@ const StudentLayout = () => {
     )
 }
 
-// Nuevo componente para los enlaces del sidebar con animación y active
+/**
+ * Componente de enlace para la barra lateral de alumno.
+ * 
+ * @param {Object} props
+ * @param {string} props.to - URL destino del enlace
+ * @param {JSX.Element} props.icon - Icono del enlace
+ * @param {string} props.label - Texto del enlace
+ * @returns {JSX.Element} Enlace estilizado para la barra lateral
+ */
 function SidebarLink({ to, icon, label }) {
     const location = useLocation();
     const isActive = location.pathname.startsWith(to);

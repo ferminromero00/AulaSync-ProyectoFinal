@@ -73,6 +73,12 @@ const handleRequest = async (url, options = {}) => {
     }
 };
 
+/**
+ * Obtiene todas las clases del profesor autenticado.
+ * 
+ * @returns {Promise<Array>} Lista de clases del profesor
+ * @throws {Error} Si ocurre un error al obtener las clases
+ */
 export const getClasesProfesor = async () => {
     try {
         return handleRequest('/clases/profesor', {
@@ -84,6 +90,13 @@ export const getClasesProfesor = async () => {
     }
 };
 
+/**
+ * Crea una nueva clase con los datos proporcionados.
+ * 
+ * @param {Object} claseData - Datos de la clase a crear
+ * @returns {Promise<Object>} Clase creada
+ * @throws {Error} Si ocurre un error al crear la clase
+ */
 export const crearClase = async (claseData) => {
     try {
         return handleRequest('/clases', {
@@ -95,6 +108,13 @@ export const crearClase = async (claseData) => {
     }
 };
 
+/**
+ * Elimina una clase por su ID.
+ * 
+ * @param {number|string} claseId - ID de la clase a eliminar
+ * @returns {Promise<Object>} Respuesta de la API
+ * @throws {Error} Si ocurre un error al eliminar la clase
+ */
 export const eliminarClase = async (claseId) => {
     try {
         return handleRequest(`/clases/${claseId}`, {
@@ -105,6 +125,13 @@ export const eliminarClase = async (claseId) => {
     }
 };
 
+/**
+ * Obtiene los datos de una clase por su ID.
+ * 
+ * @param {number|string} id - ID de la clase
+ * @returns {Promise<Object>} Datos de la clase
+ * @throws {Error} Si ocurre un error al obtener la clase
+ */
 export const getClaseById = async (id) => {
     try {
         const role = localStorage.getItem('role');
@@ -137,6 +164,13 @@ export const getClaseById = async (id) => {
     }
 };
 
+/**
+ * Busca una clase por su código de invitación.
+ * 
+ * @param {string} codigo - Código de la clase
+ * @returns {Promise<Object>} Datos de la clase encontrada
+ * @throws {Error} Si ocurre un error en la búsqueda
+ */
 export const buscarClasePorCodigo = async (codigo) => {
     try {
         const response = await handleRequest(`/alumno/clases/buscar/${codigo}`, {
@@ -157,6 +191,12 @@ export const buscarClasePorCodigo = async (codigo) => {
     }
 };
 
+/**
+ * Obtiene todas las clases del alumno autenticado.
+ * 
+ * @returns {Promise<Array>} Lista de clases del alumno
+ * @throws {Error} Si ocurre un error al obtener las clases
+ */
 export const getClasesAlumno = async () => {
     try {
         const data = await handleRequest('/alumno/clases', {
@@ -170,6 +210,13 @@ export const getClasesAlumno = async () => {
     }
 };
 
+/**
+ * Permite a un alumno unirse a una clase usando un código.
+ * 
+ * @param {string} codigo - Código de la clase
+ * @returns {Promise<Object>} Respuesta de la API
+ * @throws {Error} Si ocurre un error al unirse a la clase
+ */
 export const unirseAClase = async (codigo) => {
     try {
         console.log("unirseAClase - Llamando a la API con código:", codigo); // Log 1
@@ -185,6 +232,13 @@ export const unirseAClase = async (codigo) => {
     }
 };
 
+/**
+ * Permite a un alumno salir de una clase.
+ * 
+ * @param {number|string} claseId - ID de la clase
+ * @returns {Promise<Object>} Respuesta de la API
+ * @throws {Error} Si ocurre un error al salir de la clase
+ */
 export const salirDeClase = async (claseId) => {
     try {
         return await handleRequest(`/alumno/clases/${claseId}/salir`, {

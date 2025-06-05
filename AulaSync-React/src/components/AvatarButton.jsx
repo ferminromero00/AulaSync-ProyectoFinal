@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPerfil } from '../services/perfil';
 
+/**
+ * @typedef {Object} AvatarButtonProps
+ * @property {number} [size=40] - Tamaño del avatar en píxeles
+ * @property {boolean} [reload=false] - Indica si debe recargar el perfil al cambiar este valor
+ */
+
+/**
+ * Componente de botón con avatar que muestra la imagen de perfil del usuario
+ * y navega a la página de configuración al hacer clic.
+ *
+ * @param {AvatarButtonProps} props - Propiedades del componente
+ * @param {number} [props.size=40] - Tamaño del avatar en píxeles
+ * @param {boolean} [props.reload=false] - Si es true, fuerza la recarga del perfil
+ * @returns {JSX.Element} Botón circular con la imagen de perfil del usuario
+ */
 const AvatarButton = ({ size = 40, reload = false }) => {
     const [perfil, setPerfil] = useState(null);
     const [loading, setLoading] = useState(true);

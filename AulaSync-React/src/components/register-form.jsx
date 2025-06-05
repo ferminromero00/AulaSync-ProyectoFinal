@@ -4,6 +4,22 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
 import { login } from '../services/auth' // Añadir esta importación
 
+/**
+ * @typedef {Object} RegistrationData
+ * @property {string} email - Correo electrónico del usuario
+ * @property {string} password - Contraseña del usuario
+ * @property {string} firstName - Nombre del usuario
+ * @property {string} lastName - Apellidos del usuario
+ * @property {'profesor'|'alumno'} role - Rol del usuario
+ */
+
+/**
+ * Formulario de registro con verificación en dos pasos.
+ * Maneja el registro inicial y la verificación por código.
+ * Incluye validación de campos y feedback visual.
+ * 
+ * @returns {JSX.Element} Formulario de registro con validación
+ */
 function RegisterForm() {
   const { register, handleSubmit, formState: { errors }, setError } = useForm()
   const navigate = useNavigate()

@@ -1,5 +1,12 @@
 import { API_BASE_URL } from '../config/config';
 
+/**
+ * Descarga el informe CSV de una clase por su ID.
+ * 
+ * @param {number|string} claseId - ID de la clase a exportar
+ * @returns {Promise<void>} Descarga el archivo CSV
+ * @throws {Error} Si ocurre un error al descargar el archivo
+ */
 export const downloadClaseCSV = async (claseId) => {
     try {
         const token = localStorage.getItem('token');
@@ -28,6 +35,13 @@ export const downloadClaseCSV = async (claseId) => {
     }
 };
 
+/**
+ * Descarga el informe CSV de una tarea por su ID.
+ * 
+ * @param {number|string} tareaId - ID de la tarea a exportar
+ * @returns {Promise<void>} Descarga el archivo CSV
+ * @throws {Error} Si ocurre un error al descargar el archivo
+ */
 export const downloadTareaCSV = async (tareaId) => {
     try {
         const token = localStorage.getItem('token');

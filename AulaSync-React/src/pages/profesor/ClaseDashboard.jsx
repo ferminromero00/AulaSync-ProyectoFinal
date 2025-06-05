@@ -15,6 +15,14 @@ import { getEntregasTarea } from '../../services/entregas';
 import { TareaModal, EntregaModal, AnuncioModal } from '../../components/clase';
 import { GlobalContext } from '../../App';
 
+/**
+ * Panel de control de una clase para el profesor.
+ * Permite gestionar estudiantes, publicar anuncios y tareas, calificar entregas
+ * y ver el estado de las actividades de la clase.
+ * 
+ * @component
+ * @returns {JSX.Element} Panel de gestión y control de una clase para el profesor
+ */
 const ClaseDashboard = () => {
     const { userData } = useContext(GlobalContext);
     const { id } = useParams();

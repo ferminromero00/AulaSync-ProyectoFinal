@@ -6,6 +6,13 @@ import NotificationButton from '../components/NotificationButton'
 import AvatarButton from '../components/AvatarButton'
 import IaChatWidget from '../components/IaChatWidget'
 
+/**
+ * Layout principal para la interfaz de profesor.
+ * Incluye una barra lateral de navegación, header con notificaciones
+ * y un sistema de navegación responsivo.
+ * 
+ * @returns {JSX.Element} Layout completo para vistas de profesor
+ */
 const TeacherLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const navigate = useNavigate()
@@ -137,8 +144,15 @@ const TeacherLayout = () => {
     )
 }
 
-// Nuevo componente para los enlaces del sidebar con animación y active
-import { useLocation } from 'react-router-dom'
+/**
+ * Componente de enlace para la barra lateral con estado activo.
+ * 
+ * @param {Object} props
+ * @param {string} props.to - URL destino del enlace
+ * @param {JSX.Element} props.icon - Icono del enlace
+ * @param {string} props.label - Texto del enlace
+ * @returns {JSX.Element} Enlace estilizado para la barra lateral
+ */
 function SidebarLink({ to, icon, label }) {
     const location = useLocation();
     const isActive = location.pathname.startsWith(to);

@@ -1,5 +1,15 @@
 import { API_BASE_URL } from '../config/config';
 
+/**
+ * Inicia sesión de usuario y gestiona el almacenamiento del token.
+ * 
+ * @param {Object} credentials - Credenciales del usuario
+ * @param {string} credentials.email - Email del usuario
+ * @param {string} credentials.password - Contraseña del usuario
+ * @param {'profesor'|'alumno'} credentials.role - Rol del usuario
+ * @returns {Promise<Object>} Datos del usuario y token de autenticación
+ * @throws {Error} Si las credenciales son inválidas
+ */
 export const login = async (credentials) => {
     try {
         // Asegura que credentials.role existe
@@ -40,16 +50,29 @@ export const login = async (credentials) => {
     }
 };
 
+/**
+ * Cierra la sesión del usuario eliminando sus datos del almacenamiento local.
+ */
 export const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
 };
 
+/**
+ * Verifica si hay un usuario autenticado.
+ * 
+ * @returns {boolean} true si hay un usuario autenticado, false en caso contrario
+ */
 export const isAuthenticated = () => {
     return !!localStorage.getItem('token');
 };
 
+/**
+ * Obtiene el rol del usuario actual.
+ * 
+ * @returns {string|null} Rol del usuario ('profesor'|'alumno') o null si no hay usuario
+ */
 export const getUserRole = () => {
     return localStorage.getItem('role');
 };

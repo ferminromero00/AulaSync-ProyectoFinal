@@ -6,6 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import { GlobalContext } from "../App";
 import { API_BASE_URL } from '../config/config';
 
+/**
+ * Componente de botón de notificaciones que muestra y gestiona las notificaciones del usuario.
+ * Permite ver y responder a invitaciones de clase, notificaciones de tareas y calificaciones.
+ * Integra un menú desplegable con diferentes tipos de notificaciones y sus acciones correspondientes.
+ * 
+ * @returns {JSX.Element} Botón con menú desplegable de notificaciones
+ */
 const NotificationButton = () => {
     const navigate = useNavigate();
     const { userData, setUserData } = useContext(GlobalContext); // Añadir setUserData

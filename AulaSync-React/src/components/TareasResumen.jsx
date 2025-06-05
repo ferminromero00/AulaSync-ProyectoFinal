@@ -2,6 +2,22 @@ import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import '../styles/modalAnimations.css';
 
+/**
+ * @typedef {Object} TareaResumen
+ * @property {number} id - ID único de la tarea
+ * @property {string} titulo - Título de la tarea
+ * @property {Date} fechaEntrega - Fecha límite de entrega
+ * @property {Object} clase - Información de la clase asociada
+ */
+
+/**
+ * Componente que muestra un resumen organizado de tareas agrupadas por períodos.
+ * Incluye secciones para tareas de esta semana, este mes y sin fecha de entrega.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {TareaResumen[]} props.tareas - Array de tareas a mostrar en el resumen, cada una con su información de clase y fecha
+ * @returns {JSX.Element} Modal con resumen de tareas organizadas
+ */
 const TareasResumen = ({ tareas }) => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
         estaSemana: true,

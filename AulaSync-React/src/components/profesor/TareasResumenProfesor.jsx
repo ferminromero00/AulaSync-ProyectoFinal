@@ -1,6 +1,23 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, FileText, Users } from 'lucide-react';
 
+/**
+ * @typedef {Object} TareaProfesor
+ * @property {number} id - ID único de la tarea
+ * @property {string} titulo - Título de la tarea
+ * @property {string} clase - Nombre de la clase
+ * @property {number} entregas - Número de entregas realizadas
+ * @property {number} totalAlumnos - Total de alumnos en la clase
+ * @property {string} fechaLimite - Fecha límite de entrega
+ */
+
+/**
+ * Componente que muestra un resumen de tareas para el profesor.
+ * Organiza las tareas en secciones: pendientes de calificar y entregas recientes.
+ * Incluye estadísticas y progreso de entregas por tarea.
+ * 
+ * @returns {JSX.Element} Panel con resumen de tareas del profesor
+ */
 const TareasResumenProfesor = () => {
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
         pendientes: false,
