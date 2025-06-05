@@ -27,6 +27,17 @@ jobs:
           extensions: mbstring, xml
           coverage: xdebug     
 
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias de documentación
+        run: npm install -g documentation
+
+      - name: Generar documentación de React (JS/JSX)
+        run: documentation build "src/**/*.{js,jsx}" -f html -o docs
+
       - name: Instalar dependencias Composer
         working-directory: ./AulaSyncSymfony
         run: composer install --prefer-dist --no-progress
