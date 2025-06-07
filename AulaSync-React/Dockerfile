@@ -37,9 +37,11 @@ COPY SSL/ca.cer /etc/pki/tls/certs/ca_bundle.crt
 RUN chmod 644 /etc/pki/tls/certs/*.crt \
     && chmod 600 /etc/pki/tls/private/*.key
 
-# Copia los archivos construidos desde la etapa anterior
+# Copia el build de la app principal (React) a la raíz
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY --from=builder /app/dist /usr/share/nginx/html/docs 
+
+# Copia la documentación estática generada (NO el build de la app) a /docs
+COPY AulaSync-React/docs /usr/share/nginx/html/docs
 
 # Copia el script de entrada personalizado
 COPY AulaSync-React/docker-entrypoint.sh /docker-entrypoint.sh
