@@ -94,10 +94,12 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_IP }}:/home/ec2-user/AulaSync-ProyectoFinal
+          # Primero eliminar cualquier contenido previo
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_IP }} 'rm -rf /home/ec2-user/AulaSync-ProyectoFinal/*'
+          # Copiar todo el contenido incluyendo directorios ocultos
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r ./* ./.* ec2-user@${{ env.EC2_IP }}:/home/ec2-user/AulaSync-ProyectoFinal/
           rm private_key.pem
 
-      
   destroy:
     if: ${{ github.event.inputs.action == 'destroy' }}
     runs-on: ubuntu-latest
