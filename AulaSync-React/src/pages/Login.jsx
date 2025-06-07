@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from "react"
 import LoginForm from "../components/login-form"
 import { Link, useLocation } from "react-router-dom"
+import { FileText } from "lucide-react" // Cambiado a lucide-react
 
 export default function LoginPage() {
   const [role, setRole] = useState('profesor')
@@ -63,6 +64,22 @@ export default function LoginPage() {
               </div>
             )}
             
+            {/* Botón de documentación */}
+            <div className="mt-4 px-4 py-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-blue-100 
+                          hover:from-indigo-100 hover:to-blue-100 transition-all duration-300 group">
+              <a href="/docs/index.html" 
+                 target="_blank" 
+                 className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-blue-900">Documentación del Proyecto</h3>
+                  <p className="text-sm text-blue-600">Consulta la guía completa de AulaSync</p>
+                </div>
+                <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
+              </a>
+            </div>
+
             {/* Role selector */}
             <div className="mt-4 flex space-x-4 mb-6">
               <button
