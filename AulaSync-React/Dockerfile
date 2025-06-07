@@ -15,6 +15,7 @@ COPY AulaSync-React/. .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
+# Construir la aplicación
 RUN npm run build
 
 # Etapa 2: Configuración del servidor Nginx
@@ -38,6 +39,7 @@ RUN chmod 644 /etc/pki/tls/certs/*.crt \
 
 # Copia los archivos construidos desde la etapa anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html/docs 
 
 # Copia el script de entrada personalizado
 COPY AulaSync-React/docker-entrypoint.sh /docker-entrypoint.sh
@@ -62,22 +64,30 @@ server {
     root /usr/share/nginx/html;
     index index.html index.htm;
     
+    # Servir la documentación en /docs
+    location /docs/ {
+        alias /usr/share/nginx/html/docs/;
+        try_files \$uri \$uri/ /docs/index.html;
+        add_header Cache-Control "public, max-age=3600";
+    }
+
+    # Servir la app principal en la raíz
+    location / {
+        root /usr/share/nginx/html;
+        try_files \$uri \$uri/ /index.html;
+        add_header Cache-Control "public, max-age=3600";
+    }
+
     location /uploads/ {
         proxy_pass http://aulasync-back:8000/uploads/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
-
-        # Cache para archivos estáticos
         proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
         proxy_cache_valid 200 24h;
         expires 30d;
         add_header Cache-Control "public, no-transform";
-    }
-
-    location / {
-        try_files \$uri \$uri/ /index.html;
     }
     
     location /api/ {
