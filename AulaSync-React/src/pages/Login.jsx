@@ -20,10 +20,10 @@ export default function LoginPage() {
     const searchParams = new URLSearchParams(location.search);
     const roleParam = searchParams.get('role');
     if (roleParam) {
-        setRole(roleParam);
+      setRole(roleParam);
     }
     if (location.state?.message) {
-        setMessage(location.state.message);
+      setMessage(location.state.message);
     }
   }, [location])
 
@@ -57,25 +57,43 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-10">
             <h1 className="text-2xl font-bold text-gray-800">AulaSync</h1>
-            
+
             {message && (
               <div className="mt-4 p-4 rounded-md bg-green-50 text-green-700">
                 <p>{message}</p>
               </div>
             )}
-            
-            {/* Botón de documentación */}
-            <div className="mt-4 px-4 py-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-blue-100 
-                          hover:from-indigo-100 hover:to-blue-100 transition-all duration-300 group">
-              <a href="/docs/index.html" 
-                 target="_blank" 
-                 className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-blue-900">Documentación del Proyecto</h3>
-                  <p className="text-sm text-blue-600">Consulta la guía completa de AulaSync</p>
-                </div>
+
+            {/* Botones de documentación */}
+            <div className="mt-4 flex flex-row gap-3">
+              {/* Frontend */}
+              <a
+                href="/docs/index.html"
+                target="_blank"
+                className="flex-1 flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-blue-100 hover:from-indigo-100 hover:to-blue-100 transition-all duration-300 group shadow-sm"
+                style={{ minWidth: 0 }}
+              >
                 <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
                   <FileText className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="truncate">
+                  <span className="font-semibold text-blue-900 text-sm block truncate">Frontend</span>
+                  <span className="text-xs text-blue-600 truncate">Guía React</span>
+                </div>
+              </a>
+              {/* Backend */}
+              <a
+                href="../../../../AulaSyncSymfony/docs/namespaces/default.html"
+                target="_blank"
+                className="flex-1 flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-100 hover:from-emerald-100 hover:to-blue-100 transition-all duration-300 group shadow-sm"
+                style={{ minWidth: 0 }}
+              >
+                <div className="bg-emerald-100 p-2 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                  <FileText className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div className="truncate">
+                  <span className="font-semibold text-emerald-900 text-sm block truncate">Backend</span>
+                  <span className="text-xs text-emerald-700 truncate">API Symfony</span>
                 </div>
               </a>
             </div>
@@ -84,21 +102,19 @@ export default function LoginPage() {
             <div className="mt-4 flex space-x-4 mb-6">
               <button
                 onClick={() => setRole('profesor')}
-                className={`flex-1 py-2 px-4 rounded-md transition-all duration-300 ${
-                  role === 'profesor'
+                className={`flex-1 py-2 px-4 rounded-md transition-all duration-300 ${role === 'profesor'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 Profesor
               </button>
               <button
                 onClick={() => setRole('alumno')}
-                className={`flex-1 py-2 px-4 rounded-md transition-all duration-300 ${
-                  role === 'alumno'
+                className={`flex-1 py-2 px-4 rounded-md transition-all duration-300 ${role === 'alumno'
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 Alumno
               </button>
@@ -132,11 +148,10 @@ export default function LoginPage() {
 
       {/* Right side - Dynamic content based on role */}
       <div className="relative hidden w-0 flex-1 lg:block">
-        <div className={`absolute inset-0 h-full w-full transition-all duration-500 ${
-          role === 'profesor' 
+        <div className={`absolute inset-0 h-full w-full transition-all duration-500 ${role === 'profesor'
             ? 'bg-gradient-to-r from-blue-600 to-blue-400'
             : 'bg-gradient-to-r from-green-600 to-green-400'
-        }`}>
+          }`}>
           <div className="flex h-full flex-col items-center justify-center p-12 text-white">
             <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-white bg-opacity-20">
               {role === 'profesor' ? <TeacherIcon className="h-8 w-8" /> : <StudentIcon className="h-8 w-8" />}
