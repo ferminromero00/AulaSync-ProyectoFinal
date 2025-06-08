@@ -7,37 +7,22 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Repositorio para la entidad Profesor.
+ * Permite realizar consultas personalizadas sobre los profesores.
+ *
  * @extends ServiceEntityRepository<Profesor>
  */
 class ProfesorRepository extends ServiceEntityRepository
 {
+    /**
+     * Constructor del repositorio ProfesorRepository.
+     *
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Profesor::class);
     }
 
-    //    /**
-    //     * @return Profesor[] Returns an array of Profesor objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Profesor
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    // Añade aquí métodos personalizados para consultas sobre profesores si es necesario.
 }

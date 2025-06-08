@@ -6,8 +6,19 @@ use App\Entity\Notificacion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * Repositorio para la entidad Notificacion.
+ * Permite realizar consultas personalizadas sobre las notificaciones.
+ *
+ * @extends ServiceEntityRepository<Notificacion>
+ */
 class NotificacionRepository extends ServiceEntityRepository
 {
+    /**
+     * Constructor del repositorio NotificacionRepository.
+     *
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Notificacion::class);
@@ -21,4 +32,5 @@ class NotificacionRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    // Añade aquí métodos personalizados para consultas sobre notificaciones si es necesario.
 }
