@@ -16,6 +16,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 
+/**
+ * Controlador para gestionar las operaciones relacionadas con las clases en la API.
+ *
+ * @package App\Controller\Api
+ */
 #[Route('/api', name: 'api_')]
 class ClaseController extends AbstractController
 {
@@ -30,6 +35,13 @@ class ClaseController extends AbstractController
         $this->userActionsLogger = $userActionsLogger;
     }
 
+    /**
+     * Crea una nueva clase.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases', name: 'clases_crear', methods: ['POST'])]
     public function crearClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -69,6 +81,13 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve todas las clases del profesor autenticado.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/profesor', name: 'clases_profesor', methods: ['GET', 'OPTIONS'])]
     public function getClasesProfesor(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -106,6 +125,12 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve estadísticas de clases y estudiantes del profesor.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/profesor/stats', name: 'clases_profesor_stats', methods: ['GET'])]
     public function getClasesProfesorStats(EntityManagerInterface $em): JsonResponse
     {
@@ -140,6 +165,13 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Elimina una clase (solo el profesor propietario puede hacerlo).
+     *
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/{id}', name: 'clase_eliminar', methods: ['DELETE'])]
     public function eliminarClase(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -191,6 +223,13 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve el detalle de una clase para el profesor.
+     *
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/{id}', name: 'clase_detalle', methods: ['GET'])]
     public function getClaseDetalle(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -246,6 +285,13 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve el detalle de una clase para el alumno autenticado.
+     *
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/{id}/alumno', name: 'clase_detalle_alumno', methods: ['GET'])]
     public function getClaseDetalleAlumno(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -291,6 +337,14 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Busca una clase por código para el alumno.
+     *
+     * @param string $codigo
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/alumno/clases/buscar/{codigo}', name: 'clase_buscar_alumno', methods: ['GET', 'OPTIONS'])]
     public function buscarClasePorCodigoAlumno(string $codigo, Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -320,6 +374,13 @@ class ClaseController extends AbstractController
         ]);
     }
 
+    /**
+     * Permite a un alumno unirse a una clase por código.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/alumno/clases/unirse', name: 'clase_unirse_alumno', methods: ['POST', 'OPTIONS'])]
     public function unirseAClase(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -373,6 +434,13 @@ class ClaseController extends AbstractController
         );
     }
 
+    /**
+     * Permite a un alumno salir de una clase.
+     *
+     * @param Clase $clase
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     #[Route('/alumno/clases/{id}/salir', name: 'clase_salir_alumno', methods: ['POST'])]
     public function salirDeClase(
         #[MapEntity] Clase $clase,
@@ -409,6 +477,12 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve todas las clases del alumno autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/clases/alumno', name: 'clases_alumno', methods: ['GET'])]
     public function getClasesAlumno(EntityManagerInterface $em): JsonResponse
     {
@@ -440,6 +514,12 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve estadísticas de tareas para el usuario autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/tareas/stats', name: 'tareas_stats', methods: ['GET'])]
     public function getTareasStats(EntityManagerInterface $em): JsonResponse
     {
@@ -482,6 +562,12 @@ class ClaseController extends AbstractController
         return new JsonResponse(['error' => 'Rol no soportado'], 400);
     }
 
+    /**
+     * Devuelve todas las tareas del alumno autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/tareas/alumno', name: 'tareas_alumno', methods: ['GET'])]
     public function getTareasAlumno(EntityManagerInterface $em): JsonResponse
     {
@@ -537,6 +623,14 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Permite a un alumno entregar una tarea.
+     *
+     * @param int $id
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/tareas/{id}/entregar', name: 'tarea_entregar', methods: ['POST'])]
     public function entregarTarea(int $id, Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -582,6 +676,13 @@ class ClaseController extends AbstractController
         return new JsonResponse(['message' => 'Tarea entregada correctamente']);
     }
 
+    /**
+     * Devuelve los datos de una clase por su ID.
+     *
+     * @param int $id
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/api/clases/{id}', name: 'api_get_clase', methods: ['GET'])]
     public function getClase($id, EntityManagerInterface $em): JsonResponse
     {
@@ -623,6 +724,14 @@ class ClaseController extends AbstractController
         ]);
     }
 
+    /**
+     * Devuelve todas las entregas de una tarea.
+     *
+     * @param int $id
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/tareas/{id}/entregas', name: 'get_tarea_entregas', methods: ['GET', 'OPTIONS'])]
     public function getTareaEntregas(int $id, Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -714,6 +823,14 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Permite al profesor calificar una entrega.
+     *
+     * @param int $id
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     #[Route('/entregas/{id}/calificar', name: 'entrega_calificar', methods: ['POST'])]
     public function calificarEntrega(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -768,6 +885,12 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * (Privado) Crea una notificación de calificación de tarea.
+     *
+     * @param EntregaTarea $entrega
+     * @return void
+     */
     private function crearNotificacionCalificacion(EntregaTarea $entrega): void
     {
         try {
@@ -785,6 +908,12 @@ class ClaseController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve todas las tareas del profesor autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/tareas/profesor', name: 'api_tareas_profesor', methods: ['GET'])]
     public function getTareasProfesor(EntityManagerInterface $em): JsonResponse
     {

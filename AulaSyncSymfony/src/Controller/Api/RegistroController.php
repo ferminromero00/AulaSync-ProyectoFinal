@@ -20,6 +20,10 @@ use App\Entity\RegistroPendiente;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Component\Ldap\Exception\LdapException;
 
+/**
+ * Controlador para gestionar el registro de alumnos y profesores en la API.
+ * Incluye verificación por email y LDAP, así como el flujo de registro completo.
+ */
 #[Route('/api', name: 'api_')]
 class RegistroController extends AbstractController
 {
@@ -30,6 +34,13 @@ class RegistroController extends AbstractController
         $this->logger = $logger;
     }
 
+    /**
+     * Inicia el proceso de registro.
+     * - Valida el email.
+     * - Verifica si el email ya está registrado.
+     * - Si es profesor, verifica en LDAP.
+     * - Envía un código de verificación por email.
+     */
     #[Route('/registro/iniciar', name: 'registro_iniciar', methods: ['POST'])]
     public function iniciarRegistro(Request $request, EntityManagerInterface $em, MailerInterface $mailer, Ldap $ldap): JsonResponse
     {
@@ -164,6 +175,11 @@ class RegistroController extends AbstractController
         }
     }
 
+    /**
+     * Verifica el código de registro y crea el usuario (alumno o profesor).
+     * - Valida el código recibido.
+     * - Crea el usuario correspondiente si el código es correcto.
+     */
     #[Route('/registro/verificar', name: 'registro_verificar', methods: ['POST'])]
     public function verificarRegistro(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -284,6 +300,10 @@ class RegistroController extends AbstractController
         }
     }
 
+    /**
+     * Registro directo de alumno (sin verificación previa).
+     * - Crea un nuevo alumno si los datos son válidos.
+     */
     #[Route('/registro', name: 'registro', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -324,6 +344,10 @@ class RegistroController extends AbstractController
         }
     }
 
+    /**
+     * Registro directo de profesor (sin verificación previa).
+     * - Crea un nuevo profesor si los datos son válidos.
+     */
     #[Route('/registro/profesor', name: 'registro_profesor', methods: ['POST'])]
     public function registerProfesor(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -362,6 +386,9 @@ class RegistroController extends AbstractController
         }
     }
 
+    /**
+     * Devuelve la lista de todos los alumnos.
+     */
     #[Route('/alumnos', name: 'alumnos_list', methods: ['GET'])]
     public function listAlumnos(EntityManagerInterface $em): JsonResponse
     {
@@ -380,6 +407,10 @@ class RegistroController extends AbstractController
         return new JsonResponse($alumnosArray);
     }
 
+    /**
+     * Permite a un profesor buscar alumnos por nombre o email.
+     * Requiere el rol de profesor.
+     */
     #[Route('/profesor/alumnos/search', name: 'api_alumnos_search', methods: ['GET'])]
     #[IsGranted('ROLE_PROFESOR')]
     public function searchAlumnos(Request $request, EntityManagerInterface $em): JsonResponse

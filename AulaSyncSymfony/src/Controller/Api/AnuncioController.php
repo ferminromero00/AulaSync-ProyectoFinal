@@ -13,25 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
-/**
- * Controlador para gestionar las operaciones relacionadas con los anuncios y tareas en la API.
- *
- * Este controlador maneja la creación, obtención y eliminación de anuncios y tareas,
- * incluyendo la gestión de archivos adjuntos y notificaciones a los alumnos.
- *
- * @package App\Controller\Api
- */
 class AnuncioController extends AbstractController
 {
-    /**
-     * Crea un nuevo anuncio o tarea.
-     *
-     * @param Request $request La petición HTTP con los datos del anuncio
-     * @param EntityManagerInterface $entityManager El gestor de entidades
-     * @param ClaseRepository $claseRepository Repositorio de clases
-     * 
-     * @return JsonResponse La respuesta con los datos del anuncio creado o error
-     */
     #[Route('/api/anuncios', name: 'crear_anuncio', methods: ['POST'])]
     public function crearAnuncio(Request $request, EntityManagerInterface $entityManager, ClaseRepository $claseRepository): JsonResponse
     {
@@ -111,15 +94,6 @@ class AnuncioController extends AbstractController
         }
     }
 
-    /**
-     * Obtiene todos los anuncios de una clase específica.
-     *
-     * @param int $claseId El ID de la clase
-     * @param ClaseRepository $claseRepository Repositorio de clases
-     * @param EntityManagerInterface $entityManager El gestor de entidades
-     * 
-     * @return JsonResponse Lista de anuncios de la clase o error
-     */
     #[Route('/api/anuncios/clase/{claseId}', name: 'obtener_anuncios', methods: ['GET'])]
     public function obtenerAnuncios(int $claseId, ClaseRepository $claseRepository, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -177,14 +151,6 @@ class AnuncioController extends AbstractController
         }
     }
 
-    /**
-     * Elimina un anuncio específico.
-     *
-     * @param int $id El ID del anuncio a eliminar
-     * @param EntityManagerInterface $entityManager El gestor de entidades
-     * 
-     * @return JsonResponse Confirmación de eliminación o error
-     */
     #[Route('/api/anuncios/{id}', name: 'eliminar_anuncio', methods: ['DELETE'])]
     public function eliminarAnuncio(int $id, EntityManagerInterface $entityManager): JsonResponse
     {

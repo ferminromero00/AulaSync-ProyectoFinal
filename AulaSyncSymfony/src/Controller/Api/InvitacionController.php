@@ -5,16 +5,28 @@ namespace App\Controller\Api;
 use App\Entity\Invitacion;
 use App\Entity\Alumno;
 use App\Entity\Clase;
-use App\Entity\Notificacion; // Add this at the top with other use statements
+use App\Entity\Notificacion;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Controlador para gestionar invitaciones y notificaciones de alumnos.
+ *
+ * Permite enviar, responder y listar invitaciones, así como gestionar notificaciones.
+ */
 #[Route('/api')]
 class InvitacionController extends AbstractController
 {
+    /**
+     * Envía una invitación a un alumno para unirse a una clase.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/invitaciones/enviar', name: 'invitacion_enviar', methods: ['POST'])]
     public function enviarInvitacion(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -53,6 +65,14 @@ class InvitacionController extends AbstractController
         return new JsonResponse(['message' => 'Invitación enviada']);
     }
 
+    /**
+     * Permite al alumno responder (aceptar/rechazar) una invitación.
+     *
+     * @param Invitacion $invitacion
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/invitaciones/responder/{id}', name: 'invitacion_responder', methods: ['POST'])]
     public function responderInvitacion(Invitacion $invitacion, Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -79,6 +99,12 @@ class InvitacionController extends AbstractController
         return new JsonResponse(['message' => 'Invitación ' . $respuesta . 'da']);
     }
 
+    /**
+     * Devuelve todas las invitaciones pendientes y notificaciones del alumno autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/invitaciones/pendientes', name: 'invitaciones_pendientes', methods: ['GET'])]
     public function obtenerInvitacionesPendientes(EntityManagerInterface $em): JsonResponse
     {
@@ -115,6 +141,13 @@ class InvitacionController extends AbstractController
         return new JsonResponse($todasLasNotificaciones);
     }
 
+    /**
+     * Marca una notificación como leída (la elimina).
+     *
+     * @param Notificacion $notificacion
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/notificaciones/{id}/leer', name: 'notificacion_leer', methods: ['POST'])]
     public function marcarNotificacionLeida(Notificacion $notificacion, EntityManagerInterface $em): JsonResponse
     {
@@ -129,6 +162,12 @@ class InvitacionController extends AbstractController
         return new JsonResponse(['message' => 'Notificación leída']);
     }
 
+    /**
+     * Borra todas las notificaciones del alumno autenticado.
+     *
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
     #[Route('/notificaciones/borrar-todas', name: 'notificaciones_borrar_todas', methods: ['DELETE'])]
     public function borrarTodasNotificaciones(EntityManagerInterface $em): JsonResponse
     {
@@ -147,6 +186,12 @@ class InvitacionController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
 
+    /**
+     * Formatea las invitaciones para la respuesta JSON.
+     *
+     * @param array $invitaciones
+     * @return array
+     */
     private function formatearInvitaciones($invitaciones): array 
     {
         return array_map(function($inv) {
@@ -165,6 +210,12 @@ class InvitacionController extends AbstractController
         }, $invitaciones);
     }
 
+    /**
+     * Formatea las notificaciones para la respuesta JSON.
+     *
+     * @param array $notificaciones
+     * @return array
+     */
     private function formatearNotificaciones($notificaciones): array 
     {
         return array_map(function($notif) {

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+// Importaciones necesarias para el controlador de login
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,12 +15,20 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Controlador para gestionar la autenticación de usuarios en la API.
+ * Maneja los endpoints de login para alumnos y profesores.
+ */
 #[Route('/api', name: 'api_')]
 class LoginController extends AbstractController
 {
+    // Servicios de logging para la API y acciones de usuario
     private $apiLogger;
     private $userActionsLogger;
 
+    /**
+     * Constructor del controlador que inicializa los loggers.
+     */
     public function __construct(
         LoggerInterface $apiLogger,
         LoggerInterface $userActionsLogger
@@ -28,6 +37,10 @@ class LoginController extends AbstractController
         $this->userActionsLogger = $userActionsLogger;
     }
 
+    /**
+     * Endpoint para el login de alumnos.
+     * Verifica credenciales y devuelve token JWT si son válidas.
+     */
     #[Route('/alumno/login', name: 'login_alumno', methods: ['POST'])]
     public function loginAlumno(Request $request, UserPasswordHasherInterface $passwordHasher, JWTTokenManagerInterface $jwtManager, EntityManagerInterface $em): JsonResponse
     {
@@ -81,6 +94,12 @@ class LoginController extends AbstractController
         }
     }
 
+    /**
+     * Método auxiliar para obtener los datos de las clases de un alumno.
+     * @param Alumno $alumno El alumno del que se quieren obtener las clases
+     * @param EntityManagerInterface $em El gestor de entidades
+     * @return array Array con los datos de las clases
+     */
     private function getClasesData(Alumno $alumno, EntityManagerInterface $em): array 
     {
         return array_map(function($clase) {
@@ -94,6 +113,12 @@ class LoginController extends AbstractController
         }, $alumno->getClases()->toArray());
     }
 
+    /**
+     * Método auxiliar para obtener las invitaciones pendientes de un alumno.
+     * @param Alumno $alumno El alumno del que se quieren obtener las invitaciones
+     * @param EntityManagerInterface $em El gestor de entidades
+     * @return array Array con los datos de las invitaciones pendientes
+     */
     private function getInvitacionesPendientes(Alumno $alumno, EntityManagerInterface $em): array
     {
         $invitaciones = $em->getRepository(Invitacion::class)->findBy([
@@ -114,6 +139,10 @@ class LoginController extends AbstractController
         }, $invitaciones);
     }
 
+    /**
+     * Endpoint para el login de profesores.
+     * Verifica credenciales y devuelve información del profesor si son válidas.
+     */
     #[Route('/profesor/login', name: 'login_profesor', methods: ['POST'])]
     public function loginProfesor(#[CurrentUser] ?Profesor $profesor): JsonResponse
     {

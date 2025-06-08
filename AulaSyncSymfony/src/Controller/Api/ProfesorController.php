@@ -15,9 +15,19 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use App\Service\FileUploader;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+/**
+ * Controlador para gestionar las operaciones relacionadas con el profesor en la API.
+ *
+ * Permite consultar y actualizar el perfil, cambiar la contraseña y actualizar la foto de perfil.
+ */
 #[Route('/api/profesor')]
 class ProfesorController extends AbstractController
 {
+    /**
+     * Obtiene el perfil del profesor autenticado.
+     *
+     * @return JsonResponse Datos del perfil o error de autenticación.
+     */
     #[Route('/perfil', name: 'api_profesor_perfil_get', methods: ['GET'])]
     public function getPerfil(): JsonResponse
     {
@@ -53,6 +63,13 @@ class ProfesorController extends AbstractController
         }
     }
 
+    /**
+     * Actualiza los datos del perfil del profesor.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse Confirmación o error.
+     */
     #[Route('/perfil', name: 'api_profesor_perfil_update', methods: ['PUT'])]
     public function actualizarPerfil(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -95,6 +112,15 @@ class ProfesorController extends AbstractController
         }
     }
 
+    /**
+     * Actualiza la contraseña del profesor.
+     * Verifica la contraseña actual antes de actualizar.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @param UserPasswordHasherInterface $passwordHasher
+     * @return JsonResponse Confirmación o error.
+     */
     #[Route('/password', name: 'api_profesor_password_update', methods: ['PUT'])]
     public function cambiarPassword(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -116,6 +142,15 @@ class ProfesorController extends AbstractController
         return new JsonResponse(['message' => 'Contraseña actualizada correctamente']);
     }
 
+    /**
+     * Actualiza la foto de perfil del profesor.
+     * Gestiona la subida y eliminación de archivos.
+     *
+     * @param Request $request
+     * @param FileUploader $fileUploader
+     * @param EntityManagerInterface $em
+     * @return JsonResponse Confirmación o error.
+     */
     #[Route('/perfil/foto', name: 'api_profesor_foto_perfil', methods: ['POST'])]
     public function actualizarFotoPerfil(Request $request, FileUploader $fileUploader, EntityManagerInterface $em): JsonResponse
     {
