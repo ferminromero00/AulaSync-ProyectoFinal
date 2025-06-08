@@ -9,8 +9,18 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Formulario para la configuración del perfil del profesor.
+ * Permite editar nombre, apellidos, email, especialidad y departamento.
+ */
 class ConfiguracionProfesorType extends AbstractType
 {
+    /**
+     * Construye el formulario de configuración de profesor.
+     *
+     * @param FormBuilderInterface $builder
+     * @param array $options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -22,6 +32,11 @@ class ConfiguracionProfesorType extends AbstractType
         ;
     }
 
+    /**
+     * Configura las opciones del formulario.
+     *
+     * @param OptionsResolver $resolver
+     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
