@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth';
 import NotificationButton from '../components/NotificationButton'
@@ -145,22 +145,21 @@ const TeacherLayout = () => {
 }
 
 /**
- * Componente de enlace para la barra lateral con estado activo.
+ * Componente de enlace para la barra lateral.
  * 
- * @param {Object} props
- * @param {string} props.to - URL destino del enlace
- * @param {JSX.Element} props.icon - Icono del enlace
- * @param {string} props.label - Texto del enlace
- * @returns {JSX.Element} Enlace estilizado para la barra lateral
+ * @param {Object} props Propiedades del componente
+ * @param {string} props.to URL destino del enlace
+ * @param {JSX.Element} props.icon Icono del enlace
+ * @param {string} props.label Texto del enlace
  */
 function SidebarLink({ to, icon, label }) {
     const location = useLocation();
     const isActive = location.pathname.startsWith(to);
+    
     return (
         <Link
             to={to}
-            className={`sidebar-link flex items-center gap-3 px-4 py-3 text-blue-100 font-medium rounded-xl border border-transparent
-                ${isActive ? 'sidebar-link-active' : 'hover:sidebar-link-active'}`}
+            className={`sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
         >
             <span className="sidebar-icon">{icon}</span>
             <span>{label}</span>
