@@ -83,7 +83,7 @@ export default function LoginPage() {
               </a>
               {/* Backend */}
               <a
-                href="../../../../AulaSyncSymfony/docs/namespaces/default.html"
+                href="https://api.aulasync.work.gd/docs/namespaces/default.html"
                 target="_blank"
                 className="flex-1 flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-100 hover:from-emerald-100 hover:to-blue-100 transition-all duration-300 group shadow-sm"
                 style={{ minWidth: 0 }}

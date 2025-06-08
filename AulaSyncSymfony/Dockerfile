@@ -24,6 +24,9 @@ RUN composer install --no-scripts --optimize-autoloader
 # Copiar el resto de archivos
 COPY AulaSyncSymfony/. .
 
+# Copiar la documentación generada a la carpeta pública
+RUN cp -r /var/www/docs /var/www/public/
+
 # Generar claves JWT
 RUN mkdir -p config/jwt && \
     openssl genrsa -aes256 -passout pass:d2fc5260fad6e9ae752cd8666c237d78b2f970a4befe84df28120cd1a21803a9 -out config/jwt/private.pem 4096 && \
