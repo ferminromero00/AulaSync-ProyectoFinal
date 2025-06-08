@@ -9,8 +9,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Controlador para exportar la información de una clase en formato PDF.
+ * Utiliza KnpSnappy para generar el PDF a partir de una vista Twig.
+ */
 class ClaseExportController extends AbstractController
 {
+    /**
+     * Exporta la información de una clase a PDF.
+     * Incluye datos de alumnos, profesor y anuncios.
+     *
+     * @param int $id ID de la clase a exportar.
+     * @param EntityManagerInterface $em
+     * @param Pdf $knpSnappyPdf
+     * @return Response Archivo PDF descargable o error.
+     */
     #[Route('/api/clases/{id}/exportar-pdf', name: 'clase_exportar_pdf', methods: ['GET'])]
     public function exportarPdf($id, EntityManagerInterface $em, Pdf $knpSnappyPdf): Response
     {

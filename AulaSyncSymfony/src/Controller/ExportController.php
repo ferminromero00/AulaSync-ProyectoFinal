@@ -11,6 +11,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Controlador para exportar datos de clases y tareas en formato CSV.
+ * Solo los profesores pueden exportar datos de sus propias clases o tareas.
+ */
 #[Route('/api/export')]
 class ExportController extends AbstractController
 {
@@ -19,6 +23,13 @@ class ExportController extends AbstractController
         private EntityManagerInterface $entityManager
     ) {}
 
+    /**
+     * Exporta los datos de una clase a un archivo CSV.
+     * Solo el profesor propietario puede exportar la clase.
+     *
+     * @param Clase $clase La clase a exportar.
+     * @return Response Archivo CSV descargable.
+     */
     #[Route('/clase/{id}', name: 'export_clase')]
     public function exportClase(Clase $clase): Response
     {
@@ -42,6 +53,13 @@ class ExportController extends AbstractController
         return $response;
     }
 
+    /**
+     * Exporta los datos de una tarea a un archivo CSV.
+     * Solo el profesor propietario puede exportar la tarea.
+     *
+     * @param Tarea $tarea La tarea a exportar.
+     * @return Response Archivo CSV descargable.
+     */
     #[Route('/tarea/{id}', name: 'export_tarea')]
     public function exportTarea(Tarea $tarea): Response
     {
