@@ -7,7 +7,6 @@
   ![React](https://img.shields.io/badge/React-18.x-blue)
   ![Symfony](https://img.shields.io/badge/Symfony-6.x-black)
   ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4)
-  ![MIT License](https://img.shields.io/badge/license-MIT-green)
   ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 </div>
 
