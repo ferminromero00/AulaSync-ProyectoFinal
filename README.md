@@ -1,8 +1,6 @@
 # AulaSync - Plataforma de Gestión Educativa 🎓
 
 <div align="center">
-  <!-- Si tienes un logo real, reemplaza la ruta de abajo -->
-  <!-- <img src="path/to/logo.png" alt="AulaSync Logo" width="200"/> -->
 
   ![React](https://img.shields.io/badge/React-18.x-blue)
   ![Symfony](https://img.shields.io/badge/Symfony-6.x-black)
