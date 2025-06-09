@@ -336,8 +336,9 @@ export default function ConfiguracionProfesor() {
             type="email"
             name="email"
             value={editData.email}
-            onChange={e => setEditData({ ...editData, email: e.target.value })}
-            className="w-full border border-blue-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200"
+            disabled
+            className="w-full border border-blue-100 rounded-lg px-3 py-2 bg-gray-50 text-gray-600 cursor-not-allowed"
+            title="No puedes modificar el correo electrónico"
           />
         </div>
         <div>

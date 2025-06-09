@@ -312,8 +312,9 @@ const ConfiguracionAlumno = () => {
             type="email"
             name="email"
             value={editData.email}
-            onChange={handleInputChange}
-            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+            disabled
+            className="w-full border border-green-100 rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-not-allowed"
+            title="No puedes modificar el correo electrónico"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

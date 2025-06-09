@@ -78,21 +78,20 @@ const ClasesProfesor = ({ onClaseCreated }) => {
 
     return (
         <div className="w-full max-w-5xl mx-auto bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-xl">
-            {/* Header con diseño moderno */}
-            <div className="p-8 flex justify-between items-center border-b bg-gradient-to-r from-gray-50 to-white">
+            <div className="p-6 flex justify-between items-center border-b bg-gradient-to-r from-gray-50 to-white">
                 <div>
-                    <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                         Resumen de Clases
                     </h2>
-                    <p className="text-base text-gray-500 mt-1">Vista rápida de tus clases activas</p>
+                    <p className="text-sm text-gray-500">Vista rápida de tus clases activas</p>
                 </div>
                 <Link 
                     to="/profesor/clases"
-                    className="flex items-center gap-2 px-5 py-2 text-blue-600 font-medium
-                             hover:bg-blue-50 rounded-lg transition-colors group text-lg"
+                    className="flex items-center gap-1 px-4 py-1.5 text-blue-600 font-medium
+                             hover:bg-blue-50 rounded-lg transition-colors group text-base"
                 >
                     Ver todas 
-                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
             </div>
 
@@ -103,73 +102,49 @@ const ClasesProfesor = ({ onClaseCreated }) => {
             ) : error ? (
                 <div className="text-red-500 text-center p-4">{error}</div>
             ) : (
-                <div className="p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {clases.slice(0, 6).map((clase, index) => (
                             <Link
                                 key={clase.id}
                                 to={`/profesor/clase/${clase.id}`}
                                 className="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50
-                                    border border-gray-100 rounded-2xl p-8 hover:border-blue-300
-                                    transition-all duration-300 hover:shadow-2xl animate-fadeIn min-h-[220px] flex flex-col"
-                                style={{ animationDelay: `${index * 150}ms` }}
+                                    border border-gray-100 rounded-xl p-4 hover:border-blue-300
+                                    transition-all duration-300 hover:shadow-lg animate-fadeIn"
+                                style={{ animationDelay: `${index * 100}ms` }}
                             >
-                                {/* Fondo decorativo */}
-                                <div className="absolute -right-12 -bottom-12 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 
-                                    rounded-full transition-transform duration-500 group-hover:scale-150" />
-                                <div className="relative z-10 flex flex-col h-full">
-                                    <div className="flex items-center gap-5 mb-4">
-                                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-5 rounded-2xl
-                                            group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                                            <BookOpen className="h-9 w-9 text-blue-600" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-2xl text-gray-900 truncate mb-1 group-hover:text-blue-700 transition-colors">
-                                                {clase.nombre}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-3 mt-2">
-                                                <span className="flex items-center gap-1 text-base text-gray-500">
-                                                    <Users className="h-5 w-5" />
-                                                    {clase.numEstudiantes} estudiantes
-                                                </span>
-                                                <span className="flex items-center gap-1 text-base text-blue-600 font-semibold">
-                                                    <BookOpen className="h-5 w-5" />
-                                                    Código: {clase.codigoClase}
-                                                </span>
-                                            </div>
-                                        </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-3 rounded-xl
+                                        group-hover:scale-110 transition-transform duration-300">
+                                        <BookOpen className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    <div className="flex flex-col gap-2 mt-2 mb-4">
-                                        <div className="flex items-center gap-2 text-base text-gray-500">
-                                            <Calendar className="h-5 w-5" />
-                                            <span>
-                                                Creada: {new Date(clase.createdAt).toLocaleDateString('es-ES', {
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-lg text-gray-900 truncate mb-0.5 group-hover:text-blue-700">
+                                            {clase.nombre}
+                                        </h3>
+                                        <div className="flex flex-col gap-0.5 text-sm">
+                                            <div className="flex items-center gap-1 text-gray-500">
+                                                <Users className="h-4 w-4" />
+                                                <span>{clase.numEstudiantes} estudiantes</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-blue-600 font-medium">
+                                                <span>Código: {clase.codigoClase}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-gray-500 text-xs mt-1">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                {new Date(clase.createdAt).toLocaleDateString('es-ES', {
                                                     day: 'numeric',
                                                     month: 'short',
                                                     year: 'numeric'
                                                 })}
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                                            <span className="text-gray-500">{clase.profesor?.nombre || 'Profesor'}</span>
+                                            <span className="text-blue-600 group-hover:underline group-hover:text-blue-800">
+                                                Ver detalles →
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-base text-gray-500">
-                                            <span className="font-semibold text-gray-900">
-                                                {typeof clase.profesor === 'string' 
-                                                    ? clase.profesor 
-                                                    : clase.profesor?.nombre || 'Profesor'}
-                                            </span>
-                                            <span className="text-gray-400">|</span>
-                                            <span>
-                                                {typeof clase.profesor === 'string' 
-                                                    ? '' 
-                                                    : clase.profesor?.especialidad || 'No especificada'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex-1" />
-                                    <div className="flex justify-end mt-4">
-                                        <span className="text-lg font-medium text-blue-600 flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                                            Ver detalles
-                                            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                        </span>
                                     </div>
                                 </div>
                             </Link>
