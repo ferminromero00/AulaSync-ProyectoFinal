@@ -1,12 +1,28 @@
 # AulaSync - Plataforma de Gestión Educativa 🎓
 
 <div align="center">
-  <img src="path/to/logo.png" alt="AulaSync Logo" width="200"/>
-  
+  <!-- Si tienes un logo real, reemplaza la ruta de abajo -->
+  <!-- <img src="path/to/logo.png" alt="AulaSync Logo" width="200"/> -->
+
   ![React](https://img.shields.io/badge/React-18.x-blue)
   ![Symfony](https://img.shields.io/badge/Symfony-6.x-black)
   ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4)
+  ![MIT License](https://img.shields.io/badge/license-MIT-green)
+  ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 </div>
+
+## 📑 Índice
+
+- [Descripción](#-descripción)
+- [Características Principales](#-características-principales)
+- [Tecnologías](#-tecnologías)
+- [Instalación](#-instalación)
+- [Arquitectura](#-arquitectura)
+- [Características de la Interfaz](#-características-de-la-interfaz)
+- [Seguridad](#-seguridad)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Autores](#-autores)
+- [Contacto](#-contacto)
 
 ## 📋 Descripción
 
@@ -105,29 +121,17 @@ El proyecto sigue una arquitectura moderna basada en:
 
 ```
 AulaSync/
-├── AulaSync-React/        # Frontend
+├── 🟦 AulaSync-React/        # Frontend
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   └── services/
 │   └── public/
 │
-└── AulaSyncSymfony/       # Backend
+└── ⚫ AulaSyncSymfony/       # Backend
     ├── src/
     │   ├── Controller/
     │   ├── Entity/
     │   └── Repository/
     └── config/
 ```
-
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Por favor, lee las guías de contribución antes de enviar un PR.
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 👥 Autores
-
-- Fermín - Desarrollador Principal
