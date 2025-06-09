@@ -21,8 +21,6 @@
 - [Características de la Interfaz](#-características-de-la-interfaz)
 - [Seguridad](#-seguridad)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Autores](#-autores)
-- [Contacto](#-contacto)
 
 ## 📋 Descripción
 
