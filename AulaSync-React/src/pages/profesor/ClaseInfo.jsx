@@ -22,6 +22,10 @@ const ClaseInfo = () => {
     const [loading, setLoading] = useState(true);
     const [profesorNombre, setProfesorNombre] = useState(null);
     const [exportingPdf, setExportingPdf] = useState(false);
+    const [entregasPorTarea, setEntregasPorTarea] = useState({});
+    const [statesLoading, setStatesLoading] = useState(true);
+    const [loadingStates, setLoadingStates] = useState({});
+    const [loadingStudents, setLoadingStudents] = useState(true);
     const exportModalRef = useRef(null);
 
     // Animación de ticks progresivos para la carga
@@ -136,6 +140,84 @@ const ClaseInfo = () => {
             setExportingPdf(false);
         }
     };
+
+    useEffect(() => {
+        const cargarEntregas = async () => {
+            if (!tareas || tareas.length === 0 || !clase) return;
+            
+            // Inicializar estados de carga para cada alumno y tarea
+            const initialLoadingStates = {};
+            clase?.estudiantes?.forEach(alumno => {
+                initialLoadingStates[alumno.id] = true;
+            });
+            setLoadingStates(initialLoadingStates);
+            
+            const nuevasEntregas = {};
+            for (const tarea of tareas) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/tareas/${tarea.id}/entregas`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    if (!response.ok) {
+                        console.warn(`Error al cargar entregas para tarea ${tarea.id}`);
+                        continue;
+                    }
+                    const data = await response.json();
+                    nuevasEntregas[tarea.id] = data;
+                } catch (error) {
+                    console.warn(`Error al cargar entregas para tarea ${tarea.id}:`, error);
+                }
+            }
+            setEntregasPorTarea(nuevasEntregas);
+            
+            // Marcar todos los estados como cargados
+            const finishedLoadingStates = {};
+            clase?.estudiantes?.forEach(alumno => {
+                finishedLoadingStates[alumno.id] = false;
+            });
+            setLoadingStates(finishedLoadingStates);
+        };
+
+        cargarEntregas();
+    }, [tareas, clase]);
+
+    useEffect(() => {
+        const loadStates = async () => {
+            setStatesLoading(true);
+            try {
+                // Aquí iría la lógica para cargar los estados, si es que hay una función específica para eso
+                // Por ahora, solo simularé una carga con setTimeout
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+                console.error('Error al cargar estados:', error);
+            } finally {
+                setStatesLoading(false);
+            }
+        };
+
+        loadStates();
+    }, [tareas]);
+
+    const cargarDatos = async () => {
+        try {
+            const data = await getClaseById(id);
+            if (data && data.estudiantes) {
+                setClase(data);
+            } else {
+                console.warn('La clase no tiene estudiantes o no se pudo cargar correctamente');
+                setClase({ ...data, estudiantes: [] }); // Aseguramos que estudiantes sea al menos un array vacío
+            }
+        } catch (error) {
+            console.error('Error al cargar los datos:', error);
+            setClase({ estudiantes: [] });
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
+
+    useEffect(() => {
+        cargarDatos();
+    }, [id]);
 
     if (loading) {
         return (
@@ -306,14 +388,36 @@ const ClaseInfo = () => {
                                                 No hay estudiantes inscritos.
                                             </li>
                                         )}
-                                        {clase.estudiantes?.map((alumno, i) => (
-                                            <li key={alumno.id} className="flex items-center gap-2 text-sm">
-                                                <span className="font-medium text-gray-900">{alumno.nombre}</span>
-                                                <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-1 rounded-full text-xs font-semibold border border-amber-200">
-                                                    <AlertCircle className="h-4 w-4" /> No entregado
-                                                </span>
-                                            </li>
-                                        ))}
+                                        {clase.estudiantes?.map((alumno, i) => {
+                                            const entrega = entregasPorTarea[tarea.id]?.find(e => e.alumnoId === alumno.id);
+                                            return (
+                                                <li key={alumno.id} className="flex items-center gap-2 text-sm">
+                                                    <span className="font-medium text-gray-900">{alumno.nombre}</span>
+                                                    {loadingStates[alumno.id] ? (
+                                                        <span className="flex items-center gap-1 text-gray-600 bg-gray-50 px-2 py-1 rounded-full text-xs font-semibold border border-gray-200">
+                                                            <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"/>
+                                                            Cargando...
+                                                        </span>
+                                                    ) : (
+                                                        entrega ? (
+                                                            entrega.nota ? (
+                                                                <span className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-1 rounded-full text-xs font-semibold border border-green-200">
+                                                                    <CheckCircle className="h-4 w-4" /> Calificado ({entrega.nota})
+                                                                </span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-1 rounded-full text-xs font-semibold border border-blue-200">
+                                                                    <Check className="h-4 w-4" /> Entregado
+                                                                </span>
+                                                            )
+                                                        ) : (
+                                                            <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-1 rounded-full text-xs font-semibold border border-amber-200">
+                                                                <AlertCircle className="h-4 w-4" /> No entregado
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
                                 </div>
                             </div>
