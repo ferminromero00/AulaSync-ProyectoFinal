@@ -898,35 +898,46 @@ const ClaseDashboard = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-[80vh]">
-                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+            <div className="flex justify-center items-center h-[80vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+                <div
+                    className={`
+                        bg-white rounded-2xl shadow-2xl flex flex-col items-center border border-blue-100 animate-fade-in-up
+                        sm:px-12 sm:py-10
+                        px-5 py-6
+                    `}
+                    style={{
+                        maxWidth: window.innerWidth < 640 ? 320 : 420,
+                        minWidth: window.innerWidth < 640 ? 0 : 300,
+                        width: window.innerWidth < 640 ? '95vw' : 'auto'
+                    }}
+                >
                     <div className="flex items-center gap-4 mb-6">
-                        <BookOpen className="h-12 w-12 text-blue-500" />
-                        <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+                        <BookOpen className={`h-12 w-12 text-blue-500 ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
+                        <span className={`text-2xl font-bold text-blue-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className="flex flex-col gap-4 min-w-[300px]">
+                    <div className={`flex flex-col gap-4 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""}`}>
                         {steps.map((s, idx) => (
                             <div className="flex items-center gap-3" key={s.key}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <CheckCircle className="h-4 w-4 text-green-500 animate-pop" />
+                                        <CheckCircle className={`h-4 w-4 text-green-500 animate-pop ${window.innerWidth < 640 ? "h-3 w-3" : ""}`} />
                                     </span>
                                 ) : step === idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 ) : (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 )}
-                                <span className={`text-gray-600 ${step > idx ? "line-through text-green-700" : ""}`}>{s.label}</span>
+                                <span className={`text-gray-600 ${step > idx ? "line-through text-green-700" : ""} ${window.innerWidth < 640 ? "text-sm" : ""}`}>{s.label}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-8 text-blue-700 text-sm flex items-center gap-2">
+                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs" : ""}`}>
                         Preparando clase
-                        <span className="inline-block w-6 text-blue-700 font-bold" style={{ letterSpacing: 1 }}>
+                        <span className={`inline-block w-6 text-blue-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
                         </span>
                     </div>

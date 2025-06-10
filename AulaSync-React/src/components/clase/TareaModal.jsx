@@ -213,17 +213,51 @@ const TareaModal = ({
     const archivoEntregaUrl = tareaToShow.archivoEntregaUrl ? `${API_BASE_URL}${tareaToShow.archivoEntregaUrl}` : null;
 
     return (
-        <div className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
-            ${isClosing ? 'modal-closing' : ''}`} style={{ margin: 0, padding: 0, zIndex: 1050 }}>
+        <div
+            className={`fixed left-0 top-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-50
+            ${isClosing ? 'modal-closing' : ''}`}
+            style={{
+                margin: 0,
+                padding: 0,
+                zIndex: 1050,
+                alignItems: "center", // Asegura centrado vertical
+                justifyContent: "center", // Asegura centrado horizontal
+                display: "flex", // Asegura flexbox siempre
+            }}
+        >
             {isProcessing ? (
-                <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl animate-fadeIn">
-                    <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                    <p className="text-gray-600 font-medium">Cargando tarea...</p>
+                <div
+                    className={`
+                        bg-white rounded-2xl flex flex-col items-center gap-4 shadow-2xl animate-fadeIn
+                        sm:p-8 p-5
+                    `}
+                    style={{
+                        minWidth: window.innerWidth < 640 ? 0 : 320,
+                        maxWidth: window.innerWidth < 640 ? 260 : 400,
+                        width: window.innerWidth < 640 ? '90vw' : 'auto'
+                    }}
+                >
+                    <div className={`w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin ${window.innerWidth < 640 ? "w-10 h-10 border-2" : ""}`}></div>
+                    <p className={`text-gray-600 font-medium ${window.innerWidth < 640 ? "text-sm" : ""}`}>Cargando tarea...</p>
                 </div>
             ) : (
-                <div className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
-                    shadow-2xl modal-content max-h-[90vh] overflow-hidden z-50
-                    ${isClosing ? 'modal-content-closing' : ''}`}>
+                <div
+                    className={`bg-white rounded-2xl w-full max-w-4xl mx-4 flex flex-col md:flex-row relative 
+                        shadow-2xl modal-content max-h-[90vh] overflow-hidden z-50
+                        ${isClosing ? 'modal-content-closing' : ''}`}
+                    style={{
+                        width: window.innerWidth < 640 ? '98vw' : undefined,
+                        minWidth: window.innerWidth < 640 ? '0' : undefined,
+                        maxWidth: window.innerWidth < 640 ? '100vw' : undefined,
+                        margin: "0 auto", // Centrado horizontal en PC
+                        position: "relative",
+                        top: "unset",
+                        left: "unset",
+                        right: "unset",
+                        bottom: "unset",
+                        display: "flex",
+                    }}
+                >
                     {/* Animaciones locales solo para este modal */}
                     <style>{`
                         @keyframes tareaFadeIn {
@@ -259,7 +293,15 @@ const TareaModal = ({
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="flex-[1.2] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[260px] max-w-[55%] tarea-anim-fadeIn relative z-10">
+                    <div
+                        className="flex-[1.2] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[260px] max-w-[55%] tarea-anim-fadeIn relative z-10"
+                        style={{
+                            // SOLO EN MOVIL: ocupa casi todo el ancho
+                            minWidth: window.innerWidth < 640 ? '0' : '260px',
+                            maxWidth: window.innerWidth < 640 ? '100%' : '55%',
+                            width: window.innerWidth < 640 ? '100%' : undefined,
+                        }}
+                    >
                         <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                             {/* Cabecera */}
                             <div className="flex items-center gap-4 px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
