@@ -14,7 +14,8 @@ import IaChatWidget from '../components/IaChatWidget'
  * @returns {JSX.Element} Layout completo para vistas de profesor
  */
 const TeacherLayout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    // Cambiamos el estado inicial a false para que empiece cerrado
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const navigate = useNavigate()
 
     const handleLogout = () => {
@@ -32,7 +33,7 @@ const TeacherLayout = () => {
                 />
             )}
 
-            {/* Sidebar */}
+            {/* Sidebar - modificamos la clase para que empiece cerrado */}
             <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div className="flex h-full flex-col bg-gradient-to-b from-blue-900 via-blue-800 to-indigo-900 text-white shadow-2xl">
