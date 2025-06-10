@@ -222,34 +222,48 @@ const ClaseInfo = () => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up">
+                <div
+                    className={`
+                        bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-blue-100 animate-fade-in-up
+                        sm:px-12 sm:py-10
+                        px-5 py-6
+                    `}
+                    style={{
+                        maxWidth: window.innerWidth < 640 ? 320 : 420,
+                        minWidth: window.innerWidth < 640 ? 0 : 300,
+                        width: window.innerWidth < 640 ? '95vw' : 'auto'
+                    }}
+                >
                     <div className="flex items-center gap-4 mb-6">
-                        <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
-                        <span className="text-2xl font-bold text-blue-900">AulaSync</span>
+                        <BookOpen className={`h-12 w-12 text-blue-500 animate-spin ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
+                        <span className={`text-2xl font-bold text-blue-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className="flex flex-col gap-3 min-w-[300px]">
+                    <div className={`flex flex-col gap-3 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""}`}>
                         {steps.map((s, idx) => (
                             <div className="flex items-center gap-3" key={s.label}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <CheckCircle className="h-4 w-4 text-green-500 animate-pop" />
+                                        <svg className="text-blue-500 animate-pop" width={window.innerWidth < 640 ? 14 : 18} height={window.innerWidth < 640 ? 14 : 18} fill="none" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" fill="#dbeafe"/>
+                                            <path d="M7 13l3 3 7-7" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
                                     </span>
                                 ) : step === idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 ) : (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 )}
-                                <span className={`text-blue-800 ${step > idx ? "line-through text-blue-700" : ""}`}>{s.label}</span>
+                                <span className={`text-blue-800 ${step > idx ? "line-through text-blue-700" : ""} ${window.innerWidth < 640 ? "text-sm" : ""}`}>{s.label}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-8 text-blue-700 text-sm flex items-center gap-2">
+                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs" : ""}`}>
                         Un momento, preparando la información de la clase
-                        <span className="inline-block w-6 text-blue-700 font-bold" style={{ letterSpacing: 1 }}>
+                        <span className={`inline-block w-6 text-blue-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
                         </span>
                     </div>
@@ -279,15 +293,31 @@ const ClaseInfo = () => {
 
     return (
         <div className="max-w-5xl mx-auto py-10 px-4 animate-fadeInInfo">
-            {/* Cabecera moderna */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-4 animate-slideDown">
-                <div className="flex items-center gap-4">
+            {/* Cabecera moderna - SOLO MOBILE cambia visual */}
+            <div
+                className={`
+                    flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-4 animate-slideDown
+                    sm:flex-row sm:items-center sm:justify-between
+                `}
+            >
+                <div
+                    className={`
+                        flex items-center gap-4
+                        sm:flex-row sm:items-center
+                        ${window.innerWidth < 640 ? "flex-col items-center text-center gap-2" : ""}
+                    `}
+                >
                     <div className="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 rounded-2xl shadow">
                         <BookOpen className="h-8 w-8 text-blue-600" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-bold text-blue-900">{clase.nombre}</h1>
-                        <div className="flex items-center gap-4 mt-2 text-gray-600 text-base">
+                        <div
+                            className={`
+                                flex items-center gap-4 mt-2 text-gray-600 text-base
+                                ${window.innerWidth < 640 ? "flex-col gap-1 mt-1" : ""}
+                            `}
+                        >
                             <span className="flex items-center gap-2">
                                 <Users className="h-5 w-5 text-blue-400" />
                                 <span className="font-semibold">{clase.estudiantes?.length || 0}</span> alumnos unidos
@@ -299,8 +329,13 @@ const ClaseInfo = () => {
                         </div>
                     </div>
                 </div>
-                {/* Profesor y especialidad */}
-                <div className="flex flex-col gap-2 items-end">
+                {/* Profesor y especialidad - SOLO MOBILE: apilado y centrado */}
+                <div
+                    className={`
+                        flex flex-col gap-2 items-end
+                        ${window.innerWidth < 640 ? "items-center text-center mt-3" : ""}
+                    `}
+                >
                     <div className="text-sm text-gray-500">
                         <span className="font-semibold text-blue-700">Profesor:</span>{" "}
                         {profesorNombre
@@ -311,7 +346,6 @@ const ClaseInfo = () => {
                     <div className="text-sm text-gray-500">
                         <span className="font-semibold text-blue-700">Especialidad:</span>{" "}
                         {(() => {
-                            // Mostrar especialidad del objeto profesor si existe
                             const especialidad = clase.profesor && clase.profesor.especialidad;
                             return (especialidad && especialidad.trim() !== "")
                                 ? especialidad
@@ -321,11 +355,19 @@ const ClaseInfo = () => {
                 </div>
             </div>
 
-            {/* Botón para ir a la clase y exportar PDF */}
-            <div className="flex flex-wrap justify-end gap-3 mb-4 -mt-2">
+            {/* Botones - SOLO MOBILE: apilados y centrados */}
+            <div
+                className={`
+                    flex flex-wrap justify-end gap-3 mb-4 -mt-2
+                    ${window.innerWidth < 640 ? "flex-col items-center gap-2 justify-center" : ""}
+                `}
+            >
                 <button
                     onClick={handleExportPDF}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo"
+                    className={`
+                        inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo
+                        ${window.innerWidth < 640 ? "w-full justify-center" : ""}
+                    `}
                     style={{ animationDelay: '180ms' }}
                 >
                     <FileText className="h-5 w-5" />
@@ -333,7 +375,10 @@ const ClaseInfo = () => {
                 </button>
                 <button
                     onClick={() => navigate(`/profesor/clase/${id}`)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo"
+                    className={`
+                        inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition-all duration-300 animate-fadeInInfo
+                        ${window.innerWidth < 640 ? "w-full justify-center" : ""}
+                    `}
                     style={{ animationDelay: '200ms' }}
                 >
                     <BookOpen className="h-5 w-5" />

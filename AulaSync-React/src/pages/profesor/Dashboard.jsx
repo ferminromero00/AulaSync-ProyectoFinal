@@ -116,37 +116,48 @@ const Dashboard = () => {
     if (statsLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-violet-50 via-white to-purple-50">
-                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-violet-100 animate-fade-in-up">
+                <div
+                    className={`
+                        bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-violet-100 animate-fade-in-up
+                        sm:px-12 sm:py-10
+                        px-5 py-6
+                    `}
+                    style={{
+                        maxWidth: window.innerWidth < 640 ? 320 : 420,
+                        minWidth: window.innerWidth < 640 ? 0 : 300,
+                        width: window.innerWidth < 640 ? '95vw' : 'auto'
+                    }}
+                >
                     <div className="flex items-center gap-4 mb-6">
-                        <Loader2 className="h-12 w-12 text-violet-500 animate-spin" />
-                        <span className="text-2xl font-bold text-violet-900">AulaSync</span>
+                        <Loader2 className={`h-12 w-12 text-violet-500 animate-spin ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
+                        <span className={`text-2xl font-bold text-violet-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className="flex flex-col gap-3 min-w-[300px]">
+                    <div className={`flex flex-col gap-3 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""}`}>
                         {steps.map((s, idx) => (
                             <div className="flex items-center gap-3" key={s.label}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <svg className="text-violet-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                                        <svg className="text-violet-500 animate-pop" width={window.innerWidth < 640 ? 14 : 18} height={window.innerWidth < 640 ? 14 : 18} fill="none" viewBox="0 0 24 24">
                                             <circle cx="12" cy="12" r="10" fill="#ddd6fe"/>
                                             <path d="M7 13l3 3 7-7" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                     </span>
                                 ) : step === idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-violet-600 border-t-transparent animate-spin"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-violet-600 border-t-transparent animate-spin ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 ) : (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 )}
-                                <span className={`text-violet-800 ${step > idx ? "line-through text-violet-700" : ""}`}>{s.label}</span>
+                                <span className={`text-violet-800 ${step > idx ? "line-through text-violet-700" : ""} ${window.innerWidth < 640 ? "text-sm" : ""}`}>{s.label}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-8 text-violet-700 text-sm flex items-center gap-2">
+                    <div className={`mt-8 text-violet-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs" : ""}`}>
                         ¡Bienvenido a AulaSync! Preparando tu espacio
-                        <span className="inline-block w-6 text-violet-700 font-bold" style={{ letterSpacing: 1 }}>
+                        <span className={`inline-block w-6 text-violet-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
                         </span>
                     </div>
