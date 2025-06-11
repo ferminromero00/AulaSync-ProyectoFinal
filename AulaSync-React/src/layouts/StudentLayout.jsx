@@ -15,7 +15,8 @@ import IaChatWidget from '../components/IaChatWidget'
  * @returns {JSX.Element} Layout completo para vistas de alumno
  */
 const StudentLayout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    // Cambiado: cerrado por defecto (igual que profesor)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const navigate = useNavigate()
     const { userData } = useContext(GlobalContext);
     const clases = userData.clases || [];

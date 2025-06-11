@@ -303,7 +303,7 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                             <X className="h-5 w-5" />
                         </button>
 
-                        <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[320px] max-w-[60%] tarea-anim-fadeIn">
+                        <div className="flex-[1.15] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[320px]  tarea-anim-fadeIn">
                             <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                                 <div className="flex items-center gap-4 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">
                                     <div className="bg-blue-200 p-4 rounded-2xl shadow flex items-center justify-center">

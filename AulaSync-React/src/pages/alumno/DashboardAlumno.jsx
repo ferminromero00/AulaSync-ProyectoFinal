@@ -50,11 +50,11 @@ const DashboardAlumno = () => {
     const dotIntervalRef = useRef();
 
     useEffect(() => {
-        if (userData?.loading || (!userData?.clases && !localLoading)) {
+        if (loading) {
             setStep(0);
             intervalRef.current = setInterval(() => {
                 setStep(prev => (prev < steps.length ? prev + 1 : prev));
-            }, 500);
+            }, 600);
             dotIntervalRef.current = setInterval(() => {
                 setDotCount(prev => (prev + 1) % 3);
             }, 400);
@@ -63,8 +63,7 @@ const DashboardAlumno = () => {
             clearInterval(intervalRef.current);
             clearInterval(dotIntervalRef.current);
         };
-        // Solo depende de loading y localLoading
-    }, [userData?.loading, userData?.clases, localLoading]);
+    }, [loading]);
 
     const handleBuscarClase = async (e) => {
         e.preventDefault()
@@ -234,40 +233,51 @@ const DashboardAlumno = () => {
     }, [showNotifMenu]);
 
     // Panel de carga inicial más bonito
-    if (userData?.loading || (!userData?.clases && !localLoading)) {
+    if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-green-50 via-white to-emerald-50">
-                <div className="bg-white rounded-2xl shadow-2xl px-12 py-10 flex flex-col items-center border border-green-100 animate-fade-in-up">
+                <div
+                    className={`
+                        bg-white rounded-2xl shadow-2xl flex flex-col items-center border border-green-100 animate-fade-in-up
+                        sm:px-12 sm:py-10
+                        px-4 py-5
+                    `}
+                    style={{
+                        maxWidth: window.innerWidth < 640 ? 300 : 420,
+                        minWidth: window.innerWidth < 640 ? 0 : 300,
+                        width: window.innerWidth < 640 ? '96vw' : 'auto'
+                    }}
+                >
                     <div className="flex items-center gap-4 mb-6">
-                        <Loader2 className="h-12 w-12 text-green-500 animate-spin" />
-                        <span className="text-2xl font-bold text-green-900">AulaSync</span>
+                        <BookOpen className={`h-12 w-12 text-green-500 ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
+                        <span className={`text-2xl font-bold text-green-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className="flex flex-col gap-3 min-w-[300px]">
+                    <div className={`flex flex-col gap-3 min-w-[220px] ${window.innerWidth < 640 ? "min-w-0 items-center text-center w-full" : ""}`}>
                         {steps.map((s, idx) => (
-                            <div className="flex items-center gap-3" key={s.label}>
+                            <div className={`flex items-center gap-3 ${window.innerWidth < 640 ? "justify-center w-full" : ""}`} key={s.label}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <svg className="text-green-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" fill="#bbf7d0" />
-                                            <path d="M7 13l3 3 7-7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        <svg className="text-green-500 animate-pop" width={window.innerWidth < 640 ? 14 : 18} height={window.innerWidth < 640 ? 14 : 18} fill="none" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" fill="#bbf7d0"/>
+                                            <path d="M7 13l3 3 7-7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                     </span>
                                 ) : step === idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-green-600 border-t-transparent animate-spin"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-green-600 border-t-transparent animate-spin ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 ) : (
                                     <span className="w-4 h-4 flex items-center justify-center">
-                                        <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
+                                        <span className={`w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent ${window.innerWidth < 640 ? "w-3 h-3" : ""}`}></span>
                                     </span>
                                 )}
-                                <span className={`text-green-800 ${step > idx ? "line-through text-green-700" : ""}`}>{s.label}</span>
+                                <span className={`text-green-800 ${step > idx ? "line-through text-green-700" : ""} ${window.innerWidth < 640 ? "text-sm" : ""}`}>{s.label}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="mt-8 text-green-700 text-sm flex items-center gap-2">
+                    <div className={`mt-8 text-green-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs justify-center w-full text-center" : ""}`}>
                         ¡Bienvenido a AulaSync! Preparando tu espacio
-                        <span className="inline-block w-6 text-green-700 font-bold" style={{ letterSpacing: 1 }}>
+                        <span className={`inline-block w-6 text-green-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
                         </span>
                     </div>
@@ -317,8 +327,16 @@ const DashboardAlumno = () => {
                             <img
                                 src={userData?.user?.fotoPerfilUrl ? userData.user.fotoPerfilUrl : "/uploads/perfiles/default.png"}
                                 alt="Foto de perfil"
-                                className="h-16 w-16 rounded-full object-cover border-4 border-green-100 shadow-lg"
+                                className={`border-4 border-green-100 shadow-lg object-cover
+                                    ${window.innerWidth < 640
+                                        ? "h-14 w-14 rounded-full"
+                                        : "h-16 w-16 rounded-full"
+                                    }`}
                                 onError={e => { e.target.src = '/uploads/perfiles/default.png'; }}
+                                style={{
+                                    aspectRatio: "1/1",
+                                    objectFit: "cover"
+                                }}
                             />
                         )}
                     </div>
@@ -341,7 +359,7 @@ const DashboardAlumno = () => {
 
             {/* Panel de clases con icono de carga individual */}
             <div className="w-full">
-                <div className="bg-white rounded-2xl shadow-xl border border-green-100 flex flex-col overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-xl border border-green-100 flex flex-col overflow-visible">
                     <div className="px-8 py-6 border-b border-green-50 bg-gradient-to-r from-green-100/80 to-emerald-100/80 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <BookOpen className="h-7 w-7 text-green-500" />
@@ -351,13 +369,8 @@ const DashboardAlumno = () => {
                             Vista rápida de tus clases activas
                         </span>
                     </div>
-                    {/* Cambiado: limitar la altura y quitar el scroll */}
-                    <div className="flex-1 p-8"
-                        style={{
-                            maxHeight: '420px',
-                            overflow: 'visible'
-                        }}
-                    >
+                    {/* Cambiado: quitar altura fija y overflow, dejar que crezca naturalmente */}
+                    <div className="flex-1 p-8">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-16">
                                 <Loader2 className="h-10 w-10 text-green-500 animate-spin mb-4" />
