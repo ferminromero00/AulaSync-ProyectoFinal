@@ -283,12 +283,7 @@ export default function ConfiguracionProfesor() {
             onChange={handleFotoChange}
           />
           <div>
-            <div className="font-semibold text-lg text-blue-900">
-              {perfil ? `${perfil.firstName} ${perfil.lastName}` : ''}
-            </div>
-            <div className="text-gray-500 text-sm">
-              {perfil?.email || ''}
-            </div>
+            <div className="font-bold text-xl text-blue-900">{perfil?.firstName} {perfil?.lastName}</div>
           </div>
         </div>
         {fotoFile && (

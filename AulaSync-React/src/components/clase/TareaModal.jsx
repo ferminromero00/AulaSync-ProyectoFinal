@@ -259,7 +259,7 @@ const TareaModal = ({
                     </button>
 
                     {/* Panel izquierdo - Detalles de la tarea */}
-                    <div className="flex-[1.2] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[260px] max-w-[55%] tarea-anim-fadeIn relative z-10">
+                    <div className="flex-[1.2] flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0 min-w-[260px] tarea-anim-fadeIn relative z-10">
                         <div className="flex flex-col gap-0 h-full flex-1 tarea-stagger">
                             {/* Cabecera */}
                             <div className="flex items-center gap-4 px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 tarea-anim-fadeIn">

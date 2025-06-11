@@ -152,51 +152,40 @@ const ConfiguracionAlumno = () => {
     }
   };
 
+  // Cartel de carga responsive y centrado
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh] bg-gradient-to-br from-green-50 via-white to-emerald-50">
         <div
-          className="bg-white rounded-3xl shadow-2xl flex flex-col items-center border border-green-100 animate-fade-in-up"
+          className={`
+            bg-white rounded-3xl shadow-2xl flex flex-col items-center border border-green-100 animate-fade-in-up
+            ${window.innerWidth < 640 ? "px-4 py-6 max-w-[320px] w-full" : "sm:px-16 sm:py-12 px-8 py-8"}
+          `}
           style={{
-            padding: "4rem 4.5rem",
-            minWidth: 420,
-            maxWidth: 520,
-            width: "100%",
-            boxShadow: "0 10px 48px 0 rgba(16,185,129,0.10)",
+            minWidth: window.innerWidth < 640 ? 0 : 340,
+            maxWidth: window.innerWidth < 640 ? 320 : 420,
+            width: window.innerWidth < 640 ? '95vw' : '100%',
             margin: "0 auto"
           }}
         >
           <div className="flex items-center gap-4 mb-6">
-            <Loader2 className="h-12 w-12 text-green-500 animate-spin" />
-            <span className="text-2xl font-bold text-green-900">AulaSync</span>
+            <Loader2 className={`h-12 w-12 text-green-500 animate-spin ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
+            <span className={`text-2xl font-bold text-green-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
           </div>
-          <div className="flex flex-col gap-3 min-w-[300px]">
+          <div className={`flex flex-col gap-3 min-w-[200px] ${window.innerWidth < 640 ? "min-w-0 items-center text-center w-full" : ""}`}>
             {steps.map((s, idx) => (
-              <div className="flex items-center gap-3" key={s.label}>
-                {step > idx ? (
-                  <span className="w-4 h-4 flex items-center justify-center">
-                    <svg className="text-green-500 animate-pop" width="18" height="18" fill="none" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" fill="#bbf7d0"/>
-                      <path d="M7 13l3 3 7-7" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                ) : step === idx ? (
-                  <span className="w-4 h-4 flex items-center justify-center">
-                    <span className="w-4 h-4 rounded-full border-2 border-green-600 border-t-transparent animate-spin"></span>
-                  </span>
-                ) : (
-                  <span className="w-4 h-4 flex items-center justify-center">
-                    <span className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent"></span>
-                  </span>
-                )}
-                <span className={`text-green-800 ${step > idx ? "line-through text-green-700" : ""}`}>{s.label}</span>
+              <div className={`flex items-center gap-3 ${window.innerWidth < 640 ? "justify-center w-full" : ""}`} key={s.label}>
+                <span className="w-4 h-4 flex items-center justify-center">
+                  {s.icon}
+                </span>
+                <span className={`text-green-800 ${window.innerWidth < 640 ? "text-sm" : ""}`}>{s.label}</span>
               </div>
             ))}
           </div>
-          <div className="mt-8 text-green-700 text-sm flex items-center gap-2">
+          <div className={`mt-8 text-green-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs justify-center w-full text-center" : ""}`}>
             Un momento, cargando configuración de perfil
-            <span className="inline-block w-6 text-green-700 font-bold" style={{ letterSpacing: 1 }}>
-              {".".repeat(dotCount + 1)}
+            <span className={`inline-block w-6 text-green-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
+              {".".repeat(3)}
             </span>
           </div>
           <style>{`
@@ -207,12 +196,6 @@ const ConfiguracionAlumno = () => {
             .animate-fade-in-up {
               animation: fade-in-up 0.7s cubic-bezier(.4,1.4,.6,1) both;
             }
-            @keyframes pop {
-              0% { transform: scale(0.7); opacity: 0.5;}
-              60% { transform: scale(1.2);}
-              100% { transform: scale(1); opacity: 1;}
-            }
-            .animate-pop { animation: pop 0.4s; }
           `}</style>
         </div>
       </div>
@@ -220,190 +203,218 @@ const ConfiguracionAlumno = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-8 animate-fadeIn border border-green-100"
-      style={{ animation: "fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards", opacity: 0 }}>
-      <h2 className="text-2xl font-extrabold mb-8 text-green-900 flex items-center gap-3">
-        <User className="h-7 w-7 text-green-500" />
-        Configuración de Perfil
-      </h2>
-      {/* Foto de perfil */}
-      <form onSubmit={handleFotoUpload} className="mb-8">
-        <div className="flex items-center gap-8">
-          <div className="relative group">
-            <img
-              src={fotoPreview || (perfil?.fotoPerfilUrl || "/default-avatar.png")}
-              alt="Foto de perfil"
-              className="w-28 h-28 rounded-full object-cover border-4 border-green-100 shadow-lg transition-all duration-300 group-hover:scale-105"
-            />
-            <button
-              type="button"
-              className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 hover:bg-green-700 shadow"
-              onClick={() => fileInputRef.current.click()}
-              title="Cambiar foto"
-            >
-              <Camera className="h-5 w-5" />
-            </button>
-            {fotoFile && (
+    <div className="flex justify-center min-h-screen bg-gray-50">
+      <div 
+        className={`bg-white rounded-xl shadow-lg animate-fadeIn
+          ${window.innerWidth < 640 ? 'w-[95%] my-2' : 'max-w-2xl m-8'}`}
+        style={{
+          maxWidth: window.innerWidth < 640 ? '360px' : '42rem',
+          minHeight: window.innerWidth < 640 ? 'calc(100vh - 16px)' : 'auto',
+          padding: window.innerWidth < 640 ? '16px' : '32px',
+          overflowY: 'auto',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <h2 className={`text-green-900 flex items-center gap-3 mb-6 ${window.innerWidth < 640 ? "text-lg" : "text-2xl font-extrabold mb-8"}`}>
+          <User className={`${window.innerWidth < 640 ? "h-5 w-5" : "h-7 w-7"} text-green-500`} />
+          Configuración de Perfil
+        </h2>
+        {/* Foto de perfil */}
+        <form onSubmit={handleFotoUpload} className="mb-8">
+          <div className="flex items-center gap-8">
+            <div className="relative group">
+              <img
+                src={fotoPreview || perfil?.fotoPerfilUrl || '/uploads/perfiles/default.png'}
+                alt="Foto de perfil"
+                className="rounded-full object-cover border-2 border-green-200 shadow"
+                style={{
+                  width: window.innerWidth < 640 ? 88 : 120,
+                  height: window.innerWidth < 640 ? 88 : 120,
+                  minWidth: window.innerWidth < 640 ? 88 : 120,
+                  minHeight: window.innerWidth < 640 ? 88 : 120,
+                  maxWidth: window.innerWidth < 640 ? 88 : 120,
+                  maxHeight: window.innerWidth < 640 ? 88 : 120,
+                  aspectRatio: "1/1",
+                  objectFit: "cover"
+                }}
+                onError={e => { e.target.src = '/uploads/perfiles/default.png'; }}
+              />
               <button
                 type="button"
-                className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 shadow"
-                onClick={handleRemoveFoto}
-                title="Quitar selección"
+                className="absolute bottom-0 right-0 bg-green-600 text-white rounded-full p-2 hover:bg-green-700 shadow"
+                onClick={() => fileInputRef.current.click()}
+                title="Cambiar foto"
               >
-                <X className="h-4 w-4" />
+                <Camera className="h-5 w-5" />
               </button>
-            )}
+              {fotoFile && (
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 shadow"
+                  onClick={handleRemoveFoto}
+                  title="Quitar selección"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFotoChange}
+            />
+            <div>
+              <div className="font-bold text-xl text-green-900">{perfil?.firstName} {perfil?.lastName}</div>
+            </div>
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFotoChange}
-          />
+          {fotoFile && (
+            <button
+              type="submit"
+              className="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold"
+            >
+              Guardar foto de perfil
+            </button>
+          )}
+        </form>
+
+        {/* Formulario de datos personales */}
+        <form onSubmit={handlePerfilSubmit} className="space-y-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+                <User className="h-4 w-4 text-green-400" /> Nombre
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={editData.firstName}
+                onChange={handleInputChange}
+                className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+                <User className="h-4 w-4 text-green-400" /> Apellidos
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={editData.lastName}
+                onChange={handleInputChange}
+                className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+              />
+            </div>
+          </div>
           <div>
-            <div className="font-bold text-xl text-green-900">{perfil?.firstName} {perfil?.lastName}</div>
-            <div className="text-gray-500 text-base">{perfil?.email}</div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+              <Mail className="h-4 w-4 text-green-400" /> Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={editData.email}
+              disabled
+              className="w-full border border-green-100 rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-not-allowed"
+              title="No puedes modificar el correo electrónico"
+            />
           </div>
-        </div>
-        {fotoFile && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+                <BookOpen className="h-4 w-4 text-green-400" /> Especialidad
+              </label>
+              <input
+                type="text"
+                name="especialidad"
+                value={editData.especialidad}
+                onChange={handleInputChange}
+                className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+                placeholder="(opcional)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
+                <Briefcase className="h-4 w-4 text-green-400" /> Departamento
+              </label>
+              <input
+                type="text"
+                name="departamento"
+                value={editData.departamento}
+                onChange={handleInputChange}
+                className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
+                placeholder="(opcional)"
+              />
+            </div>
+          </div>
           <button
             type="submit"
-            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold"
+            className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
           >
-            Guardar foto de perfil
+            Guardar cambios
           </button>
-        )}
-      </form>
+        </form>
 
-      {/* Formulario de datos personales */}
-      <form onSubmit={handlePerfilSubmit} className="space-y-6 mb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Cambiar contraseña */}
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-green-900">
+            <Lock className="h-5 w-5 text-green-400" /> Cambiar contraseña
+          </h3>
           <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
-              <User className="h-4 w-4 text-green-400" /> Nombre
-            </label>
+            <label className="block text-sm font-semibold mb-1 text-green-900">Contraseña actual</label>
             <input
-              type="text"
-              name="firstName"
-              value={editData.firstName}
-              onChange={handleInputChange}
+              type="password"
+              name="currentPassword"
+              value={passwords.currentPassword}
+              onChange={handlePasswordChange}
               className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
-              <User className="h-4 w-4 text-green-400" /> Apellidos
-            </label>
+            <label className="block text-sm font-semibold mb-1 text-green-900">Nueva contraseña</label>
             <input
-              type="text"
-              name="lastName"
-              value={editData.lastName}
-              onChange={handleInputChange}
+              type="password"
+              name="newPassword"
+              value={passwords.newPassword}
+              onChange={handlePasswordChange}
               className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
-            <Mail className="h-4 w-4 text-green-400" /> Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={editData.email}
-            disabled
-            className="w-full border border-green-100 rounded-lg px-4 py-2 bg-gray-50 text-gray-600 cursor-not-allowed"
-            title="No puedes modificar el correo electrónico"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
-              <BookOpen className="h-4 w-4 text-green-400" /> Especialidad
-            </label>
-            <input
-              type="text"
-              name="especialidad"
-              value={editData.especialidad}
-              onChange={handleInputChange}
-              className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-              placeholder="(opcional)"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1 text-green-900">
-              <Briefcase className="h-4 w-4 text-green-400" /> Departamento
-            </label>
+            <label className="block text-sm font-semibold mb-1 text-green-900">Repetir nueva contraseña</label>
             <input
-              type="text"
-              name="departamento"
-              value={editData.departamento}
-              onChange={handleInputChange}
+              type="password"
+              name="repeatPassword"
+              value={passwords.repeatPassword}
+              onChange={handlePasswordChange}
               className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-              placeholder="(opcional)"
             />
           </div>
-        </div>
-        <button
-          type="submit"
-          className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
-        >
-          Guardar cambios
-        </button>
-      </form>
-
-      {/* Cambiar contraseña */}
-      <form onSubmit={handlePasswordSubmit} className="space-y-4">
-        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-green-900">
-          <Lock className="h-5 w-5 text-green-400" /> Cambiar contraseña
-        </h3>
-        <div>
-          <label className="block text-sm font-semibold mb-1 text-green-900">Contraseña actual</label>
-          <input
-            type="password"
-            name="currentPassword"
-            value={passwords.currentPassword}
-            onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1 text-green-900">Nueva contraseña</label>
-          <input
-            type="password"
-            name="newPassword"
-            value={passwords.newPassword}
-            onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1 text-green-900">Repetir nueva contraseña</label>
-          <input
-            type="password"
-            name="repeatPassword"
-            value={passwords.repeatPassword}
-            onChange={handlePasswordChange}
-            className="w-full border border-green-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-200 focus:border-green-400 transition"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
-        >
-          Cambiar contraseña
-        </button>
-      </form>
-      <style>{`
-        @keyframes fadeSlideIn {
-          0% { opacity: 0; transform: translateY(20px);}
-          100% { opacity: 1; transform: none;}
-        }
-        .animate-fadeIn {
-          animation: fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards;
-        }
-      `}</style>
+          <button
+            type="submit"
+            className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 shadow transition font-semibold text-lg"
+          >
+            Cambiar contraseña
+          </button>
+        </form>
+        <style>{`
+          @media (max-width: 640px) {
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          }
+          @keyframes fadeSlideIn {
+            0% { opacity: 0; transform: translateY(20px);}
+            100% { opacity: 1; transform: none;}
+          }
+          .animate-fadeIn {
+            animation: fadeSlideIn 0.7s cubic-bezier(.4,1.4,.6,1) forwards;
+          }
+        `}</style>
+      </div>
     </div>
   );
 };
