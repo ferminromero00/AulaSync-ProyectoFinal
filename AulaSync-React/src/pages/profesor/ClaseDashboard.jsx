@@ -965,103 +965,121 @@ const ClaseDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className={`min-h-screen bg-gray-50 ${window.innerWidth < 640 ? 'px-1' : ''}`}>
             {renderDeletingOverlay()}
             {renderCreatingOverlay()}
             {/* Header de la clase */}
-            <div className="bg-white border-b shadow-sm opacity-0 animate-fadeIn">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
-                                <BookOpen className="h-8 w-8 text-blue-600" />
+            <div className={`bg-white border-b shadow-sm opacity-0 animate-fadeIn ${window.innerWidth < 640 ? 'py-1' : ''}`}>
+                <div className={`mx-auto ${window.innerWidth < 640 ? 'px-0' : 'max-w-7xl px-4 sm:px-6 lg:px-8'} py-2`}>
+                    <div className={`flex flex-col md:flex-row md:items-center md:justify-between ${window.innerWidth < 640 ? 'gap-1' : 'gap-4'}`}>
+                        <div className={`flex items-center ${window.innerWidth < 640 ? 'gap-1' : 'gap-4'}`}>
+                            <div className={`bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl ${window.innerWidth < 640 ? 'p-1' : 'p-3'}`}>
+                                <BookOpen className={`text-blue-600 ${window.innerWidth < 640 ? 'h-4 w-4' : 'h-8 w-8'}`} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">{claseData.nombre}</h1>
-                                <div className="mt-1 flex items-center gap-3 text-sm">
-                                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <h1 className={`font-bold text-gray-900 ${window.innerWidth < 640 ? 'text-sm' : 'text-2xl'}`}>
+                                    {claseData.nombre}
+                                </h1>
+                                <div className={`mt-0.5 flex items-center gap-2 ${window.innerWidth < 640 ? 'text-[11px]' : 'text-sm'}`}>
+                                    <span className="inline-block px-1.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">
                                         Código: {claseData.codigoClase}
                                     </span>
                                 </div>
                             </div>
                         </div>
                         {role === 'profesor' && (
-                            <button 
-                                onClick={() => setShowAnuncioModal(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl 
-                                    hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20"
-                            >
-                                <Bell className="h-5 w-5" />
-                                <span className="font-medium">Publicar anuncio</span>
-                            </button>
+                            <div className={`${window.innerWidth < 640 ? 'flex justify-center w-full mt-1' : ''}`}>
+                                <button
+                                    onClick={() => setShowAnuncioModal(true)}
+                                    className={`
+                                        flex items-center gap-2 bg-blue-600 text-white rounded-lg
+                                        hover:bg-blue-700 transition-all duration-300 shadow-sm
+                                        ${window.innerWidth < 640 ? 'px-2 py-1 text-xs w-full h-7 min-h-0 min-w-0' : 'px-6 py-3'}
+                                    `}
+                                    style={window.innerWidth < 640 ? { fontSize: '12px', minWidth: 0, height: 28, lineHeight: '18px', width: '100%' } : {}}
+                                >
+                                    <Bell className={`${window.innerWidth < 640 ? 'h-4 w-4' : 'h-5 w-5'}`} />
+                                    <span className="font-medium">Publicar anuncio</span>
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col lg:flex-row gap-8 stagger-animation">
-                    {/* Lista de estudiantes */}
-                    <div className="lg:w-[300px] shrink-0 bg-white rounded-2xl border border-gray-100 shadow p-6 h-fit sticky top-8 opacity-0 animate-slideRight"
-                         style={{ animationDelay: '200ms' }}>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-gray-900">Estudiantes</h2>
-                            <div className="flex items-center gap-2">
+            {/* Contenido principal */}
+            <div className={`mx-auto ${window.innerWidth < 640 ? 'px-0 py-1' : 'max-w-7xl px-4 sm:px-6 lg:px-8 py-8'}`}>
+                <div className={`flex flex-col lg:flex-row ${window.innerWidth < 640 ? 'gap-1' : 'gap-8'} stagger-animation`}>
+                    
+                    {/* Lista de estudiantes - Más pequeña en móvil */}
+                    <div className={`
+                        lg:w-[300px] shrink-0 bg-white rounded-xl border border-gray-100 shadow
+                        ${window.innerWidth < 640 ? 'p-1 w-full mb-1' : 'p-6'}
+                        h-fit sticky top-8 opacity-0 animate-slideRight
+                    `}>
+                        <div className={`flex items-center justify-between ${window.innerWidth < 640 ? 'mb-1' : 'mb-6'}`}>
+                            <h2 className={`font-semibold text-gray-900 ${window.innerWidth < 640 ? 'text-xs' : 'text-lg'}`}>
+                                Estudiantes
+                            </h2>
+                            <div className="flex items-center gap-1">
                                 {role === 'profesor' && (
                                     <button
-                                        className="p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                        title="Añadir estudiante"
+                                        className={`p-1 rounded-full hover:bg-blue-50 transition-colors`}
                                         onClick={() => setShowSearchModal(true)}
                                     >
-                                        <UserPlus className="h-5 w-5 text-blue-600" />
+                                        <UserPlus className={`text-blue-600 ${window.innerWidth < 640 ? 'h-4 w-4' : 'h-5 w-5'}`} />
                                     </button>
                                 )}
                                 <button
-                                    className="p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                    title="Ver lista completa"
+                                    className={`p-1 rounded-full hover:bg-blue-50 transition-colores`}
                                     onClick={() => setShowAlumnosModal(true)}
                                 >
-                                    <MoreVertical className="h-5 w-5 text-blue-600" />
+                                    <MoreVertical className={`text-blue-600 ${window.innerWidth < 640 ? 'h-4 w-4' : 'h-5 w-5'}`} />
                                 </button>
                             </div>
                         </div>
-                        <div className="min-h-[200px] max-h-[280px] overflow-y-auto">
+                        <div className={`min-h-[40px] ${window.innerWidth < 640 ? 'max-h-[60px]' : 'max-h-[280px]'} overflow-y-auto`}>
                             {claseData.estudiantes && claseData.estudiantes.length > 0 ? (
-                                <ul className="space-y-3">
-                                    {claseData.estudiantes.slice(0, 4).map((estudiante) => (
-                                        <li key={estudiante.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                <ul className={`space-y-1 ${window.innerWidth < 640 ? '' : 'space-y-3'}`}>
+                                    {claseData.estudiantes.slice(0, window.innerWidth < 640 ? 2 : 4).map((estudiante) => (
+                                        <li key={estudiante.id}
+                                            className={`flex items-center gap-1 p-1 hover:bg-gray-50 rounded-lg transition-colores`}>
                                             <img
                                                 src={estudiante.fotoPerfilUrl ? `${API_BASE_URL}${estudiante.fotoPerfilUrl}` : '/default-avatar.png'}
                                                 alt={`Foto de ${estudiante.nombre}`}
-                                                className="h-9 w-9 rounded-full object-cover border-2 border-gray-200"
+                                                className={`rounded-full object-cover border-2 border-gray-200
+                                                    ${window.innerWidth < 640 ? 'h-5 w-5' : 'h-9 w-9'}`}
                                                 onError={e => { e.target.src = '/default-avatar.png'; }}
                                             />
-                                            <span className="font-medium text-gray-900 truncate">{estudiante.nombre}</span>
+                                            <span className={`font-medium text-gray-900 truncate ${window.innerWidth < 640 ? 'text-[11px]' : ''}`}>
+                                                {estudiante.nombre}
+                                            </span>
                                         </li>
                                     ))}
-                                    {claseData.estudiantes.length > 4 && (
-                                        <li className="text-center text-blue-600 text-sm py-2 border-t">
+                                    {claseData.estudiantes.length > (window.innerWidth < 640 ? 2 : 4) && (
+                                        <li className="text-center text-blue-600 text-xs py-1 border-t">
                                             Ver todos ({claseData.estudiantes.length})
                                         </li>
                                     )}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-gray-500">No hay estudiantes inscritos.</p>
+                                <p className="text-xs text-gray-500">No hay estudiantes inscritos.</p>
                             )}
                         </div>
                     </div>
 
-                    {/* Tablón de anuncios y tareas juntos */}
-                    <div className="flex-1 flex flex-col gap-8 opacity-0 animate-fadeIn"
+                    {/* Tablón de anuncios - más compacto y centrado en móvil */}
+                    <div className={`flex-1 flex flex-col ${window.innerWidth < 640 ? 'gap-1' : 'gap-8'} opacity-0 animate-fadeIn`}
                          style={{ animationDelay: '400ms' }}>
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Tablón de anuncios</h2>
+                        <div className={`bg-white rounded-xl border border-gray-100 shadow
+                            ${window.innerWidth < 640 ? 'p-1 w-full max-w-[340px] mx-auto' : 'p-6'}`}>
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className={`font-semibold text-gray-900 ${window.innerWidth < 640 ? 'text-sm' : 'text-lg'}`}>Tablón de anuncios</h2>
                                 {renderFiltros()}
                             </div>
-                            <div className="min-h-[80px]">
+                            <div className="min-h-[40px]">
                                 {filtrarTareas(anuncios).length > 0 ? (
-                                    <div className="space-y-4">
+                                    <div className={window.innerWidth < 640 ? "space-y-1" : "space-y-4"}>
                                         {filtrarTareas(anuncios).map((anuncio, index) =>
                                             anuncio.tipo === "tarea" ? (
                                                 <div
@@ -1088,89 +1106,100 @@ const ClaseDashboard = () => {
                                                     </div>
                                                     <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
                                                     <div className="relative z-20">
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="bg-blue-100 p-4 rounded-xl group-hover:bg-blue-200 transition-colors">
-                                                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                                                        {/* Título arriba, siempre visible y truncado si es muy largo */}
+                                                        <div className="flex items-center gap-4 mb-2">
+                                                            <div className="bg-blue-100 p-4 rounded-xl group-hover:bg-blue-200 transition-colors">
+                                                                <BookOpen className="h-6 w-6 text-blue-600" />
+                                                            </div>
+                                                            <h3
+                                                                className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colores text-xl truncate"
+                                                                title={anuncio.titulo || "Tarea sin título"}
+                                                                style={{
+                                                                    maxWidth: '90%',
+                                                                    display: 'block',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap'
+                                                                }}
+                                                            >
+                                                                {anuncio.titulo || "Tarea sin título"}
+                                                            </h3>
+                                                        </div>
+                                                        {/* Estado de la tarea debajo del título */}
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            {role === 'alumno' && anuncio.tipo === 'tarea' && (
+                                                                (() => {
+                                                                    const estado = getEstadoTarea(anuncio);
+                                                                    switch (estado) {
+                                                                        case 'entregada':
+                                                                            return (
+                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                                                    Entregada
+                                                                                </span>
+                                                                            );
+                                                                        case 'expirada':
+                                                                            return (
+                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
+                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                                                    Expiró hace {getTimeAgo(anuncio.fechaEntrega)}
+                                                                                </span>
+                                                                            );
+                                                                        default:
+                                                                            return (
+                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                                                    Pendiente
+                                                                                </span>
+                                                                            );
+                                                                    }
+                                                                })()
+                                                            )}
+                                                            {role === 'profesor' && (
+                                                                <div className="flex items-center gap-2 mr-2 text-xs">
+                                                                    <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+                                                                        {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)} entregas
+                                                                    </span>
+                                                                    <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200">
+                                                                        {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
+                                                                    </span>
                                                                 </div>
-                                                                <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors text-xl truncate">
-                                                                    {anuncio.titulo || "Tarea sin título"}
-                                                                </h3>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                {role === 'alumno' && anuncio.tipo === 'tarea' && (
-                                                                    (() => {
-                                                                        const estado = getEstadoTarea(anuncio);
-                                                                        switch (estado) {
-                                                                            case 'entregada':
-                                                                                return (
-                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
-                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                                                                        Entregada
-                                                                                    </span>
-                                                                                );
-                                                                            case 'expirada':
-                                                                                return (
-                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
-                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                                                                        Expiró hace {getTimeAgo(anuncio.fechaEntrega)}
-                                                                                    </span>
-                                                                                );
-                                                                            default:
-                                                                                return (
-                                                                                    <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
-                                                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                                                                                        Pendiente
-                                                                                    </span>
-                                                                                );
-                                                                        }
-                                                                    })()
-                                                                )}
-                                                                {role === 'profesor' && (
-                                                                    <div className="flex items-center gap-2 mr-2 text-xs">
-                                                                        <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
-                                                                            {anuncio.entregasRealizadas ?? (anuncio.entregas?.length ?? 0)} entregas
-                                                                        </span>
-                                                                        <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200">
-                                                                            {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                                {/* Botón eliminar más compacto */}
-                                                                {role === 'profesor' && (
-                                                                    <button
-                                                                        onClick={e => {
-                                                                            e.stopPropagation();
-                                                                            handleDeleteAnuncio(anuncio.id);
-                                                                        }}
-                                                                        className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colors flex items-center justify-center"
-                                                                        title="Eliminar tarea"
-                                                                        style={{ backdropFilter: 'blur(8px)' }}
-                                                                    >
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
-                                                                        </svg>
-                                                                    </button>
-                                                                )}
-                                                            </div>
+                                                            )}
+                                                            {/* Botón eliminar más compacto */}
+                                                            {role === 'profesor' && (
+                                                                <button
+                                                                    onClick={e => {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteAnuncio(anuncio.id);
+                                                                    }}
+                                                                    className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colors flex items-center justify-center"
+                                                                    title="Eliminar tarea"
+                                                                    style={{ backdropFilter: 'blur(8px)' }}
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-base text-gray-600 mt-4">
-                                                            <Calendar className="h-5 w-5 text-gray-500" />
-                                                            <span className="flex-1">
-                                                                {anuncio.fechaEntrega
-                                                                    ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
-                                                                        day: 'numeric',
-                                                                        month: 'long',
-                                                                        year: 'numeric',
-                                                                        hour: '2-digit',
-                                                                        minute: '2-digit'
-                                                                    })
-                                                                    : "Sin fecha límite"}
-                                                            </span>
-                                                            <span className="text-base text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
-                                                                Ver detalles <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                                            </span>
-                                                        </div>
+                                                    </div>
+                                                    {/* ...resto del contenido (fecha, detalles, etc)... */}
+                                                    <div className="flex items-center gap-4 text-base text-gray-600 mt-4">
+                                                        <Calendar className="h-5 w-5 text-gray-500" />
+                                                        <span className="flex-1">
+                                                            {anuncio.fechaEntrega
+                                                                ? new Date(anuncio.fechaEntrega).toLocaleString('es-ES', {
+                                                                    day: 'numeric',
+                                                                    month: 'long',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })
+                                                                : "Sin fecha límite"}
+                                                        </span>
+                                                        <span className="text-base text-blue-600 font-medium flex items-center gap-1 group-hover:underline">
+                                                            Ver detalles <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                                        </span>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -1202,7 +1231,7 @@ const ClaseDashboard = () => {
                                                                 e.stopPropagation();
                                                                 handleDeleteAnuncio(anuncio.id);
                                                             }}
-                                                            className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white shadow hover:bg-red-100 border border-red-200 transition-colors flex items-center justify-center"
+                                                            className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white shadow hover:bg-red-100 border border-red-200 transition-colores"
                                                             title="Eliminar anuncio"
                                                             style={{ boxShadow: '0 2px 8px 0 rgba(255,0,0,0.04)' }}
                                                         >
@@ -1215,10 +1244,10 @@ const ClaseDashboard = () => {
                                                     {/* Contenido principal */}
                                                     <div className="relative z-20">
                                                         <div className="flex items-center gap-3 mb-2">
-                                                            <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                                            <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colores">
                                                                 <Bell className="h-5 w-5 text-blue-600" />
                                                             </div>
-                                                            <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colors">
+                                                            <h3 className="font-semibold text-blue-700 group-hover:text-blue-900 transition-colores">
                                                                 {anuncio.titulo || "Anuncio"}
                                                             </h3>
                                                         </div>
@@ -1242,7 +1271,7 @@ const ClaseDashboard = () => {
                                                             <span className="text-sm text-gray-500">
                                                                 {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
                                                             </span>
-                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colors">
+                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colores">
                                                                 Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                                             </span>
                                                         </div>
@@ -1252,9 +1281,9 @@ const ClaseDashboard = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="text-gray-500 text-center py-8">
-                                        <Bell className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                                        <p>No hay anuncios publicados</p>
+                                    <div className="text-gray-500 text-center py-4">
+                                        <Bell className="h-8 w-8 mx-auto text-gray-400 mb-1" />
+                                        <p className="text-xs">No hay anuncios publicados</p>
                                     </div>
                                 )}
                             </div>
@@ -1308,19 +1337,33 @@ const ClaseDashboard = () => {
                 setShowTipoSelector={setShowTipoSelector}
                 isCreatingAnuncio={isCreatingAnuncio}
                 isClosing={isClosing}
-                // --- NUEVO: props de diseño ---
-                modalClassName="rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-0"
+                // --- NUEVO: props de diseño responsive móvil ---
+                modalClassName={`
+                    rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50
+                    ${window.innerWidth < 640 ? 'p-0 w-full max-w-full min-h-screen' : 'p-0'}
+                `}
                 header={(
-                    <div className="flex items-center gap-3 px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl">
-                        <Bell className="h-7 w-7 text-blue-500" />
-                        <span className="text-xl font-bold text-blue-900">
+                    <div className={`
+                        flex items-center gap-3
+                        ${window.innerWidth < 640
+                            ? 'px-4 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl'
+                            : 'px-8 py-6 border-b border-blue-100 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 rounded-t-2xl'
+                        }
+                    `}>
+                        <Bell className={window.innerWidth < 640 ? "h-6 w-6 text-blue-500" : "h-7 w-7 text-blue-500"} />
+                        <span className={window.innerWidth < 640 ? "text-lg font-bold text-blue-900" : "text-xl font-bold text-blue-900"}>
                             Crear nueva publicación
                         </span>
                     </div>
                 )}
-                tipoSelectorClassName="flex gap-4 px-8 pt-6"
+                tipoSelectorClassName={window.innerWidth < 640 ? "flex gap-2 px-4 pt-4" : "flex gap-4 px-8 pt-6"}
                 tipoBtnClassName={tipo => `
-                    flex-1 flex flex-col items-center justify-center gap-2 py-6 px-2 rounded-xl border-2 transition-all cursor-pointer
+                    flex-1 flex flex-col items-center justify-center gap-1
+                    ${window.innerWidth < 640
+                        ? 'py-4 px-1 rounded-xl border-2 text-xs'
+                        : 'py-6 px-2 rounded-xl border-2'
+                    }
+                    transition-all cursor-pointer
                     ${anuncioData.tipo === tipo
                         ? 'border-blue-500 bg-blue-50 shadow-lg'
                         : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'}
@@ -1328,24 +1371,38 @@ const ClaseDashboard = () => {
                 tipoBtnContent={{
                     anuncio: (
                         <>
-                            <Bell className="h-7 w-7 text-blue-500" />
-                            <span className="font-semibold text-blue-900">Publicar anuncio</span>
-                            <span className="text-xs text-gray-500">Comparte información o avisos con tus estudiantes</span>
+                            <Bell className={window.innerWidth < 640 ? "h-6 w-6 text-blue-500" : "h-7 w-7 text-blue-500"} />
+                            <span className={window.innerWidth < 640 ? "font-semibold text-blue-900 text-sm" : "font-semibold text-blue-900"}>
+                                Publicar anuncio
+                            </span>
+                            <span className={window.innerWidth < 640 ? "text-[11px] text-gray-500 text-center" : "text-xs text-gray-500"}>
+                                Comparte información o avisos con tus estudiantes
+                            </span>
                         </>
                     ),
                     tarea: (
                         <>
-                            <FileText className="h-7 w-7 text-indigo-500" />
-                            <span className="font-semibold text-indigo-900">Crear tarea</span>
-                            <span className="text-xs text-gray-500">Asigna actividades y trabajos a tus estudiantes</span>
+                            <FileText className={window.innerWidth < 640 ? "h-6 w-6 text-indigo-500" : "h-7 w-7 text-indigo-500"} />
+                            <span className={window.innerWidth < 640 ? "font-semibold text-indigo-900 text-sm" : "font-semibold text-indigo-900"}>
+                                Crear tarea
+                            </span>
+                            <span className={window.innerWidth < 640 ? "text-[11px] text-gray-500 text-center" : "text-xs text-gray-500"}>
+                                Asigna actividades y trabajos a tus estudiantes
+                            </span>
                         </>
                     )
                 }}
-                bodyClassName="px-8 py-6"
-                footerClassName="px-8 pb-6"
-                btnCrearClassName="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/10 transition-all text-lg"
-                btnCancelarClassName="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all text-lg"
-                // --- FIN props de diseño ---
+                bodyClassName={window.innerWidth < 640 ? "px-4 py-4" : "px-8 py-6"}
+                footerClassName={window.innerWidth < 640 ? "px-4 pb-4" : "px-8 pb-6"}
+                btnCrearClassName={`
+                    w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/10 transition-all
+                    ${window.innerWidth < 640 ? 'text-base' : 'text-lg'}
+                `}
+                btnCancelarClassName={`
+                    w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all
+                    ${window.innerWidth < 640 ? 'text-base' : 'text-lg'}
+                `}
+                // --- FIN props de diseño responsive móvil ---
             />
 
             <TareaModal
