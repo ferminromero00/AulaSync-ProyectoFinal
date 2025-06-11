@@ -915,9 +915,9 @@ const ClaseDashboard = () => {
                         <BookOpen className={`h-12 w-12 text-blue-500 ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
                         <span className={`text-2xl font-bold text-blue-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className={`flex flex-col gap-4 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""}`}>
+                    <div className={`flex flex-col gap-4 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""} ${window.innerWidth < 640 ? "items-center text-center w-full" : ""}`}>
                         {steps.map((s, idx) => (
-                            <div className="flex items-center gap-3" key={s.key}>
+                            <div className={`flex items-center gap-3 ${window.innerWidth < 640 ? "justify-center w-full" : ""}`} key={s.key}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
                                         <CheckCircle className={`h-4 w-4 text-green-500 animate-pop ${window.innerWidth < 640 ? "h-3 w-3" : ""}`} />
@@ -935,7 +935,7 @@ const ClaseDashboard = () => {
                             </div>
                         ))}
                     </div>
-                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs" : ""}`}>
+                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs justify-center w-full text-center" : ""}`}>
                         Preparando clase
                         <span className={`inline-block w-6 text-blue-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
@@ -1172,11 +1172,11 @@ const ClaseDashboard = () => {
                                                                         e.stopPropagation();
                                                                         handleDeleteAnuncio(anuncio.id);
                                                                     }}
-                                                                    className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colors flex items-center justify-center"
+                                                                    className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colores flex items-center justify-center"
                                                                     title="Eliminar tarea"
                                                                     style={{ backdropFilter: 'blur(8px)' }}
                                                                 >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colores" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
                                                                     </svg>
                                                                 </button>

@@ -326,9 +326,9 @@ const TareasProfesor = () => {
                         <Loader2 className={`h-12 w-12 text-blue-500 animate-spin ${window.innerWidth < 640 ? "h-8 w-8" : ""}`} />
                         <span className={`text-2xl font-bold text-blue-900 ${window.innerWidth < 640 ? "text-lg" : ""}`}>AulaSync</span>
                     </div>
-                    <div className={`flex flex-col gap-3 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0" : ""}`}>
+                    <div className={`flex flex-col gap-3 min-w-[300px] ${window.innerWidth < 640 ? "min-w-0 items-center text-center w-full" : ""}`}>
                         {steps.map((s, idx) => (
-                            <div className="flex items-center gap-3" key={s.label}>
+                            <div className={`flex items-center gap-3 ${window.innerWidth < 640 ? "justify-center w-full" : ""}`} key={s.label}>
                                 {step > idx ? (
                                     <span className="w-4 h-4 flex items-center justify-center">
                                         <svg className="text-blue-500 animate-pop" width={window.innerWidth < 640 ? 14 : 18} height={window.innerWidth < 640 ? 14 : 18} fill="none" viewBox="0 0 24 24">
@@ -349,7 +349,7 @@ const TareasProfesor = () => {
                             </div>
                         ))}
                     </div>
-                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs" : ""}`}>
+                    <div className={`mt-8 text-blue-700 text-sm flex items-center gap-2 ${window.innerWidth < 640 ? "mt-4 text-xs justify-center w-full text-center" : ""}`}>
                         un momento, cargando resumen de tareas
                         <span className={`inline-block w-6 text-blue-700 font-bold ${window.innerWidth < 640 ? "w-4" : ""}`} style={{ letterSpacing: 1 }}>
                             {".".repeat(dotCount + 1)}
