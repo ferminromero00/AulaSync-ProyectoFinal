@@ -478,8 +478,16 @@ const TareasResumenAlumno = ({ tareas = [] }) => {
                                     </>
                                 ) : (
                                     (() => {
-                                        const isExpired = new Date(tareaSeleccionada.fechaEntrega) < new Date();
-                                        if (isExpired) {
+                                        const isExpired = (tarea) => {
+                                            // Si no hay fecha de entrega, la tarea no puede estar expirada
+                                            if (!tarea.fechaEntrega) return false;
+                                            
+                                            const fechaEntrega = new Date(tarea.fechaEntrega);
+                                            const ahora = new Date();
+                                            return fechaEntrega < ahora;
+                                        };
+
+                                        if (isExpired(tareaSeleccionada)) {
                                             return (
                                                 <div className="flex flex-col gap-4 items-center justify-center py-8 px-4 bg-red-50 border border-red-200 rounded-xl">
                                                     <AlertCircle className="h-12 w-12 text-red-500" />
