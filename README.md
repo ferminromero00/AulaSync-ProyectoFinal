@@ -62,7 +62,7 @@ AulaSync es una plataforma educativa moderna que facilita la interacción entre 
   - React Hot Toast
 
 - **Backend**
-  - Symfony 6
+  - Symfony 7.2
   - API REST
   - JWT Authentication
   - MySQL
