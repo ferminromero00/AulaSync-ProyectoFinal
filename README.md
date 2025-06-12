@@ -2,10 +2,10 @@
 
 <div align="center">
 
-  ![React](https://img.shields.io/badge/React-18.x-blue)
-  ![Symfony](https://img.shields.io/badge/Symfony-6.x-black)
-  ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-06B6D4)
-  ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
+![React](https://img.shields.io/badge/React-blue)
+![Symfony](https://img.shields.io/badge/Symfony-black)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4)
+![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 </div>
 
 ## 📑 Índice
