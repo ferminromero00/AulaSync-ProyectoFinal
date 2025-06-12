@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, Users, FileText, Settings, LogOut } from 'lucide-react'
 import { logout } from '../services/auth';
@@ -14,9 +14,19 @@ import IaChatWidget from '../components/IaChatWidget'
  * @returns {JSX.Element} Layout completo para vistas de profesor
  */
 const TeacherLayout = () => {
-    // Cambiamos el estado inicial a false para que empiece cerrado
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-    const navigate = useNavigate()
+    // Nuevo: persistir el estado del sidebar en localStorage
+    const getSidebarState = () => {
+        const val = localStorage.getItem('teacherSidebarOpen');
+        return val === null ? false : val === 'true';
+    };
+    const [isSidebarOpen, setIsSidebarOpen] = useState(getSidebarState());
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Guardar el estado en localStorage cada vez que cambie
+    useEffect(() => {
+        localStorage.setItem('teacherSidebarOpen', isSidebarOpen);
+    }, [isSidebarOpen]);
 
     const handleLogout = () => {
         logout();
@@ -24,7 +34,7 @@ const TeacherLayout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-100 flex relative">
             {/* Overlay solo para móvil */}
             {isSidebarOpen && (
                 <div 
@@ -33,14 +43,32 @@ const TeacherLayout = () => {
                 />
             )}
 
-            {/* Sidebar - modificamos la clase para que empiece cerrado */}
-            <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+            {/* Sidebar */}
+            <aside
+                className={`
+                    fixed top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:translate-x-0
+                    ${isSidebarOpen ? '' : 'lg:-translate-x-full'}
+                `}
+                style={{
+                    position: 'fixed'
+                }}
+            >
                 <div className="flex h-full flex-col bg-gradient-to-b from-blue-900 via-blue-800 to-indigo-900 text-white shadow-2xl">
                     {/* Logo y título */}
                     <div className="flex h-16 items-center gap-2 px-6 border-b border-blue-700/50">
                         <BookOpen className="h-7 w-7 text-blue-300 animate-sidebarIcon" />
                         <span className="text-xl font-bold tracking-wider text-white/90 animate-sidebarTitle">AulaSync</span>
+                        {/* Botón cerrar menú (X) solo en móvil/tablet, DENTRO del sidebar */}
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="ml-auto text-white hover:text-blue-200 transition-colors p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 block lg:hidden"
+                            style={{ display: isSidebarOpen ? 'block' : 'none' }}
+                            aria-label="Cerrar menú"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
                     </div>
 
                     {/* Navegación principal */}
@@ -110,22 +138,23 @@ const TeacherLayout = () => {
                 `}</style>
             </aside>
 
-            {/* Main content */}
-            <div className="flex-1 flex flex-col min-h-screen">
+            <div className={`
+                flex-1 flex flex-col min-h-screen transition-all duration-300
+                ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}
+            `}>
                 <header className="sticky top-0 z-20 bg-white border-b w-full">
                     <div className="flex h-16 items-center gap-4 px-4 justify-between">
                         <div className="flex items-center gap-4">
-                            <button 
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-                            >
-                                <span className="sr-only">Toggle menú</span>
-                                {isSidebarOpen ? (
-                                    <X className="h-6 w-6" />
-                                ) : (
+                            {/* Botón de menú - solo visible cuando el sidebar está cerrado */}
+                            {!isSidebarOpen && (
+                                <button 
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                                    aria-label="Abrir menú"
+                                >
                                     <Menu className="h-6 w-6" />
-                                )}
-                            </button>
+                                </button>
+                            )}
                         </div>
                         <div className="flex items-center gap-4">
                             <NotificationButton />

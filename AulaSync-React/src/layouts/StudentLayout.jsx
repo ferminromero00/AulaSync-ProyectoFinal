@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, BookOpen, BarChart2, FileText, Settings, LogOut, GraduationCap } from 'lucide-react'
 import { logout } from '../services/auth'
@@ -15,11 +15,18 @@ import IaChatWidget from '../components/IaChatWidget'
  * @returns {JSX.Element} Layout completo para vistas de alumno
  */
 const StudentLayout = () => {
-    // Cambiado: cerrado por defecto (igual que profesor)
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-    const navigate = useNavigate()
+    const getSidebarState = () => {
+        const val = localStorage.getItem('studentSidebarOpen');
+        return val === null ? false : val === 'true';
+    };
+    const [isSidebarOpen, setIsSidebarOpen] = useState(getSidebarState());
+    const navigate = useNavigate();
     const { userData } = useContext(GlobalContext);
     const clases = userData.clases || [];
+
+    useEffect(() => {
+        localStorage.setItem('studentSidebarOpen', isSidebarOpen);
+    }, [isSidebarOpen]);
 
     const handleLogout = () => {
         logout();
@@ -27,7 +34,7 @@ const StudentLayout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-100 flex relative">
             {/* Overlay para móvil */}
             {isSidebarOpen && (
                 <div 
@@ -36,14 +43,32 @@ const StudentLayout = () => {
                 />
             )}
 
-            {/* Sidebar rediseñado - más parecido al de profesor */}
-            <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+            {/* Sidebar */}
+            <aside
+                className={`
+                    fixed top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:translate-x-0
+                    ${isSidebarOpen ? '' : 'lg:-translate-x-full'}
+                `}
+                style={{
+                    position: 'fixed'
+                }}
+            >
                 <div className="flex h-full flex-col bg-gradient-to-b from-green-900 via-green-800 to-emerald-900 text-white shadow-2xl">
                     {/* Logo y título */}
                     <div className="flex h-16 items-center gap-2 px-6 border-b border-green-700/50">
                         <BookOpen className="h-7 w-7 text-green-300 animate-sidebarIcon" />
                         <span className="text-xl font-bold tracking-wider text-white/90 animate-sidebarTitle">AulaSync</span>
+                        {/* Botón cerrar menú (X) solo en móvil/tablet, DENTRO del sidebar */}
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="ml-auto text-white hover:text-green-200 transition-colors p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 block lg:hidden"
+                            style={{ display: isSidebarOpen ? 'block' : 'none' }}
+                            aria-label="Cerrar menú"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
                     </div>
 
                     {/* Navegación principal */}
@@ -61,7 +86,7 @@ const StudentLayout = () => {
                         {/* Lista de clases */}
                         <div className="mt-6 px-3">
                             <span className="px-4 text-xs font-medium uppercase tracking-wider text-green-300/80">
-                                Mis Clases
+                                MIS CLASES
                             </span>
                             <div className="mt-2 space-y-1">
                                 {clases.length === 0 ? (
@@ -95,7 +120,7 @@ const StudentLayout = () => {
                             icon={<Settings className="h-5 w-5" />}
                             label="Configuración"
                         />
-                        <div className="h-4" /> {/* Espacio extra entre Configuración y Cerrar Sesión */}
+                        <div className="h-4" />
                         <button
                             onClick={handleLogout}
                             className="flex w-full items-center gap-3 px-4 py-2 text-red-100 rounded-lg 
@@ -138,16 +163,23 @@ const StudentLayout = () => {
             </aside>
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col min-h-screen">
+            <div className={`
+                flex-1 flex flex-col min-h-screen transition-all duration-300
+                ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}
+            `}>
                 <header className="sticky top-0 z-20 bg-white border-b">
                     <div className="flex h-16 items-center justify-between px-4">
                         <div className="flex items-center gap-4">
-                            <button 
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100"
-                            >
-                                {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                            </button>
+                            {/* Botón menú solo visible cuando el sidebar está cerrado */}
+                            {!isSidebarOpen && (
+                                <button 
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100"
+                                    aria-label="Abrir menú"
+                                >
+                                    <Menu className="h-6 w-6" />
+                                </button>
+                            )}
                             <span className="text-lg font-semibold">AulaSync</span>
                         </div>
                         <div className="flex items-center gap-4">
