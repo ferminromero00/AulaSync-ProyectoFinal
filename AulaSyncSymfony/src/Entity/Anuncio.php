@@ -46,7 +46,7 @@ class Anuncio
     #[ORM\JoinColumn(nullable: false)]
     private ?Profesor $autor = null;
 
-    #[ORM\OneToMany(mappedBy: 'tarea', targetEntity: EntregaTarea::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'tarea', targetEntity: EntregaTarea::class)]
     private Collection $entregas;
 
     /**

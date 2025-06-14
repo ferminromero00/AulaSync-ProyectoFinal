@@ -42,6 +42,7 @@ class Clase
     private Collection $alumnos;
 
     #[ORM\ManyToMany(targetEntity: Alumno::class)]
+    #[ORM\JoinTable(name: 'clase_estudiante')] // Renombrado para evitar conflicto
     private Collection $estudiantes;
 
     #[ORM\OneToMany(mappedBy: 'clase', targetEntity: Anuncio::class, orphanRemoval: true)]

@@ -21,9 +21,9 @@ class EntregaTarea
     #[ORM\JoinColumn(nullable: false)]
     private ?\App\Entity\Alumno $alumno = null;
 
-    #[ORM\ManyToOne(targetEntity: \App\Entity\Anuncio::class)]
+    #[ORM\ManyToOne(targetEntity: Anuncio::class, inversedBy: 'entregas')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?\App\Entity\Anuncio $tarea = null;
+    private ?Anuncio $tarea = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $archivoUrl = null;
@@ -44,96 +44,148 @@ class EntregaTarea
      * Obtiene el ID de la entrega.
      * @return int|null
      */
-    public function getId(): ?int { return $this->id; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     /**
      * Obtiene el alumno que realizó la entrega.
      * @return \App\Entity\Alumno|null
      */
-    public function getAlumno(): ?\App\Entity\Alumno { return $this->alumno; }
+    public function getAlumno(): ?\App\Entity\Alumno
+    {
+        return $this->alumno;
+    }
 
     /**
      * Establece el alumno que realizó la entrega.
      * @param \App\Entity\Alumno|null $alumno
      * @return self
      */
-    public function setAlumno(?\App\Entity\Alumno $alumno): self { $this->alumno = $alumno; return $this; }
+    public function setAlumno(?\App\Entity\Alumno $alumno): self
+    {
+        $this->alumno = $alumno;
+        return $this;
+    }
 
     /**
      * Obtiene la tarea asociada a la entrega.
      * @return \App\Entity\Anuncio|null
      */
-    public function getTarea(): ?\App\Entity\Anuncio { return $this->tarea; }
+    public function getTarea(): ?\App\Entity\Anuncio
+    {
+        return $this->tarea;
+    }
 
     /**
      * Establece la tarea asociada a la entrega.
      * @param \App\Entity\Anuncio|null $tarea
      * @return self
      */
-    public function setTarea(?\App\Entity\Anuncio $tarea): self { $this->tarea = $tarea; return $this; }
+    public function setTarea(?\App\Entity\Anuncio $tarea): self
+    {
+        $this->tarea = $tarea;
+        return $this;
+    }
 
     /**
      * Obtiene la URL del archivo entregado.
      * @return string|null
      */
-    public function getArchivoUrl(): ?string { return $this->archivoUrl; }
+    public function getArchivoUrl(): ?string
+    {
+        return $this->archivoUrl;
+    }
 
     /**
      * Establece la URL del archivo entregado.
      * @param string|null $archivoUrl
      * @return self
      */
-    public function setArchivoUrl(?string $archivoUrl): self { $this->archivoUrl = $archivoUrl; return $this; }
+    public function setArchivoUrl(?string $archivoUrl): self
+    {
+        $this->archivoUrl = $archivoUrl;
+        return $this;
+    }
 
     /**
      * Obtiene el comentario de la entrega.
      * @return string|null
      */
-    public function getComentario(): ?string { return $this->comentario; }
+    public function getComentario(): ?string
+    {
+        return $this->comentario;
+    }
 
     /**
      * Establece el comentario de la entrega.
      * @param string|null $comentario
      * @return self
      */
-    public function setComentario(?string $comentario): self { $this->comentario = $comentario; return $this; }
+    public function setComentario(?string $comentario): self
+    {
+        $this->comentario = $comentario;
+        return $this;
+    }
 
     /**
      * Obtiene la fecha de entrega.
      * @return \DateTimeInterface|null
      */
-    public function getFechaEntrega(): ?\DateTimeInterface { return $this->fechaEntrega; }
+    public function getFechaEntrega(): ?\DateTimeInterface
+    {
+        return $this->fechaEntrega;
+    }
 
     /**
      * Establece la fecha de entrega.
      * @param \DateTimeInterface $fechaEntrega
      * @return self
      */
-    public function setFechaEntrega(\DateTimeInterface $fechaEntrega): self { $this->fechaEntrega = $fechaEntrega; return $this; }
+    public function setFechaEntrega(\DateTimeInterface $fechaEntrega): self
+    {
+        $this->fechaEntrega = $fechaEntrega;
+        return $this;
+    }
 
     /**
      * Obtiene la nota de la entrega.
      * @return float|null
      */
-    public function getNota(): ?float { return $this->nota; }
+    public function getNota(): ?float
+    {
+        return $this->nota;
+    }
 
     /**
      * Establece la nota de la entrega.
      * @param float|null $nota
      * @return self
      */
-    public function setNota(?float $nota): self { $this->nota = $nota; return $this; }
+    public function setNota(?float $nota): self
+    {
+        $this->nota = $nota;
+        return $this;
+    }
 
     /**
      * Obtiene el comentario de corrección.
      * @return string|null
      */
-    public function getComentarioCorreccion(): ?string { return $this->comentarioCorreccion; }
+    public function getComentarioCorreccion(): ?string
+    {
+        return $this->comentarioCorreccion;
+    }
 
     /**
      * Establece el comentario de corrección.
      * @param string|null $comentarioCorreccion
      * @return self
      */
-    public function setComentarioCorreccion(?string $comentarioCorreccion): self { $this->comentarioCorreccion = $comentarioCorreccion; return $this; }
+    public function setComentarioCorreccion(?string $comentarioCorreccion): self
+    {
+        $this->comentarioCorreccion = $comentarioCorreccion;
+        return $this;
+    }
 }
