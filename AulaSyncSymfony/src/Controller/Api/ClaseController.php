@@ -803,7 +803,7 @@ class ClaseController extends AbstractController
                     'profesor' => $entrega->getTarea()->getClase()->getProfesor()->getFirstName() . ' ' . 
                                 $entrega->getTarea()->getClase()->getProfesor()->getLastName(),
                     'tareaTitulo' => $entrega->getTarea()->getTitulo(),
-                    'mensaje_accion' => '¡Wow! Ve a ver tu nota!',
+                    'mensaje_accion' => 'Ve a ver tu nota!',
                     'fechaCalificacion' => $fechaActual->format('d/m/Y, H:i:s')
                 ]);
 
