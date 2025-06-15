@@ -167,12 +167,19 @@ class AnuncioController extends AbstractController
                 return $this->json(['error' => 'No tienes permiso para eliminar este anuncio'], 403);
             }
 
+            // Si el anuncio es de tipo 'tarea', eliminar entregas asociadas manualmente
+            if ($anuncio->getTipo() === 'tarea') {
+                foreach ($anuncio->getEntregas() as $entrega) {
+                    $entityManager->remove($entrega);
+                }
+            }
+
             $entityManager->remove($anuncio);
             $entityManager->flush();
 
             return $this->json(['message' => 'Anuncio eliminado correctamente']);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Error al eliminar el anuncio'], 500);
+            return $this->json(['error' => 'Error al eliminar el anuncio: ' . $e->getMessage()], 500);
         }
     }
 }
