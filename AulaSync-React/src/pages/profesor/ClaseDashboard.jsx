@@ -228,7 +228,9 @@ const ClaseDashboard = () => {
                 };
             }
 
-            await crearAnuncio(dataToSend);
+            // Crear anuncio/tarea en backend
+            const nuevoAnuncio = await crearAnuncio(dataToSend);
+
             toast.success(anuncioData.tipo === 'tarea' ? 'Tarea creada correctamente' : 'Anuncio creado correctamente');
             setShowAnuncioModal(false);
             setAnuncioData({
@@ -240,7 +242,15 @@ const ClaseDashboard = () => {
                 descripcion: ''
             });
             setShowTipoSelector(true);
-            await fetchAnuncios(); // Usar await aquí para asegurar que los anuncios se actualicen
+
+            // ACTUALIZAR ESTADO LOCAL INMEDIATAMENTE
+            setAnuncios(prev => [
+                // Si el backend devuelve la tarea/anuncio completo, úsalo. Si no, puedes hacer una llamada a la API o construir el objeto aquí.
+                { ...nuevoAnuncio, entregas: [], entregasRealizadas: 0, entregasPendientes: claseData?.estudiantes?.length || 0, tipo: anuncioData.tipo },
+                ...prev
+            ]);
+            // Si quieres máxima consistencia, puedes seguir recargando desde la API:
+            // await fetchAnuncios();
         } catch (error) {
             toast.error(error.message || 'Error al crear el anuncio');
         } finally {
@@ -580,6 +590,23 @@ const ClaseDashboard = () => {
                         )
                     }
                     : prev
+            );
+            // NUEVO: Actualizar la entrega en el array de anuncios (tareas)
+            setAnuncios(prevAnuncios =>
+                prevAnuncios.map(anuncio =>
+                    anuncio.id === tareaSeleccionada?.id
+                        ? {
+                            ...anuncio,
+                            entregas: Array.isArray(anuncio.entregas)
+                                ? anuncio.entregas.map(e =>
+                                    e.id === entregaSeleccionada.id
+                                        ? { ...e, nota: notaEdicion, comentarioCorreccion: comentarioCorreccionEdicion, calificado: true }
+                                        : e
+                                )
+                                : anuncio.entregas
+                        }
+                        : anuncio
+                )
             );
             toast.success('Entrega calificada correctamente');
         } catch (e) {
