@@ -1172,29 +1172,39 @@ const ClaseDashboard = () => {
                                                         <div className="flex items-center gap-2 mb-2">
                                                             {role === 'alumno' && anuncio.tipo === 'tarea' && (
                                                                 (() => {
-                                                                    const estado = getEstadoTarea(anuncio);
-                                                                    switch (estado) {
-                                                                        case 'entregada':
-                                                                            return (
-                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                                                                    Entregada
-                                                                                </span>
-                                                                            );
-                                                                        case 'expirada':
-                                                                            return (
-                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                                                                    Expiró hace {getTimeAgo(anuncio.fechaEntrega)}
-                                                                                </span>
-                                                                            );
-                                                                        default:
-                                                                            return (
-                                                                                <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-                                                                                    Pendiente
-                                                                                </span>
-                                                                            );
+                                                                    const entrega = anuncio.entregas?.find(e =>
+                                                                        String(e.alumno?.id ?? e.alumnoId ?? e.alumno) === String(alumnoId)
+                                                                    );
+                                                                    const isEntregada = !!entrega;
+                                                                    const isCalificada = isEntregada && entrega.nota !== undefined && entrega.nota !== null && entrega.nota !== '';
+                                                                    if (isCalificada) {
+                                                                        return (
+                                                                            <span className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                                                                Calificada ({entrega.nota})
+                                                                            </span>
+                                                                        );
+                                                                    } else if (isEntregada) {
+                                                                        return (
+                                                                            <span className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                                                Entregada
+                                                                            </span>
+                                                                        );
+                                                                    } else if (anuncio.fechaEntrega && new Date(anuncio.fechaEntrega) < new Date()) {
+                                                                        return (
+                                                                            <span className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-200">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                                                Expiró hace {getTimeAgo(anuncio.fechaEntrega)}
+                                                                            </span>
+                                                                        );
+                                                                    } else {
+                                                                        return (
+                                                                            <span className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                                                                Pendiente
+                                                                            </span>
+                                                                        );
                                                                     }
                                                                 })()
                                                             )}
