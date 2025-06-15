@@ -48,8 +48,7 @@ const TeacherLayout = () => {
                 className={`
                     fixed top-0 left-0 z-40 h-screen w-64 transform transition-transform duration-300 ease-in-out
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    lg:translate-x-0
-                    ${isSidebarOpen ? '' : 'lg:-translate-x-full'}
+                    lg:${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 `}
                 style={{
                     position: 'fixed'
@@ -60,11 +59,12 @@ const TeacherLayout = () => {
                     <div className="flex h-16 items-center gap-2 px-6 border-b border-blue-700/50">
                         <BookOpen className="h-7 w-7 text-blue-300 animate-sidebarIcon" />
                         <span className="text-xl font-bold tracking-wider text-white/90 animate-sidebarTitle">AulaSync</span>
-                        {/* Botón cerrar menú (X) solo en móvil/tablet, DENTRO del sidebar */}
+                        
+                        {/* Modificar esta parte - Botón de cerrar */}
                         <button
                             onClick={() => setIsSidebarOpen(false)}
-                            className="ml-auto text-white hover:text-blue-200 transition-colors p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 block lg:hidden"
-                            style={{ display: isSidebarOpen ? 'block' : 'none' }}
+                            className={`ml-auto text-white hover:text-blue-200 transition-colors p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400
+                                ${!isSidebarOpen ? 'hidden lg:block' : 'block lg:block'}`}
                             aria-label="Cerrar menú"
                         >
                             <X className="h-6 w-6" />
@@ -138,9 +138,10 @@ const TeacherLayout = () => {
                 `}</style>
             </aside>
 
+            {/* Main content */}
             <div className={`
                 flex-1 flex flex-col min-h-screen transition-all duration-300
-                ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}
+                lg:${isSidebarOpen ? 'ml-64' : 'ml-0'}
             `}>
                 <header className="sticky top-0 z-20 bg-white border-b w-full">
                     <div className="flex h-16 items-center gap-4 px-4 justify-between">
