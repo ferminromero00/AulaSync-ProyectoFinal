@@ -1256,8 +1256,6 @@ const ClaseDashboard = () => {
                                                         </div>
                                                         <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                                                             <span className="flex items-center gap-2">
-                                                                <span className="font-medium text-gray-700">{anuncio.autor?.nombre || 'Usuario'}</span>
-                                                                <span>•</span>
                                                                 <span>{new Date(anuncio.fechaCreacion).toLocaleString('es-ES', {
                                                                     day: 'numeric',
                                                                     month: 'short',
@@ -1267,14 +1265,7 @@ const ClaseDashboard = () => {
                                                                 })}</span>
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center justify-between mt-2">
-                                                            <span className="text-sm text-gray-500">
-                                                                {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
-                                                            </span>
-                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colores">
-                                                                Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                                                            </span>
-                                                        </div>
+                                                        
                                                     </div>
                                                 </div>
                                             )
