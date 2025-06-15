@@ -384,14 +384,6 @@ const TareasProfesor = () => {
             <div className="space-y-6">
                 {renderSeccion("Todas las tareas", tareas, "todas", <BookOpen className="h-5 w-5 text-blue-600" />, "bg-blue-50")}
             </div>
-            <div className="mt-8 px-8 pb-8"> {/* Añadido pb-8 */}
-                <div className="flex items-center gap-2 mb-4">
-                    <Users className="h-5 w-5 text-blue-500" />
-                    <span className="font-semibold text-blue-900 text-lg">Estado por estudiante</span>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100 max-h-64 overflow-y-auto">
-                </div>
-            </div>
             <TareaModal
                 showModal={showTareaModal}
                 tarea={tareaSeleccionada}

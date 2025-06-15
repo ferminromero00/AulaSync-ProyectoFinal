@@ -102,18 +102,8 @@ class RegistroController extends AbstractController
                         ], 403);
                     }
 
-                    // Añadir log de éxito cuando encuentra al profesor
-                    $this->logger->info('Profesor encontrado en LDAP', [
-                        'email' => $email,
-                        'ldapEntry' => $results[0]->getAttributes()
-                    ]);
-
-                    // También puedes devolver una respuesta de éxito si quieres confirmar que se encontró
-                    return new JsonResponse([
-                        'success' => true,
-                        'message' => 'Profesor verificado correctamente',
-                        'email' => $email
-                    ]);
+                    // Si el profesor está en LDAP, NO hacemos return aquí.
+                    // Dejamos que el flujo continúe para enviar el correo igual que para alumnos.
 
                 } catch (LdapException $e) {
                     $this->logger->error('Error de conexión LDAP', [
