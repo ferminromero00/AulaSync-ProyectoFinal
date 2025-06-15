@@ -1125,6 +1125,22 @@ const ClaseDashboard = () => {
                                                         boxShadow: '0 6px 32px 0 rgba(59,130,246,0.08)'
                                                     }}
                                                 >
+                                                    {/* Botón eliminar arriba a la derecha, solo para profesor */}
+                                                    {role === 'profesor' && (
+                                                        <button
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                handleDeleteAnuncio(anuncio.id);
+                                                            }}
+                                                            className="absolute top-3 right-3 z-30 p-2 rounded-full bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colores flex items-center justify-center"
+                                                            title="Eliminar tarea"
+                                                            style={{ backdropFilter: 'blur(8px)' }}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colores" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
                                                     {/* Fondo decorativo animado */}
                                                     <div className="pointer-events-none absolute inset-0 z-0">
                                                         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-100 opacity-0 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500 blur-2xl"></div>
@@ -1191,22 +1207,6 @@ const ClaseDashboard = () => {
                                                                         {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
                                                                     </span>
                                                                 </div>
-                                                            )}
-                                                            {/* Botón eliminar más compacto */}
-                                                            {role === 'profesor' && (
-                                                                <button
-                                                                    onClick={e => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteAnuncio(anuncio.id);
-                                                                    }}
-                                                                    className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colores flex items-center justify-center"
-                                                                    title="Eliminar tarea"
-                                                                    style={{ backdropFilter: 'blur(8px)' }}
-                                                                >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colores" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
-                                                                    </svg>
-                                                                </button>
                                                             )}
                                                         </div>
                                                     </div>
