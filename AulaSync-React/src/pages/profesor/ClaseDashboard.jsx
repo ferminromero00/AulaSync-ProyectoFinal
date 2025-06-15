@@ -272,7 +272,7 @@ const ClaseDashboard = () => {
             setShowDeleteModal(false);
         } catch (error) {
             console.error('Error al eliminar anuncio:', error);
-            toast.error('Error al eliminar el anuncio');
+            toast.error(error.message || 'Error al eliminar el anuncio');
         } finally {
             setIsDeletingAnuncio(false);
             setAnuncioToDelete(null);
@@ -1105,6 +1105,25 @@ const ClaseDashboard = () => {
                                                         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-100/20 to-indigo-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-xl"></div>
                                                     </div>
                                                     <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none transition-all duration-300 z-10"></div>
+                                                    
+                                                    {/* Botón eliminar tarea SOLO PROFESOR, ARRIBA DERECHA */}
+                                                    {role === 'profesor' && (
+                                                        <button
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                handleDeleteAnuncio(anuncio.id);
+                                                            }}
+                                                            className="absolute top-3 right-3 z-50 p-2 rounded-full bg-white shadow hover:bg-red-100 border border-red-200 transition-colores"
+                                                            title="Eliminar tarea"
+                                                            style={{ boxShadow: '0 2px 8px 0 rgba(255,0,0,0.04)' }}
+                                                        >
+                                                            {/* Icono de papelera */}
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+
                                                     <div className="relative z-20">
                                                         {/* Título arriba, siempre visible y truncado si es muy largo */}
                                                         <div className="flex items-center gap-4 mb-2">
@@ -1164,22 +1183,6 @@ const ClaseDashboard = () => {
                                                                         {anuncio.entregasPendientes ?? ((claseData?.estudiantes?.length || 0) - (anuncio.entregas?.length ?? 0))} pendientes
                                                                     </span>
                                                                 </div>
-                                                            )}
-                                                            {/* Botón eliminar más compacto */}
-                                                            {role === 'profesor' && (
-                                                                <button
-                                                                    onClick={e => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteAnuncio(anuncio.id);
-                                                                    }}
-                                                                    className="p-1.5 rounded-lg bg-white/90 shadow-sm hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-colores flex items-center justify-center"
-                                                                    title="Eliminar tarea"
-                                                                    style={{ backdropFilter: 'blur(8px)' }}
-                                                                >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colores" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1v3m-7 0h10" />
-                                                                    </svg>
-                                                                </button>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1271,9 +1274,10 @@ const ClaseDashboard = () => {
                                                             <span className="text-sm text-gray-500">
                                                                 {anuncio.clase?.nombre || claseData?.nombre || 'Sin clase'}
                                                             </span>
-                                                            <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colores">
+                                                            {/* Quitar "Ver detalles" aquí */}
+                                                            {/* <span className="text-xs text-blue-600 font-medium flex items-center gap-1 group-hover:underline group-hover:text-blue-800 transition-colores">
                                                                 Ver detalles <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                                                            </span>
+                                                            </span> */}
                                                         </div>
                                                     </div>
                                                 </div>
