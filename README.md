@@ -25,7 +25,7 @@ AulaSync es una plataforma educativa moderna que facilita la interacción entre 
 
 ## ✨ Características Principales
 
-### Para Profesores 👨‍🏫
+### Para Profesores 👨‍🏫 
 
 - **Gestión de Clases**
   - Creación y administración de clases
